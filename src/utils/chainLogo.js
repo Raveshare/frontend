@@ -18,6 +18,5 @@ const chainLogos = {
 };
 
 export const chainLogo = (chainId) => {
-  console.log(chainId);
   return chainLogos[chainId] || null;
 };
