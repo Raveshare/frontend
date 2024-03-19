@@ -223,8 +223,9 @@ const FarcasterNormalPost = () => {
         ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
         : zoraNftCreatorV1Config.address[chainId],
     functionName: "createEditionWithReferral",
-    args: argsArr,
+    args: argsArr,    
   });
+  console.log("Config", config);
   const { write, data, error, isLoading } = useContractWrite(config);
   const {
     data: receipt,
@@ -410,6 +411,7 @@ const FarcasterNormalPost = () => {
       } else {
         console.log("write contract");
         setTimeout(() => {
+          console.log("write contract2");
           write?.();
         }, 1000);
       }
@@ -459,10 +461,10 @@ const FarcasterNormalPost = () => {
       toast.error(errorMessage("An error occurred. Please try again."));
     }
 
-    if (prepareError) {
+    if (isPrepareError) {
       console.log("PrepareError", prepareError);
     }
-  }, [error, prepareError]);
+  }, [error, isPrepareError]);
 
   console.log("Topup balance", walletData?.balance);
 

@@ -382,6 +382,7 @@ const Editor = () => {
   // Effect to check with the slugId and fetch the image changes
   useEffect(() => {
     const fetchImage = async () => {
+      if (!slugId) return;
       try {
         const imageUrl = await apiGetOgImageForSlug(slugId);
         if (imageUrl) {
