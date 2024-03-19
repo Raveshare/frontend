@@ -32,12 +32,21 @@ import {
   deployZoraContract,
   getFrame,
   getOrCreateWallet,
+  mintToXchain,
   postFrame,
 } from "../../../../../../../services/apis/BE-apis";
 import { InputBox, InputErrorMsg, NumberInputBox } from "../../../../../common";
 import Topup from "./Topup";
-import { useAccount, useNetwork, useSwitchNetwork } from "wagmi";
+import {
+  useAccount,
+  useContractWrite,
+  useNetwork,
+  usePrepareContractWrite,
+  useSwitchNetwork,
+  useWaitForTransaction,
+} from "wagmi";
 import WithdrawFunds from "./WithdrawFunds";
+import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -117,6 +126,12 @@ const FarcasterNormalPost = () => {
     mutationFn: shareOnSocials,
   });
 
+  // store zora link in DB Mutation
+  const { mutateAsync: storeZoraLinkMutation } = useMutation({
+    mutationKey: "storeZoraLink",
+    mutationFn: mintToXchain,
+  });
+
   // upload to IPFS Mutation
   const {
     mutate,
@@ -136,9 +151,9 @@ const FarcasterNormalPost = () => {
     postName,
     postName?.split(" ")[0].toUpperCase(),
     farcasterStates?.frameData?.allowedMints,
-    "0",
+    "100",
     address,
-    walletData?.publicAddress,
+    address,
     {
       publicSalePrice: "0",
       maxSalePurchasePerAddress: "4294967295",
@@ -195,6 +210,27 @@ const FarcasterNormalPost = () => {
       return newState;
     });
   };
+
+  // create edition configs
+  const {
+    config,
+    error: prepareError,
+    isError: isPrepareError,
+  } = usePrepareContractWrite({
+    abi: zoraNftCreatorV1Config.abi,
+    address:
+      chain?.id == 8453
+        ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
+        : zoraNftCreatorV1Config.address[chainId],
+    functionName: "createEditionWithReferral",
+    args: argsArr,
+  });
+  const { write, data, error, isLoading } = useContractWrite(config);
+  const {
+    data: receipt,
+    isLoading: isPending,
+    isSuccess,
+  } = useWaitForTransaction({ hash: data?.hash });
 
   // deploy zora contract
   const deployZoraContractFn = async () => {
@@ -366,9 +402,43 @@ const FarcasterNormalPost = () => {
 
   useEffect(() => {
     if (isUploadSuccess) {
-      deployZoraContractFn();
+      if (
+        farcasterStates.frameData?.isFrame &&
+        farcasterStates.frameData?.isCreatorSponsored
+      ) {
+        deployZoraContractFn();
+      } else {
+        console.log("write contract");
+        setTimeout(() => {
+          write?.();
+        }, 1000);
+      }
     }
   }, [isUploadSuccess]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setZoraContractAddress(receipt?.logs[0]?.address);
+      setIsDeployingZoraContractSuccess(true);
+
+      let paramsData = {
+        canvasId: contextCanvasIdRef.current,
+        mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
+        chain: chain?.name,
+        contractType: 721,
+        chainId: chain?.id,
+        hash: receipt?.logs[0]?.address,
+      };
+
+      storeZoraLinkMutation(paramsData)
+        .then((res) => {
+          console.log("StoreZoraLink", res?.message);
+        })
+        .catch((error) => {
+          console.log("StoreZoraLinkErr", errorMessage(error));
+        });
+    }
+  }, isSuccess);
 
   useEffect(() => {
     if (isDeployingZoraContractSuccess) {
@@ -381,6 +451,18 @@ const FarcasterNormalPost = () => {
       sharePost("farcaster");
     }
   }, [isPostingFrameSuccess]);
+
+  useEffect(() => {
+    if (error) {
+      setIsPostingFrame(false);
+      setIsDeployingZoraContractError(true);
+      toast.error(errorMessage("An error occurred. Please try again."));
+    }
+
+    if (prepareError) {
+      console.log("PrepareError", prepareError);
+    }
+  }, [error, prepareError]);
 
   console.log("Topup balance", walletData?.balance);
 
@@ -785,7 +867,9 @@ const FarcasterNormalPost = () => {
           <EVMWallets title="Login with EVM" className="mx-2" />
         ) : !isFarcasterAuth ? (
           <FarcasterAuth />
-        ) : farcasterStates?.frameData?.isFrame && chain.id != chainId ? (
+        ) : farcasterStates?.frameData?.isFrame &&
+          !farcasterStates?.frameData?.isCreatorSponsored &&
+          chain.id != chainId ? (
           <div className="mx-2 outline-none">
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
