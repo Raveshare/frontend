@@ -412,7 +412,7 @@ const FarcasterNormalPost = () => {
         console.log("write contract");
         setTimeout(() => {
           console.log("write contract2");
-          write?.();
+          write && write?.();
         }, 1000);
       }
     }
