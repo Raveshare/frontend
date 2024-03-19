@@ -148,8 +148,8 @@ const FarcasterNormalPost = () => {
   const chainId = ENVIRONMENT === "production" ? 8453 : 999999999; // 999999999 - zora sepolia
 
   const argsArr = [
-    postName,
-    postName?.split(" ")[0].toUpperCase(),
+    postName || "My Frame",
+    postName?.split(" ")[0].toUpperCase() || "MYFRAME",
     farcasterStates?.frameData?.allowedMints || 10,
     "100",
     address,
@@ -164,7 +164,7 @@ const FarcasterNormalPost = () => {
       presaleMerkleRoot:
         "0x0000000000000000000000000000000000000000000000000000000000000000",
     },
-    postDescription,
+    postDescription || "This is My frame",
     "0x0",
     `ipfs://${uploadData?.message}`,
     APP_ETH_ADDRESS,
@@ -409,7 +409,7 @@ const FarcasterNormalPost = () => {
         deployZoraContractFn();
       } else {
         console.log("writing contract");
-        write?.();
+        (() => write?.())();
       }
     }
   }, [isUploadSuccess]);
