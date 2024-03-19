@@ -148,9 +148,9 @@ const FarcasterNormalPost = () => {
   const chainId = ENVIRONMENT === "production" ? 8453 : 999999999; // 999999999 - zora sepolia
 
   const argsArr = [
-    postName,
-    postName?.split(" ")[0].toUpperCase(),
-    farcasterStates?.frameData?.allowedMints,
+    postName || "My Frame",
+    postName?.split(" ")[0].toUpperCase() || "MYFRAME",
+    farcasterStates?.frameData?.allowedMints || 10,
     "100",
     address,
     address,
@@ -164,7 +164,7 @@ const FarcasterNormalPost = () => {
       presaleMerkleRoot:
         "0x0000000000000000000000000000000000000000000000000000000000000000",
     },
-    postDescription,
+    postDescription || "This is My frame",
     "0x0",
     `ipfs://${uploadData?.message}`,
     APP_ETH_ADDRESS,
@@ -223,9 +223,11 @@ const FarcasterNormalPost = () => {
         ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
         : zoraNftCreatorV1Config.address[chainId],
     functionName: "createEditionWithReferral",
-    args: argsArr,    
+    args: argsArr,
   });
-  console.log("Config", config);
+
+  console.log(argsArr);
+
   const { write, data, error, isLoading } = useContractWrite(config);
   const {
     data: receipt,
@@ -403,17 +405,11 @@ const FarcasterNormalPost = () => {
 
   useEffect(() => {
     if (isUploadSuccess) {
-      if (
-        farcasterStates.frameData?.isFrame &&
-        farcasterStates.frameData?.isCreatorSponsored
-      ) {
+      if (farcasterStates.frameData?.isCreatorSponsored) {
         deployZoraContractFn();
       } else {
-        console.log("write contract");
-        setTimeout(() => {
-          console.log("write contract2");
-          write && write?.();
-        }, 1000);
+        console.log("writing contract");
+        (() => write?.())();
       }
     }
   }, [isUploadSuccess]);
@@ -462,6 +458,8 @@ const FarcasterNormalPost = () => {
     }
 
     if (isPrepareError) {
+      setIsPostingFrame(false);
+      setIsDeployingZoraContractError(true);
       console.log("PrepareError", prepareError);
     }
   }, [error, isPrepareError]);
