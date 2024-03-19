@@ -458,6 +458,8 @@ const FarcasterNormalPost = () => {
     }
 
     if (isPrepareError) {
+      setIsPostingFrame(false);
+      setIsDeployingZoraContractError(true);
       console.log("PrepareError", prepareError);
     }
   }, [error, isPrepareError]);
