@@ -75,6 +75,8 @@ const FarcasterNormalPost = () => {
   const [isPostingFrame, setIsPostingFrame] = useState(false);
   const [isPostingFrameError, setIsPostingFrameError] = useState(false);
   const [isPostingFrameSuccess, setIsPostingFrameSuccess] = useState(false);
+  const [isStoringFrameData, setIsStoringFrameData] = useState(false);
+  const [isDeployingZoraContract, setIsDeployingZoraContract] = useState(false);
   const [frameId, setFrameId] = useState(null);
 
   const {
@@ -236,7 +238,7 @@ const FarcasterNormalPost = () => {
 
   // deploy zora contract
   const deployZoraContractFn = async () => {
-    console.log("Deploying Zora contract");
+    setIsDeployingZoraContract(true);
 
     deployZoraContractMutation({
       contract_type: "721",
@@ -247,15 +249,19 @@ const FarcasterNormalPost = () => {
       .then((res) => {
         setZoraContractAddress(res?.contract_address);
         setIsDeployingZoraContractSuccess(true);
+        setIsDeployingZoraContract(false);
       })
       .catch((err) => {
         setIsPostingFrame(false);
         setIsDeployingZoraContractError(true);
+        setIsDeployingZoraContract(false);
         toast.error(errorMessage(err));
       });
   };
 
   const postFrameDataFn = async () => {
+    setIsStoringFrameData(true);
+
     const params = {
       canvasId: contextCanvasIdRef.current,
       owner: address,
@@ -276,15 +282,18 @@ const FarcasterNormalPost = () => {
     postFrameData(params)
       .then((res) => {
         if (res?.status === "success") {
+          setIsStoringFrameData(false);
           setFrameId(res?.frameId);
           setIsPostingFrame(false);
           setIsPostingFrameSuccess(true);
         } else if (res?.error) {
+          setIsStoringFrameData(false);
           setIsPostingFrameError(true);
           toast.error(res?.error);
         }
       })
       .catch((err) => {
+        setIsStoringFrameData(false);
         setIsPostingFrameError(true);
         toast.error(errorMessage(err));
       });
@@ -423,21 +432,27 @@ const FarcasterNormalPost = () => {
 
   useEffect(() => {
     if (isUploadSuccess) {
+      setIsPostingFrame(false);
       if (farcasterStates.frameData?.isCreatorSponsored) {
         deployZoraContractFn();
       } else {
-        setIsPostingFrame(false);
-          write?.();
+        write?.();
       }
     }
   }, [isUploadSuccess, write]);
 
   useEffect(() => {
     if (isSuccess) {
-      storeZoraLink();
       setIsDeployingZoraContractSuccess(true);
       setZoraContractAddress(receipt?.logs[0]?.address);
 
+      storeZoraLink();
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      storeZoraLink();
     }
   }, [isSuccess]);
 
@@ -488,6 +503,8 @@ const FarcasterNormalPost = () => {
         isSuccess={false}
         isFrame={farcasterStates.frameData?.isFrame}
         frameId={frameId}
+        isStoringFrameData={isStoringFrameData}
+        isDeployingZoraContract={isDeployingZoraContract}
       />
       <div className="mb-4 m-4">
         <div className="flex justify-between">
