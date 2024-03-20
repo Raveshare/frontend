@@ -47,6 +47,7 @@ import {
 } from "wagmi";
 import WithdrawFunds from "./WithdrawFunds";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
+import { zoraURLErc721 } from "../../zora-mint/utils";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -226,7 +227,6 @@ const FarcasterNormalPost = () => {
     args: argsArr,
   });
 
-
   const { write, data, error, isLoading } = useContractWrite(config);
   const {
     data: receipt,
@@ -402,12 +402,30 @@ const FarcasterNormalPost = () => {
     }
   };
 
+  const storeZoraLink = () => {
+    let paramsData = {
+      canvasId: contextCanvasIdRef.current,
+      mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
+      chain: chain?.name,
+      contractType: 721,
+      chainId: chain?.id,
+      hash: receipt?.logs[0]?.address,
+    };
+
+    storeZoraLinkMutation(paramsData)
+      .then((res) => {
+        console.log("StoreZoraLink", res?.slug);
+      })
+      .catch((error) => {
+        console.log("StoreZoraLinkErr", errorMessage(error));
+      });
+  };
+
   useEffect(() => {
     if (isUploadSuccess) {
       if (farcasterStates.frameData?.isCreatorSponsored) {
         deployZoraContractFn();
       } else {
-        console.log("writing contract");
         setTimeout(() => {
           write?.();
         }, 1000);
@@ -420,24 +438,9 @@ const FarcasterNormalPost = () => {
       setZoraContractAddress(receipt?.logs[0]?.address);
       setIsDeployingZoraContractSuccess(true);
 
-      let paramsData = {
-        canvasId: contextCanvasIdRef.current,
-        mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
-        chain: chain?.name,
-        contractType: 721,
-        chainId: chain?.id,
-        hash: receipt?.logs[0]?.address,
-      };
-
-      storeZoraLinkMutation(paramsData)
-        .then((res) => {
-          console.log("StoreZoraLink", res?.message);
-        })
-        .catch((error) => {
-          console.log("StoreZoraLinkErr", errorMessage(error));
-        });
+      storeZoraLink();
     }
-  }, isSuccess);
+  }, [isSuccess]);
 
   useEffect(() => {
     if (isDeployingZoraContractSuccess) {
