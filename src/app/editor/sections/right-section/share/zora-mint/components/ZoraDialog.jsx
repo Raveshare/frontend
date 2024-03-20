@@ -34,6 +34,8 @@ const ZoraDialog = ({
   isFarcaster,
   isFrame,
   frameId,
+  isStoringFrameData,
+  isDeployingZoraContract
 }) => {
   const [open, setOpen] = useState(false);
   const { resetState } = useReset();
@@ -85,6 +87,8 @@ const ZoraDialog = ({
                 "Confirm the transaction to create the split..."}
               {isLoading && "Confirm the transaction to create the Edition..."}
               {isPending && "Transaction is pending..."}
+              {isDeployingZoraContract && "Deploying collection..."}
+              {isStoringFrameData && "Storing Frame data..."}
               {isOpenAction && isShareLoading && "Creating Lens open action..."}
               {isFarcaster && isShareLoading && "Sharing on Farcaster..."}
               {isOpenAction
@@ -194,7 +198,8 @@ const ZoraDialog = ({
               isCreatingSplit ||
               isLoading ||
               isPending ||
-              isShareLoading
+              isShareLoading ||
+              isStoringFrameData
             }
             // color="teal"
             onClick={() => {
