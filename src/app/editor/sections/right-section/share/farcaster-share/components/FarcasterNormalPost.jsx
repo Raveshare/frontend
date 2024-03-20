@@ -229,7 +229,13 @@ const FarcasterNormalPost = () => {
     args: argsArr,
   });
 
-  const { write, data, error, isLoading } = useContractWrite(config);
+  const {
+    write,
+    data,
+    error: writeError,
+    isLoading,
+    isError: isWriteError,
+  } = useContractWrite(config);
   const {
     data: receipt,
     isLoading: isPending,
@@ -252,7 +258,6 @@ const FarcasterNormalPost = () => {
         setIsDeployingZoraContract(false);
       })
       .catch((err) => {
-        setIsPostingFrame(false);
         setIsDeployingZoraContractError(true);
         setIsDeployingZoraContract(false);
         toast.error(errorMessage(err));
@@ -284,7 +289,6 @@ const FarcasterNormalPost = () => {
         if (res?.status === "success") {
           setIsStoringFrameData(false);
           setFrameId(res?.frameId);
-          setIsPostingFrame(false);
           setIsPostingFrameSuccess(true);
         } else if (res?.error) {
           setIsStoringFrameData(false);
@@ -468,19 +472,19 @@ const FarcasterNormalPost = () => {
     }
   }, [isPostingFrameSuccess]);
 
+  // error handling for mint
   useEffect(() => {
-    if (error) {
-      setIsPostingFrame(false);
-      setIsDeployingZoraContractError(true);
-      toast.error(errorMessage("An error occurred. Please try again."));
+    if (isWriteError) {
+      console.log("mint error", isWriteError);
+      console.log("mint error", writeError);
+      toast.error(writeError?.message.split("\n")[0]);
     }
 
     if (isPrepareError) {
-      setIsPostingFrame(false);
-      setIsDeployingZoraContractError(true);
-      console.log("PrepareError", prepareError);
+      console.log("prepare error", prepareError);
+      // toast.error(prepareError.message);
     }
-  }, [error, isPrepareError]);
+  }, [isWriteError, isPrepareError]);
 
   console.log("Topup balance", walletData?.balance);
 
@@ -489,7 +493,13 @@ const FarcasterNormalPost = () => {
       <ZoraDialog
         title="Share on Farcaster"
         icon={logoFarcaster}
-        isError={isError || isPostingFrameError || isDeployingZoraContractError}
+        isError={
+          isError ||
+          isPostingFrameError ||
+          isDeployingZoraContractError ||
+          isWriteError ||
+          (farcasterStates?.frameData?.isCreatorSponsored && prepareError)
+        }
         isLoading={isLoading}
         isCreatingSplit={null}
         isUploadingToIPFS={isPostingFrame}
