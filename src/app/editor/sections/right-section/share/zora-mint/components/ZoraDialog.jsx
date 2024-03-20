@@ -35,7 +35,7 @@ const ZoraDialog = ({
   isFrame,
   frameId,
   isStoringFrameData,
-  isDeployingZoraContract
+  isDeployingZoraContract,
 }) => {
   const [open, setOpen] = useState(false);
   const { resetState } = useReset();
@@ -199,7 +199,8 @@ const ZoraDialog = ({
               isLoading ||
               isPending ||
               isShareLoading ||
-              isStoringFrameData
+              isStoringFrameData ||
+              isDeployingZoraContract
             }
             // color="teal"
             onClick={() => {
