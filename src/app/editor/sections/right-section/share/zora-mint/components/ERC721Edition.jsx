@@ -847,6 +847,25 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     mutate(canvasBase64Ref.current[0]);
   };
 
+  const storeZoraLink = () => {
+    let paramsData = {
+      canvasId: contextCanvasIdRef.current,
+      mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
+      chain: chain?.name,
+      contractType: 721,
+      chainId: chain?.id,
+      hash: receipt?.logs[0]?.address,
+    };
+
+    storeZoraLinkMutation(paramsData)
+      .then((res) => {
+        console.log("StoreZoraLink", res?.slug);
+      })
+      .catch((error) => {
+        console.log("StoreZoraLinkErr", errorMessage(error));
+      });
+  };
+
   // add recipient to the split list
   useEffect(() => {
     if (isAuthenticated) {
@@ -924,22 +943,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   // store the zora link in DB
   useEffect(() => {
     if (isSuccess && receipt?.logs[0]?.address) {
-      let paramsData = {
-        canvasId: contextCanvasIdRef.current,
-        mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
-        chain: chain?.name,
-        contractType: 721,
-        chainId: chain?.id,
-        hash: receipt?.logs[0]?.address,
-      };
-
-      storeZoraLinkMutation(paramsData)
-        .then((res) => {
-          console.log("StoreZoraLink", res?.message);
-        })
-        .catch((error) => {
-          console.log("StoreZoraLinkErr", errorMessage(error));
-        });
+      storeZoraLink();
     }
   }, [isSuccess]);
 
