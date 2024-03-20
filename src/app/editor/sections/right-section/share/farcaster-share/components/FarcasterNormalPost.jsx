@@ -150,7 +150,7 @@ const FarcasterNormalPost = () => {
   const argsArr = [
     postName || "My Frame",
     postName?.split(" ")[0].toUpperCase() || "MYFRAME",
-    farcasterStates?.frameData?.allowedMints || 10,
+    farcasterStates?.frameData?.allowedMints || "10",
     "100",
     address,
     address,
@@ -409,10 +409,12 @@ const FarcasterNormalPost = () => {
         deployZoraContractFn();
       } else {
         console.log("writing contract");
-        (() => write?.())();
+        setTimeout(() => {
+          write?.();
+        }, 1000);
       }
     }
-  }, [isUploadSuccess]);
+  }, [isUploadSuccess, write]);
 
   useEffect(() => {
     if (isSuccess) {
