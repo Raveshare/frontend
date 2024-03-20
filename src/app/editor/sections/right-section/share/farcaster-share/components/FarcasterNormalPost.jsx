@@ -226,7 +226,6 @@ const FarcasterNormalPost = () => {
     args: argsArr,
   });
 
-  console.log(argsArr);
 
   const { write, data, error, isLoading } = useContractWrite(config);
   const {
