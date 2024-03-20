@@ -84,7 +84,6 @@ const CompSearch = () => {
 
   const fnGenerateImages = async () => {
     if (!delayedQuery) {
-      console.log("No Query");
       return;
     }
     async function load() {
@@ -93,20 +92,17 @@ const CompSearch = () => {
       try {
         setIsLoading(true);
         const response = await getFalAiImage(delayedQuery);
-        consoleLogonlyDev("response", response);
         setStStatusCode(response.status);
         if (response.status === 200) {
           setIsLoading(false);
           setStStatusCode(200);
           setData(response.data);
-          console.log(response.data);
         } else if (data.status === 429) {
           setIsLoading(false);
           setStStatusCode(429);
         }
       } catch (e) {
-        console.log("There is an error");
-        console.log(e);
+        console.log("err", e);
         // setError(e);
         setError(e.message);
         setIsLoading(false);
@@ -279,7 +275,6 @@ const CompInstructImage = () => {
       }),
     };
 
-    console.log("Calling API Start");
 
     // await fetch("https://api.getimg.ai/v1/stable-diffusion/instruct", options)
     await fetch(
@@ -289,8 +284,6 @@ const CompInstructImage = () => {
       // await axios.post("https://api.getimg.ai/v1/stable-diffusion/instruct", options)
       .then((response) => response.json())
       .then((response) => {
-        console.log(" Response from Fetch ");
-        console.log(response);
         // if (response.status === 200) {
         if (!response.image) {
           setBase64ImgLink("");
@@ -309,15 +302,13 @@ const CompInstructImage = () => {
         setClicked(false);
       })
       .catch((err) => {
-        console.log(" Response from Axios ");
-        console.error(err);
+        console.error("err", err);
         if (err.response.status == 401) {
           setBase64ImgLink("");
           setStDisplayMessage(err.response.data.error.type);
         }
       });
     setClicked(false);
-    console.log("Calling API End");
   };
 
   const handleImageUpload = (e) => {
@@ -342,7 +333,6 @@ const CompInstructImage = () => {
 
   useEffect(() => {
     setUploadedImg(uploadedImg);
-    console.log(uploadedImg);
   }, [uploadedImg]);
 
   return (

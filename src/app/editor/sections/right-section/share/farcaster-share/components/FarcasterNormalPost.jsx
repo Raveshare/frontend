@@ -426,19 +426,18 @@ const FarcasterNormalPost = () => {
       if (farcasterStates.frameData?.isCreatorSponsored) {
         deployZoraContractFn();
       } else {
-        setTimeout(() => {
+        setIsPostingFrame(false);
           write?.();
-        }, 1000);
       }
     }
   }, [isUploadSuccess, write]);
 
   useEffect(() => {
     if (isSuccess) {
-      setZoraContractAddress(receipt?.logs[0]?.address);
-      setIsDeployingZoraContractSuccess(true);
-
       storeZoraLink();
+      setIsDeployingZoraContractSuccess(true);
+      setZoraContractAddress(receipt?.logs[0]?.address);
+
     }
   }, [isSuccess]);
 
@@ -476,10 +475,10 @@ const FarcasterNormalPost = () => {
         title="Share on Farcaster"
         icon={logoFarcaster}
         isError={isError || isPostingFrameError || isDeployingZoraContractError}
-        isLoading={false}
+        isLoading={isLoading}
         isCreatingSplit={null}
         isUploadingToIPFS={isPostingFrame}
-        isPending={null}
+        isPending={isPending}
         isShareLoading={isShareLoading}
         isShareSuccess={isShareSuccess}
         isOpenAction={false}
