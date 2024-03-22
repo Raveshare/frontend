@@ -149,14 +149,17 @@ const FarcasterNormalPost = () => {
   });
 
   const chainId = ENVIRONMENT === "production" ? 8453 : 999999999; // 999999999 - zora sepolia
+  const isCreatorSponsored = farcasterStates?.frameData?.isCreatorSponsored;
+  const LOA = walletData?.publicAddress;
+  const allowedMints = farcasterStates?.frameData?.allowedMints;
 
   const argsArr = [
     postName || "My Frame",
     postName?.split(" ")[0].toUpperCase() || "MYFRAME",
-    farcasterStates?.frameData?.allowedMints || "10",
+    allowedMints || "10",
     "100",
     address,
-    address,
+    isCreatorSponsored ? LOA : address,Ï
     {
       publicSalePrice: "0",
       maxSalePurchasePerAddress: "4294967295",
