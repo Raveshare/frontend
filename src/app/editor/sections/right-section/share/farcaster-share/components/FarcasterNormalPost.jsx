@@ -159,7 +159,7 @@ const FarcasterNormalPost = () => {
     allowedMints || "10",
     "100",
     address,
-    isCreatorSponsored ? LOA : address,Ï
+    isCreatorSponsored ? LOA : address,
     {
       publicSalePrice: "0",
       maxSalePurchasePerAddress: "4294967295",
