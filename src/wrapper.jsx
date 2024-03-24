@@ -10,7 +10,6 @@ import { TourProvider } from "@reactour/tour";
 import { OnboardingSteps } from "./app/editor/common";
 import { EVMWalletProvider } from "./providers/EVM";
 import { SolanaWalletProvider } from "./providers/solana";
-import Test from "./Test";
 
 const radius = 8;
 
@@ -74,7 +73,6 @@ export const Wrapper = () => {
                 {/* <Route path="/design/:slugId" element={<App />} /> */}
                 Replace this
                 {/* https://staging-lenspost.vercel.app/?slug=image-data-slug */}
-
               </Routes>
               {ENVIRONMENT === "localhost" && <ReactQueryDevtools />}
             </BrowserRouter>

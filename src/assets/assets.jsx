@@ -3,6 +3,7 @@ import SuForward from "@meronex/icons/su/SuForward";
 import SuFolderClosed from "@meronex/icons/su/SuFolderClosed";
 import SuDownloadAlt from "@meronex/icons/su/SuDownloadAlt";
 // CSS className - go2941063172 polotno-side-panel-tab"
+import ServerErrorImg from "./pngs/serverError.png";
 
 export const TemplatesIcon = () => {
   return <img src="/sidebar-icons/templates.svg" alt="templates" />;
@@ -80,4 +81,4 @@ export const ShareIcon = () => {
 // image + icons export
 import SolanaLogo from "./svgs/solanaLogoMark.svg";
 
-export { SolanaLogo };
+export { SolanaLogo, ServerErrorImg };
