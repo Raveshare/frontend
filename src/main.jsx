@@ -10,7 +10,7 @@ import Error from "./app/error";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    {/* <Wrapper /> */}
-    <Error />
+    <Wrapper />
+    {/* <Error /> */}
   </React.StrictMode>
 );
