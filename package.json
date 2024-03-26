@@ -18,6 +18,8 @@
     "@material-tailwind/react": "^2.1.1",
     "@meronex/icons": "^4.0.0",
     "@rainbow-me/rainbowkit": "^1",
+    "@sentry/react": "^7.108.0",
+    "@sentry/vite-plugin": "^2.16.0",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-wallets": "^0.19.23",
