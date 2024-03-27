@@ -78,6 +78,19 @@ const CustomImageComponent = ({
       y: changeCanvasDimension ? 0 : store.height / 4,
     });
 
+    // Add a logo to the bottom right corner of the canvas
+    let h = store.activePage.computedHeight;
+    let w = store.activePage.computedWidth;
+    store.activePage.addElement({
+      x: w - 100,
+      y: h - 100,
+      type: "image",
+      src: "/logo_16x16.png",
+      selectable: false,
+      alwaysOnTop: true,
+      showInExport: true,
+    });
+
     // NOTE: NO NEED OF THIS NOW
     // if nft is a lens collect, add it to the lensCollectNftRecipientDataRef
     // if (isLensCollect?.isLensCollect) {
