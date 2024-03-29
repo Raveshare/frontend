@@ -148,6 +148,11 @@ export const StickerPanel = () => {
   // Halloween use 'H' and not 'h' - BE Response
   const tabArray = [
     {
+      name: "Cybershakti",
+      author: "cybershakti",
+      campaign: "shakti",
+    },
+    {
       name: "Otto",
       author: "otto",
       campaign: "otto",
