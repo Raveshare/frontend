@@ -27,8 +27,8 @@ const BgRemover = ({ inSpeedDial }) => {
       return { error: removedBgURL.error };
     }
 
-    fnAddImageToCanvas(removedBgURL.url);
-    fnUpdateRecipientDataRef(removedBgURL.elementId, elementId);
+    await fnAddImageToCanvas(removedBgURL.url);
+    await fnUpdateRecipientDataRef(removedBgURL.elementId, elementId);
 
     return { url: removedBgURL.url };
   };
@@ -40,26 +40,40 @@ const BgRemover = ({ inSpeedDial }) => {
       : { error: res?.error };
   };
 
-  const fnAddImageToCanvas = async (removedBgUrl) => {
+  const fnFindActivePageNo = () => {
+    console.log("store", store);
+    console.log("store._activePageId", store._activePageId);
+
+    console.log("store.activePage", store.activePage);
+
     const activePageIndex = store.pages.findIndex(
       (page) => page.identifier === store._activePageId
     );
-    if (activePageIndex !== -1) {
-      const selectedElement = store.selectedElements[0];
-      await store.pages[activePageIndex].addElement({
-        type: "image",
-        x: 0.5 * store.width,
-        y: 0.5 * store.height,
-        width: selectedElement.width,
-        height: selectedElement.height,
-        src: removedBgUrl,
-        selectable: true,
-        draggable: true,
-        removable: true,
-        resizable: true,
-        showInExport: true,
-      });
-    }
+
+    console.log("activePageIndex", activePageIndex);
+    setStActivePageNo(activePageIndex);
+    console.log("stActivePageNo", stActivePageNo);
+  };
+  const fnAddImageToCanvas = async (removedBgUrl) => {
+    console.log(removedBgUrl);
+    fnFindActivePageNo();
+
+    // if (stActivePageNo !== -1) {
+    const selectedElement = store.selectedElements[0];
+    await store.activePage.addElement({
+      type: "image",
+      x: 0.5 * store.width,
+      y: 0.5 * store.height,
+      width: selectedElement.width,
+      height: selectedElement.height,
+      src: `${replaceImageURL(removedBgUrl)}`,
+      selectable: true,
+      draggable: true,
+      removable: true,
+      resizable: true,
+      showInExport: true,
+    });
+    // }
   };
 
   const fnCallToast = async () => {
