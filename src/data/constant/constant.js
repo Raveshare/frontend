@@ -15,4 +15,4 @@ export const APP_SOLANA_ADDRESS =
 export const APP_ETH_ADDRESS = "0x77fAD8D0FcfD481dAf98D0D156970A281e66761b";
 
 export const FREE_MINTS = 10;
-export const FRAME_LINK = "https://frames.lenspost.xyz/frame/";
+export const FRAME_URL = "https://frames.poster.fun";
