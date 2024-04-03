@@ -6,7 +6,7 @@ export const loadJSONFile = (file, store) => {
     try {
       json = JSON.parse(text);
     } catch (e) {
-      alert('Can not load the project.');
+      alert("Can not load the project.");
     }
 
     if (json) {
@@ -14,7 +14,7 @@ export const loadJSONFile = (file, store) => {
     }
   };
   reader.onerror = function () {
-    alert('Can not load Polotno project file.');
+    alert("Can not load Polotno project file.");
   };
   reader.readAsText(file);
 };
@@ -31,23 +31,36 @@ export const loadImageFile = (file, store) => {
         store.width / img.width,
         store.height / img.height
       );
-      const type = file.type.indexOf('svg') > -1 ? 'svg' : 'image';
+      const type = file.type.indexOf("svg") > -1 ? "svg" : "image";
       store.activePage.addElement({
         type,
         width: img.width * scale,
         height: img.height * scale,
         src: url,
       });
+
+      // Add a logo to the bottom right corner of the canvas
+      let h = store.activePage.computedHeight;
+      let w = store.activePage.computedWidth;
+      store.activePage.addElement({
+        x: w - 100,
+        y: h - 100,
+        type: "image",
+        src: "/logo_16x16.png",
+        selectable: false,
+        alwaysOnTop: true,
+        showInExport: true,
+      });
     };
   };
   reader.onerror = function () {
-    alert('Can not load image.');
+    alert("Can not load image.");
   };
   reader.readAsDataURL(file);
 };
 
 export const loadFile = (file, store) => {
-  if (file.type.indexOf('image') >= 0) {
+  if (file.type.indexOf("image") >= 0) {
     loadImageFile(file, store);
   } else {
     loadJSONFile(file, store);
