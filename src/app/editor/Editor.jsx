@@ -30,6 +30,7 @@ import {
   getFromLocalStorage,
   saveToLocalStorage,
   consoleLogonlyDev,
+  waterMark,
 } from "../../utils";
 import { useTour } from "@reactour/tour";
 import FcIdea from "@meronex/icons/fc/FcIdea";
@@ -113,6 +114,11 @@ const Editor = () => {
     farcasterStates,
     setFarcasterStates,
   } = useContext(Context);
+
+  // initialize watermark
+  // useEffect(() => {
+  //   waterMark(store);
+  // }, [store]);
 
   // Slug implementation - Imports : // ?slug=test-slug-id
   const navigate = useNavigate();

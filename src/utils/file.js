@@ -46,7 +46,7 @@ export const loadImageFile = (file, store) => {
         x: w - 100,
         y: h - 100,
         type: "image",
-        src: "/logo_16x16.png",
+        src: "/OGlogo.png",
         selectable: false,
         alwaysOnTop: true,
         showInExport: true,
@@ -65,4 +65,18 @@ export const loadFile = (file, store) => {
   } else {
     loadJSONFile(file, store);
   }
+};
+
+export const waterMark = (store) => {
+  let h = store.activePage.computedHeight;
+  let w = store.activePage.computedWidth;
+  store.activePage.addElement({
+    x: w - 100,
+    y: h - 100,
+    type: "image",
+    src: "/watermark.png",
+    selectable: false,
+    alwaysOnTop: true,
+    showInExport: true,
+  });
 };
