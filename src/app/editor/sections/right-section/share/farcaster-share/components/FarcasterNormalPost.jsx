@@ -153,12 +153,6 @@ const FarcasterNormalPost = () => {
   const LOA = walletData?.publicAddress;
   const allowedMints = farcasterStates?.frameData?.allowedMints;
 
-  console.log({
-    isCreatorSponsored,
-    LOA,
-    allowedMints,
-  });
-
   const argsArr = [
     postName || "My Frame",
     postName?.split(" ")[0].toUpperCase() || "MYFRAME",

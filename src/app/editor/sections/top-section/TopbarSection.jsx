@@ -8,7 +8,7 @@ import { useAppAuth } from "../../../../hooks/app";
 import { Typography } from "@material-tailwind/react";
 import { EVMWallets, SolanaWallets } from "./auth/wallets";
 import Logo from "./logo/Logo";
-import PointsBtn from "./PointsBtn/PointsBtn"
+import PointsBtn from "./PointsBtn/PointsBtn";
 const TopbarSection = () => {
   const { isAuthenticated } = useAppAuth();
   const { chain } = useNetwork();
@@ -23,7 +23,7 @@ const TopbarSection = () => {
   };
 
   return (
-    <div className="bg-white mb-2 w-full p-2 sm:overflow-x-auto sm:overflow-y-hidden sm:max-w-[100vw] sticky border">
+    <div className="bg-white mb-2 w-full px-3 py-2 sm:overflow-x-auto sm:overflow-y-hidden sm:max-w-[100vw] sticky border">
       <div className="flex items-center justify-between">
         <Logo />
 

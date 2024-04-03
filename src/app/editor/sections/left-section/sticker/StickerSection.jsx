@@ -126,6 +126,7 @@ export const CompIcons = () => {
               x,
               y,
             });
+
             const req = await fetch(
               `${API}/download-iconfinder?download_url=${download_url}&KEY=${getKey()}`
             );

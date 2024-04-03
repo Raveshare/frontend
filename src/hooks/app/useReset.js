@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Context } from "../../providers/context";
 import { useStore } from "../polotno";
+import { waterMark } from "../../utils";
 
 const useReset = () => {
   const store = useStore();
@@ -109,6 +110,7 @@ const useReset = () => {
     // clear the page
     store.clear({ keepHistory: true });
     store.addPage();
+
     store.setSize(1080, 1080);
 
     // reset all the states

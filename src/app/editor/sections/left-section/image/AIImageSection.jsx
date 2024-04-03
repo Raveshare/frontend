@@ -65,25 +65,12 @@ const CompSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [delayedQuery, setDelayedQuery] = useState(
+  const [query, setQuery] = useState(
     RANDOM_QUERIES[(RANDOM_QUERIES.length * Math.random()) | 0]
   );
-  const [query, setQuery] = useState();
-  // RANDOM_QUERIES[(RANDOM_QUERIES.length * Math.random()) | 0]
-  // delayedQuery
-
-  const requestTimeout = useRef();
-  useEffect(() => {
-    requestTimeout.current = setTimeout(() => {
-      setDelayedQuery(query);
-    }, 2000);
-    return () => {
-      clearTimeout(requestTimeout.current);
-    };
-  }, [query]);
 
   const fnGenerateImages = async () => {
-    if (!delayedQuery) {
+    if (!query) {
       return;
     }
     async function load() {
@@ -91,7 +78,7 @@ const CompSearch = () => {
       setError(null);
       try {
         setIsLoading(true);
-        const response = await getFalAiImage(delayedQuery);
+        const response = await getFalAiImage(query);
         setStStatusCode(response.status);
         if (response.status === 200) {
           setIsLoading(false);
@@ -106,7 +93,7 @@ const CompSearch = () => {
         // setError(e);
         setError(e.message);
         setIsLoading(false);
-        setStStatusCode(429);
+        // setStStatusCode(429);
       }
       setIsLoading(false);
     }
@@ -115,7 +102,7 @@ const CompSearch = () => {
 
   useEffect(() => {
     fnGenerateImages();
-  }, [delayedQuery]);
+  }, []);
 
   return (
     <>
@@ -132,12 +119,14 @@ const CompSearch = () => {
             }}
             onKeyPress={(e) => {
               if (e.key === "Enter") {
-                setQuery(e.target.value);
+                // setQuery(e.target.value);
+                fnGenerateImages();
               }
             }}
             value={query}
             type="search"
           />
+          <MatButton className="mb-4" onClick={fnGenerateImages}>Generate</MatButton>
           {/* 
 			<button className="bg-[#e1f16b] w-full px-4 p-1  mb-4 rounded-md hover:bg-[#e0f26cce]" onClick={fnGenerateImages}>Generate</button>
 			*/}
@@ -174,6 +163,12 @@ const CompSearch = () => {
             <CustomImageComponent key={key} preview={val.url} />
           ))}
         </>
+      )}
+
+      {!isLoading && error && (
+        <div className="mt-4 p-2 text-red-600 bg-red-50 rounded-md">
+          {error}
+        </div>
       )}
 
       {stStatusCode === 429 && (
@@ -274,7 +269,6 @@ const CompInstructImage = () => {
         image: base64Stripper(uploadedImg),
       }),
     };
-
 
     // await fetch("https://api.getimg.ai/v1/stable-diffusion/instruct", options)
     await fetch(

@@ -8,10 +8,9 @@ export const resetAllVariables = (
   setMenu
 ) => {
   setPostDescription("");
-  store.clear({ keepHistory: true });
-  store.addPage();
+
   referredFromRef.current = [];
-  contextCanvasIdRef.current = null
+  contextCanvasIdRef.current = null;
   setEnabled({
     chargeForCollect: false,
     chargeForCollectPrice: "1",
