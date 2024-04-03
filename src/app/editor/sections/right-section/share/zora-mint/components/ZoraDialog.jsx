@@ -15,7 +15,7 @@ import { useNetwork } from "wagmi";
 import BiCopy from "@meronex/icons/bi/BiCopy";
 import { toast } from "react-toastify";
 import { zoraURLErc721 } from "../utils";
-import { FRAME_LINK } from "../../../../../../../data";
+import { FRAME_URL } from "../../../../../../../data";
 
 const ZoraDialog = ({
   title,
@@ -126,7 +126,7 @@ const ZoraDialog = ({
                         <span className="flex gap-1 items-center">
                           Check your
                           <a
-                            href={FRAME_LINK + frameId}
+                            href={FRAME_URL + "/frame/" + frameId}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-500"
@@ -136,7 +136,7 @@ const ZoraDialog = ({
                           <BiCopy
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                FRAME_LINK + frameId
+                                FRAME_URL + "/frame/" + frameId
                               );
                               setIsCopy({
                                 id: 2,

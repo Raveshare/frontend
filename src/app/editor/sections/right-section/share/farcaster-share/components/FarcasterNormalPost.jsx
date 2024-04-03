@@ -17,7 +17,7 @@ import { useLocalStorage, useReset } from "../../../../../../../hooks/app";
 import {
   APP_ETH_ADDRESS,
   ERROR,
-  FRAME_LINK,
+  FRAME_URL,
   LOCAL_STORAGE,
   URL_REGEX,
 } from "../../../../../../../data";
@@ -320,7 +320,7 @@ const FarcasterNormalPost = () => {
     if (farcasterStates.frameData?.isFrame) {
       canvasParams = {
         ...canvasParams,
-        frameLink: FRAME_LINK + frameId,
+        frameLink: FRAME_URL + "/frame/" + frameId,
       };
     }
 
