@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { Context } from "../../providers/context";
 import { clearAllLocalStorageData } from "../../utils";
 import useReset from "./useReset";
+import * as Sentry from "@sentry/react";
 
 const useLogout = () => {
   const { solanaDisconnect } = useSolanaWallet();
@@ -16,6 +17,7 @@ const useLogout = () => {
     disconnect();
     solanaDisconnect();
     posthog.reset();
+    Sentry.setUser(null);
     clearAllLocalStorageData();
   };
 

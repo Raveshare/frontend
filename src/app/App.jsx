@@ -33,6 +33,7 @@ import { ENVIRONMENT } from "../services";
 import { SolanaWalletErrorContext } from "../providers/solana/SolanaWalletProvider";
 import { useLogout } from "../hooks/app";
 import { useStore } from "../hooks/polotno";
+import * as Sentry from "@sentry/react";
 
 const App = () => {
   const { setSteps, setIsOpen, setCurrentStep } = useTour();
@@ -179,6 +180,9 @@ const App = () => {
             profileHandle: res?.profileHandle,
           });
           saveToLocalStorage(LOCAL_STORAGE.userId, res?.userId);
+          Sentry.setUser({
+            id: res?.userId,
+          });
           setSession(res.jwt);
           posthog.identify(res?.userId, {
             evm_address: address,
@@ -223,6 +227,9 @@ const App = () => {
             profileHandle: res?.profileHandle,
           });
           saveToLocalStorage(LOCAL_STORAGE.userId, res?.userId);
+          Sentry.setUser({
+            id: res?.userId,
+          });
           setSession(res.jwt);
           posthog.identify(res?.userId, {
             solana_address: solanaAddress,
