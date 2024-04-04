@@ -51,20 +51,17 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
-  const gasPrice = feeData
-    ? Number(feeData?.formatted?.gasPrice)
-    : 0.000000000001000254;
+  const TxFeeForDeployment = 0.00009;
+  const txFeeForMint = 0.00002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
 
-  // console.log("numberOfExtraMints", numberOfExtraMints);
-
-  const payForMints = (gasPrice * 1000 * numberOfExtraMints)
+  const payForMints = Number(
+    txFeeForMint * numberOfExtraMints + TxFeeForDeployment
+  )
     .toFixed(18)
     .toString();
-
-  // console.log("payForMints", payForMints);
 
   const { config } = usePrepareSendTransaction({
     to: topUpAccount, // users wallet
@@ -136,22 +133,22 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     }
   }, [isError, isTxError]);
 
-  // if (chain?.id !== network?.id) {
-  //   return (
-  //     <Card className="my-2">
-  //       <List>
-  //         <ListItem
-  //           className="flex justify-between items-center gap-2"
-  //           onClick={() => switchNetwork(network?.id)}
-  //         >
-  //           <Typography variant="h6" color="blue-gray">
-  //             Please switch to {network?.name} network
-  //           </Typography>
-  //         </ListItem>
-  //       </List>
-  //     </Card>
-  //   );
-  // }
+  if (chain?.id !== network?.id) {
+    return (
+      <Card className="my-2">
+        <List>
+          <ListItem
+            className="flex justify-between items-center gap-2"
+            onClick={() => switchNetwork(network?.id)}
+          >
+            <Typography variant="h6" color="blue-gray">
+              Please switch to {network?.name} network
+            </Typography>
+          </ListItem>
+        </List>
+      </Card>
+    );
+  }
 
   if (isFeeLoading) {
     return (

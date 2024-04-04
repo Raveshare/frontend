@@ -8,8 +8,10 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import * as Sentry from "@sentry/react";
 import Error from "./app/error";
+import { ENVIRONMENT } from "./services";
 
 Sentry.init({
+  environment: ENVIRONMENT === "production" ? "production" : "development",
   dsn: "https://3db3649e65d788153415beddf01a245d@o4506978044739584.ingest.us.sentry.io/4506978049196032",
   integrations: [
     Sentry.browserTracingIntegration(),
@@ -17,7 +19,7 @@ Sentry.init({
       maskAllText: false,
       blockAllMedia: false,
     }),
-    
+
     Sentry.feedbackIntegration({
       colorScheme: "system",
       isEmailRequired: true,
