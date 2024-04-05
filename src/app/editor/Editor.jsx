@@ -96,7 +96,8 @@ const Editor = () => {
   const { isAuthenticated } = useAppAuth();
   const canvasIdRef = useRef(null);
   const timeoutRef = useRef(null);
-  const {} = useLocalStorage();
+  const isPageActive = useRef(false);
+  const isWatermark = useRef(false);
   const { setSteps, setIsOpen, setCurrentStep } = useTour();
   const {
     contextCanvasIdRef,
@@ -297,10 +298,12 @@ const Editor = () => {
         console.log("Canvas is empty. Its stopped saving");
         canvasIdRef.current = null;
         contextCanvasIdRef.current = null;
+        isPageActive.current = false;
       }
 
       // save it to the backend
       if (canvasChildren?.length > 0) {
+        isPageActive.current = true;
         // console.log("parentRecipientObj", recipientDataFilter().recipientsData);
         // console.log("parentRecipientRef", recipientDataCombiner().recipients);
 
@@ -476,6 +479,17 @@ const Editor = () => {
       off();
     };
   }, []);
+
+  // watermark
+  // useEffect(() => {
+  //   console.log("isPageActive", store?.pages.length);
+  //   if (isPageActive.current && !isWatermark.current) {
+  //     // waterMark(store);
+  //     isWatermark.current = true;
+  //   } else {
+  //     isWatermark.current = false;
+  //   }
+  // }, [isPageActive.current]);
 
   return (
     <>

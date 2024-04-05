@@ -12,4 +12,5 @@ export const LOCAL_STORAGE = {
   userGuideTour: "user.guide.tour",
   braveShieldWarn: "brave.shield.warn",
   userId: "user.id",
+  isWatermark: "watermark",
 };

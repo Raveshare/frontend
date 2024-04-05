@@ -71,12 +71,14 @@ export const waterMark = (store) => {
   let h = store.activePage.computedHeight;
   let w = store.activePage.computedWidth;
   store.activePage.addElement({
-    x: w - 100,
-    y: h - 100,
+    x: w - 220,
+    y: h - 220,
     type: "image",
     src: "/watermark.png",
     selectable: false,
     alwaysOnTop: true,
     showInExport: true,
+    height: h / 5,
+    width: w / 5,
   });
 };
