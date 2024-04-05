@@ -28,6 +28,7 @@ const useLocalStorage = () => {
   const userGuideTour = getFromLocalStorage(LOCAL_STORAGE.userGuideTour);
   const braveShieldWarn = getFromLocalStorage(LOCAL_STORAGE.braveShieldWarn);
   const userId = getFromLocalStorage(LOCAL_STORAGE.userId);
+  const isWatermark = getFromLocalStorage(LOCAL_STORAGE.isWatermark);
 
   return {
     authToken,
@@ -43,6 +44,7 @@ const useLocalStorage = () => {
     userGuideTour,
     braveShieldWarn,
     userId,
+    isWatermark,
   };
 };
 

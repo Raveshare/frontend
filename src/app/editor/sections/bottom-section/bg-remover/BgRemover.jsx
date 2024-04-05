@@ -41,21 +41,13 @@ const BgRemover = ({ inSpeedDial }) => {
   };
 
   const fnFindActivePageNo = () => {
-    console.log("store", store);
-    console.log("store._activePageId", store._activePageId);
-
-    console.log("store.activePage", store.activePage);
-
     const activePageIndex = store.pages.findIndex(
       (page) => page.identifier === store._activePageId
     );
 
-    console.log("activePageIndex", activePageIndex);
     setStActivePageNo(activePageIndex);
-    console.log("stActivePageNo", stActivePageNo);
   };
   const fnAddImageToCanvas = async (removedBgUrl) => {
-    console.log(removedBgUrl);
     fnFindActivePageNo();
 
     // if (stActivePageNo !== -1) {
