@@ -33,6 +33,7 @@ const ShareSection = () => {
   } = useContext(Context);
   const getTwitterAuth = getFromLocalStorage("twitterAuth");
   const [stClickedEmojiIcon, setStClickedEmojiIcon] = useState(false);
+  const [charLimitError, setCharLimitError] = useState("");
 
   const chainsArray = [
     {
@@ -54,7 +55,7 @@ const ShareSection = () => {
     {
       id: 42161,
       name: "Arbitrum One",
-    }
+    },
   ];
 
   const filterChains = () => {
@@ -107,6 +108,27 @@ const ShareSection = () => {
     setPostDescription(postDescription + emojiData?.emoji); //Add emoji to description
   }
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    const name = e.target.name;
+    const maxByteLimit = 195;
+    const byteLength = new TextEncoder().encode(value).length;
+
+    if (name === "title") {
+      setPostName(value);
+    } else if (name === "description") {
+      if (byteLength > maxByteLimit) {
+        setCharLimitError("Maximun character limit exceeded");
+        setPostDescription(
+          value.substring(0, value.length - (byteLength - maxByteLimit))
+        );
+      } else {
+        setCharLimitError("");
+        setPostDescription(value);
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-md rounded-lg  rounded-r-none ">
@@ -133,18 +155,23 @@ const ShareSection = () => {
             <div className="flex items-center justify-between"></div>
             <InputBox
               label={"Title"}
+              name="title"
               autoFocus={true}
-              onChange={(e) => setPostName(e.target.value)}
+              onChange={(e) => handleInputChange(e)}
               value={postName}
             />
             <div className="space-x-2">
               <Textarea
                 label="Description"
-                onChange={(e) => setPostDescription(e.target.value)}
+                name="description"
+                onChange={(e) => handleInputChange(e)}
                 value={postDescription}
                 // placeholder="Write a description..."
                 // className="border border-b-4 w-full h-40 mb-2 text-lg outline-none p-2 ring-0 focus:ring-2 rounded-lg"
               />
+              {charLimitError && (
+                <div className="text-red-500 text-sm">{charLimitError}</div>
+              )}
 
               <div className="flex flex-row">
                 {/* Open the emoji panel - 22Jul2023 */}
