@@ -63,6 +63,11 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
+  console.log({
+    payForMints,
+    extraPayForMints,
+  });
+
   const { config } = usePrepareSendTransaction({
     to: topUpAccount, // users wallet
     value: extraPayForMints
