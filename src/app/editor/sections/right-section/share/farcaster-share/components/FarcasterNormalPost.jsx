@@ -157,7 +157,7 @@ const FarcasterNormalPost = () => {
     postName || "My Frame",
     postName?.split(" ")[0].toUpperCase() || "MYFRAME",
     allowedMints || "10",
-    "100",
+    "500",
     address,
     isCreatorSponsored ? LOA : address,
     {
