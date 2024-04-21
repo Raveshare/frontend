@@ -43,11 +43,6 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     formatUnits: "ether",
   });
 
-  // console.log(
-  //   "feeData",
-  //   Number(feeData?.formatted?.gasPrice).toFixed(18).toString()
-  // );
-
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
@@ -62,11 +57,6 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   )
     .toFixed(18)
     .toString();
-
-  console.log({
-    payForMints,
-    extraPayForMints,
-  });
 
   const { config } = usePrepareSendTransaction({
     to: topUpAccount, // users wallet
