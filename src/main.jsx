@@ -12,7 +12,7 @@ import { ENVIRONMENT } from "./services";
 
 Sentry.init({
   environment: ENVIRONMENT === "production" ? "production" : "development",
-  dsn: "https://3db3649e65d788153415beddf01a245d@o4506978044739584.ingest.us.sentry.io/4506978049196032",
+  dsn: "https://659f128450258c756b7656b1cccfb135@o4506978044739584.ingest.us.sentry.io/4507125636792320",
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration({
