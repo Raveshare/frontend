@@ -58,6 +58,7 @@ import { Button } from "@material-tailwind/react";
 import { useAppAuth, useLocalStorage } from "../../hooks/app";
 import { getFarUserDetails } from "../../services/apis/BE-apis";
 import { useLocation, useNavigate } from "react-router-dom";
+import { watermarkBase64 } from "../../assets/base64/watermark";
 
 // enable animations
 unstable_setAnimationsEnabled(true);
@@ -352,6 +353,9 @@ const Editor = () => {
         }
       }
     }, 3000);
+
+    // Load the Watermark
+    fnLoadWatermark();
   };
 
   // ------ Testing Share Canvas Start --------
@@ -387,6 +391,51 @@ const Editor = () => {
     // Set or update the content of the meta tag
     metaTag.setAttribute("content", ogImageLink);
   };
+
+  const fnLoadWatermark = () => {
+    if (!store) return;
+    consoleLogonlyDev(store.toJSON());
+
+    let w = store.width;
+    let h = store.height;
+    const watermarkbase64 = `data:image/png;base64,${watermarkBase64}`;
+
+    // Check if watermark is already added
+    store.pages.forEach((page, index) => {
+      let watermarkAdded = false;
+      page.children.forEach((pageItem) => {
+        if (pageItem.name === "watermark") {
+          console.log("Watermark already added to the page");
+          // pageItem.x = w - w / 8; // Adjusted x position to bottom-right
+          // pageItem.y = h - h / 8; // Adjusted y position to bottom-right
+          watermarkAdded = true;
+        }
+      });
+
+      // Add watermark
+      if (!watermarkAdded) {
+        page.addElement({
+          x: w - w / 8, // Adjusted x position to bottom-right
+          y: h - h / 8, // Adjusted y position to bottom-right
+          type: "image",
+          name: "watermark",
+          src: watermarkbase64,
+          selectable: false,
+          alwaysOnTop: true,
+          showInExport: true,
+          height: h / 8,
+          width: w / 8,
+        });
+        console.log(
+          `Watermark added to ${page} page, at x: ${w}, y: ${h - 16}`
+        );
+      }
+    });
+  };
+
+  useEffect(() => {
+    fnLoadWatermark();
+  }, [store]);
 
   // Effect to check with the slugId and fetch the image changes
   useEffect(() => {
