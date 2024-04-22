@@ -29,6 +29,7 @@ const useLocalStorage = () => {
   const braveShieldWarn = getFromLocalStorage(LOCAL_STORAGE.braveShieldWarn);
   const userId = getFromLocalStorage(LOCAL_STORAGE.userId);
   const isWatermark = getFromLocalStorage(LOCAL_STORAGE.isWatermark);
+  const userLOA = getFromLocalStorage(LOCAL_STORAGE.userLOA);
 
   return {
     authToken,
@@ -45,6 +46,7 @@ const useLocalStorage = () => {
     braveShieldWarn,
     userId,
     isWatermark,
+    userLOA,
   };
 };
 

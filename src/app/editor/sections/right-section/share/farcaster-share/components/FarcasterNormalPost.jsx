@@ -12,6 +12,7 @@ import {
   errorMessage,
   jsConfettiFn,
   addressCrop,
+  saveToLocalStorage,
 } from "../../../../../../../utils";
 import { useLocalStorage, useReset } from "../../../../../../../hooks/app";
 import {
@@ -53,6 +54,7 @@ const FarcasterNormalPost = () => {
   const { resetState } = useReset();
   const { address } = useAccount();
   const { chain } = useNetwork();
+  const { userLOA } = useLocalStorage();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
   const { switchNetwork, isLoading: isLoadingSwitchNetwork } =
     useSwitchNetwork();
@@ -77,6 +79,7 @@ const FarcasterNormalPost = () => {
   const [isPostingFrameSuccess, setIsPostingFrameSuccess] = useState(false);
   const [isStoringFrameData, setIsStoringFrameData] = useState(false);
   const [isDeployingZoraContract, setIsDeployingZoraContract] = useState(false);
+  const [isUploadSuccess, setIsUploadSuccess] = useState(false);
   const [frameId, setFrameId] = useState(null);
 
   const {
@@ -98,20 +101,11 @@ const FarcasterNormalPost = () => {
     error: walletError,
     isSuccess: isWalletSuccess,
     refetch: refetchWallet,
+    isRefetching: isWalletRefetching,
   } = useQuery({
     queryKey: ["getOrCreateWallet"],
     queryFn: () => getOrCreateWallet(),
-    enabled: true,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnSettled: false,
-    retry: false,
-    retryOnMount: false,
-    retryOnReconnect: false,
-    retryOnSettled: false,
-    staleTime: 2_000,
-    cacheTime: 2_000,
   });
 
   const { mutateAsync: deployZoraContractMutation } = useMutation({
@@ -141,16 +135,18 @@ const FarcasterNormalPost = () => {
     data: uploadData,
     isError: isUploadError,
     error: uploadError,
-    isSuccess: isUploadSuccess,
     isLoading: isUploading,
   } = useMutation({
     mutationKey: "uploadToIPFS",
     mutationFn: uploadUserAssetToIPFS,
+    onSuccess: () => {
+      setIsUploadSuccess(true);
+    },
   });
 
   const chainId = ENVIRONMENT === "production" ? 8453 : 999999999; // 999999999 - zora sepolia
   const isCreatorSponsored = farcasterStates?.frameData?.isCreatorSponsored;
-  const LOA = walletData?.publicAddress;
+  const LOA = walletData?.publicAddress ? walletData?.publicAddress : userLOA;
   const allowedMints = farcasterStates?.frameData?.allowedMints;
 
   const argsArr = [
@@ -274,7 +270,7 @@ const FarcasterNormalPost = () => {
       canvasId: contextCanvasIdRef.current,
       owner: address,
       isTopUp: farcasterStates.frameData?.isTopup,
-      allowedMints: parseInt(farcasterStates.frameData?.allowedMints),
+      allowedMints: Number(farcasterStates.frameData?.allowedMints),
       metadata: {
         name: postName,
         description: postDescription,
@@ -438,13 +434,17 @@ const FarcasterNormalPost = () => {
   };
 
   useEffect(() => {
-    if (isUploadSuccess) {
+    if (isUploadSuccess && farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
-      if (farcasterStates.frameData?.isCreatorSponsored) {
-        deployZoraContractFn();
-      } else {
-        write?.();
-      }
+      deployZoraContractFn();
+    }
+  }, [isUploadSuccess]);
+
+  useEffect(() => {
+    console.log({ isUploadSuccess });
+    if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
+      setIsPostingFrame(false);
+      write?.();
     }
   }, [isUploadSuccess, write]);
 
@@ -453,12 +453,6 @@ const FarcasterNormalPost = () => {
       setIsDeployingZoraContractSuccess(true);
       setZoraContractAddress(receipt?.logs[0]?.address);
 
-      storeZoraLink();
-    }
-  }, [isSuccess]);
-
-  useEffect(() => {
-    if (isSuccess) {
       storeZoraLink();
     }
   }, [isSuccess]);
@@ -475,6 +469,12 @@ const FarcasterNormalPost = () => {
     }
   }, [isPostingFrameSuccess]);
 
+  useEffect(() => {
+    if (isWalletSuccess) {
+      saveToLocalStorage(LOCAL_STORAGE.userLOA, walletData?.publicAddress);
+    }
+  }, [isWalletSuccess]);
+
   // error handling for mint
   useEffect(() => {
     if (isWriteError) {
@@ -487,7 +487,23 @@ const FarcasterNormalPost = () => {
       console.log("prepare error", prepareError);
       // toast.error(prepareError.message);
     }
-  }, [isWriteError, isPrepareError]);
+
+    if (isUploadError) {
+      toast.error(uploadError?.message);
+    }
+
+    setIsUploadSuccess(false);
+    setIsError(false);
+    setIsPostingFrameError(false);
+    setIsDeployingZoraContractError(false);
+  }, [
+    isWriteError,
+    isPrepareError,
+    isError,
+    isPostingFrameError,
+    isDeployingZoraContractError,
+    isUploadError,
+  ]);
 
   console.log("Topup balance", walletData?.balance);
 
@@ -501,7 +517,8 @@ const FarcasterNormalPost = () => {
           isPostingFrameError ||
           isDeployingZoraContractError ||
           isWriteError ||
-          (farcasterStates?.frameData?.isCreatorSponsored && prepareError)
+          (farcasterStates?.frameData?.isCreatorSponsored && prepareError) ||
+          isUploadError
         }
         isLoading={isLoading}
         isCreatingSplit={null}
@@ -821,7 +838,7 @@ const FarcasterNormalPost = () => {
             </p>
             <p className="text-end mt-4">
               <span>Topup account:</span>
-              {isWalletLoading ? (
+              {isWalletLoading || isWalletRefetching ? (
                 <span className="text-blue-500"> Loading address... </span>
               ) : (
                 <span
@@ -837,7 +854,12 @@ const FarcasterNormalPost = () => {
               )}
             </p>
             <p className="text-end">
-              <span>Topup balance:</span> {walletData?.balance} Base ETH
+              <span>Topup balance:</span>
+              {isWalletLoading || isWalletRefetching ? (
+                <span className="text-blue-500"> Loading balance... </span>
+              ) : (
+                <span>{walletData?.balance} Base ETH</span>
+              )}
             </p>
             <div className="flex flex-col w-full py-2">
               <NumberInputBox
@@ -906,7 +928,7 @@ const FarcasterNormalPost = () => {
           <FarcasterAuth />
         ) : farcasterStates?.frameData?.isFrame &&
           !farcasterStates?.frameData?.isCreatorSponsored &&
-          chain.id != chainId ? (
+          chain?.id != chainId ? (
           <div className="mx-2 outline-none">
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"

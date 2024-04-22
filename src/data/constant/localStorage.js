@@ -13,4 +13,5 @@ export const LOCAL_STORAGE = {
   braveShieldWarn: "brave.shield.warn",
   userId: "user.id",
   isWatermark: "watermark",
+  userLOA: "user.LOA",
 };
