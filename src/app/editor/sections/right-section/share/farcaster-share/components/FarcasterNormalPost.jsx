@@ -441,7 +441,6 @@ const FarcasterNormalPost = () => {
   }, [isUploadSuccess]);
 
   useEffect(() => {
-    console.log({ isUploadSuccess });
     if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
       write?.();
