@@ -35,8 +35,8 @@ Sentry.init({
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <Wrapper />
-  // {/* <Error /> */}
-  // </React.StrictMode>
+  <React.StrictMode>
+    <Wrapper />
+    {/* <Error /> */}
+  </React.StrictMode>
 );
