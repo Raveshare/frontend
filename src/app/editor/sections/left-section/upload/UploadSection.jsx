@@ -23,7 +23,7 @@ import {
 import { UploadIcon } from "../../../../../assets/assets";
 import { toast } from "react-toastify";
 import { deleteUserAsset, getUserAssets } from "../../../../../services";
-import { fnLoadMore } from "../../../../../utils";
+import { errorMessage, fnLoadMore } from "../../../../../utils";
 import { UploadFileDropzone } from "./components";
 import { LoadingAnimatedComponent } from "../../../common";
 import { useAppAuth } from "../../../../../hooks/app";
