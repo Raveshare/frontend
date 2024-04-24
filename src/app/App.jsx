@@ -356,6 +356,7 @@ const App = () => {
       newWorker.addEventListener("statechange", () => {
         if (newWorker.state === "installed") {
           if (navigator.serviceWorker.controller) {
+            console.log("New update available");
             setIsUpdateAvailable(true);
           }
         }
