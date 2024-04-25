@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Button, Position, Menu, HTMLSelect, Slider } from "@blueprintjs/core";
 import { Popover2 } from "@blueprintjs/popover2";
 import * as unit from "polotno/utils/unit";
 import { ExportIcon } from "../../../../../assets/assets";
 import { useStore } from "../../../../../hooks/polotno";
+import posthog from "posthog-js";
+import { Context } from "../../../../../providers/context";
 
 const DownloadBtn = () => {
   const store = useStore();
@@ -11,6 +13,7 @@ const DownloadBtn = () => {
   const [quality, setQuality] = React.useState(1);
   const [type, setType] = React.useState("png");
   const [fps, setFPS] = React.useState(10);
+  const { contextCanvasIdRef } = useContext(Context);
 
   const getName = () => {
     const texts = [];
@@ -26,6 +29,16 @@ const DownloadBtn = () => {
     return "lenspost" || words.join(" ").replace(/\s/g, "-").toLowerCase();
     // return "lenspost";
   };
+
+  const captureEvent = () => {
+    posthog.capture("downloaded design", {
+      canvas_id: contextCanvasIdRef.current,
+      fileType: type,
+      quality,
+      fps,
+    });
+  };
+
   return (
     <Popover2
       content={
@@ -154,6 +167,8 @@ const DownloadBtn = () => {
                   });
                 });
               }
+
+              captureEvent();
             }}
           >
             Download {type.toUpperCase()}

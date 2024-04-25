@@ -52,7 +52,7 @@ const TopbarSection = () => {
             <div id="fifth-step">
               <ShareButton />
             </div>
-            {/* <DownloadBtn /> */}
+            <DownloadBtn />
 
             <div className="" id="first-step">
               <ProfileMenu />

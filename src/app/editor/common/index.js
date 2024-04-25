@@ -30,6 +30,7 @@ import TabsWithArrows from "./core/CustomsTabsWArrows/TabsWithArrows";
 import Networks from "./modals/Networks";
 
 import ShareWithTagsModal from "../sections/left-section/design/components/modals/ShareWithTagsModal";
+import UpdateAvailable from "./modals/UpdateAvailable";
 
 export {
   CustomImageComponent,
@@ -56,9 +57,7 @@ export {
   CompCarousel,
   BraveShieldWarn,
   TabsWithArrows,
-
   ShareWithTagsModal,
-
   Networks,
-
+  UpdateAvailable,
 };

@@ -22,6 +22,7 @@ import {
   LoadingComponent,
   OnboardingSteps,
   OnboardingStepsWithShare,
+  UpdateAvailable,
 } from "./editor/common";
 import { clearAllLocalStorageData, errorMessage } from "../utils";
 import { useSolanaWallet } from "../hooks/solana";
@@ -59,6 +60,7 @@ const App = () => {
     signMessage,
   } = useSignMessage();
   const [session, setSession] = useState("");
+  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const getEvmAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
   const getSolanaAuth = getFromLocalStorage(LOCAL_STORAGE.solanaAuth);
   const getUserAuthToken = getFromLocalStorage(LOCAL_STORAGE.userAuthToken);
@@ -344,10 +346,29 @@ const App = () => {
     }
   }, [solanaConnected, solanaAddress]);
 
+  // check for updates
+  useEffect(() => {
+    const registration = navigator.serviceWorker;
+    if (!registration) return;
+
+    registration.addEventListener("updatefound", () => {
+      const newWorker = registration.installing;
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed") {
+          if (navigator.serviceWorker.controller) {
+            console.log("New update available");
+            setIsUpdateAvailable(true);
+          }
+        }
+      });
+    });
+  }, []);
+
   return (
     <>
       <Editor />
       {window.navigator?.brave && !isBraveShieldWarn && <BraveShieldWarn />}
+      {isUpdateAvailable && <UpdateAvailable />}
       <CheckInternetConnection />
       <LoadingComponent isLoading={isLoading} text={text} />
       <ToastContainer
