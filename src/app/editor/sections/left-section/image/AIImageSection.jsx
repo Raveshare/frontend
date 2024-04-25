@@ -38,7 +38,8 @@ import animationData from "../../../../../assets/lottie/loaders/aiGeneration.jso
 import { useStore } from "../../../../../hooks/polotno";
 import { Context } from "../../../../../providers/context";
 import { Tab, Tabs, TabsHeader, TabsBody } from "@material-tailwind/react";
-import { getFalAiImage } from "../../../../../services";
+import { getFalAiImage, getFalImgtoImg } from "../../../../../services";
+
 // Tab1 - Search Tab
 
 const RANDOM_QUERIES = [
@@ -65,9 +66,8 @@ const CompSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [query, setQuery] = useState(
-    RANDOM_QUERIES[(RANDOM_QUERIES.length * Math.random()) | 0]
-  );
+  const [query, setQuery] = useState();
+  // RANDOM_QUERIES[(RANDOM_QUERIES.length * Math.random()) | 0]
 
   const fnGenerateImages = async () => {
     if (!query) {
@@ -104,6 +104,10 @@ const CompSearch = () => {
     fnGenerateImages();
   }, []);
 
+  useEffect(() => {
+    consoleLogonlyDev(query);
+  }, [query]);
+
   return (
     <>
       <div className="">
@@ -126,7 +130,9 @@ const CompSearch = () => {
             value={query}
             type="search"
           />
-          <MatButton className="mb-4" onClick={fnGenerateImages}>Generate</MatButton>
+          <MatButton className="mb-4" onClick={fnGenerateImages}>
+            Generate
+          </MatButton>
           {/* 
 			<button className="bg-[#e1f16b] w-full px-4 p-1  mb-4 rounded-md hover:bg-[#e0f26cce]" onClick={fnGenerateImages}>Generate</button>
 			*/}
@@ -155,7 +161,19 @@ const CompSearch = () => {
           );
         })}
       </div>
-      {isLoading && <LoadingAnimatedComponent />}
+      {/* {isLoading && <LoadingAnimatedComponent />} */}
+      {isLoading && (
+        <div className="mt-0 text-center text-blue-600">
+          <Lottie animationData={animationData} className="h-64" />
+          {/* Generating Image... */}
+        </div>
+      )}
+      {query == "" ||
+        (!data &&  !isLoading &&(
+          <div className="p-2 pt-4  text-center text-gray-500">
+            Give a prompt and click Generate to get started
+          </div>
+        ))}
 
       {!isLoading && stStatusCode === 200 && (
         <>
@@ -231,7 +249,7 @@ const CompDesignify = () => {
 const CompInstructImage = () => {
   const { fastPreview } = useContext(Context);
 
-  const [base64ImgLink, setBase64ImgLink] = useState(""); // For Newly generated Image Preview
+  const [responseImage, setResponseImage] = useState(""); // For Newly generated Image Preview
   const [uploadedImg, setUploadedImg] = useState(); //For Uploaded Preview
   const [clicked, setClicked] = useState(false);
   const [stImgPrompt, setStImgPrompt] = useState(
@@ -250,47 +268,46 @@ const CompInstructImage = () => {
 
   const fnCallInstructImgAPI = async () => {
     setClicked(true);
-    setBase64ImgLink("");
+    setResponseImage("");
 
-    const options = {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        authorization:
-          "Bearer key-2ldCt5QwA0Jt9VxoHDWadZukBnQKqM9Rcj9UBZPRVR0eh8sbhLzMylCMmNreNR5GqwgsMJmoolcBGA5JBgUleuP2BqWNiYZ2",
-        // "Bearer key-4tA8akcKtGFZQwipltBWJz3CCe1Jh6u7PX59uRJY9U6wEvareOdhlhWgCiMWnZeCz9CC6GIJLaddIJGbHr5crjfz6ROXTUXY"
-      },
-      body: JSON.stringify({
-        // data: {
-        prompt: stImgPrompt,
-        // image: base64Stripper(uploadedImg),
-        // image: `${base64Stripper(uploadedImg)}`,
-        image: base64Stripper(uploadedImg),
-      }),
-    };
+    // const options = {
+    //   method: "POST",
+    //   headers: {
+    //     accept: "application/json",
+    //     "content-type": "application/json",
+    //     authorization:
+    //       "Bearer key-2ldCt5QwA0Jt9VxoHDWadZukBnQKqM9Rcj9UBZPRVR0eh8sbhLzMylCMmNreNR5GqwgsMJmoolcBGA5JBgUleuP2BqWNiYZ2",
+    //     // "Bearer key-4tA8akcKtGFZQwipltBWJz3CCe1Jh6u7PX59uRJY9U6wEvareOdhlhWgCiMWnZeCz9CC6GIJLaddIJGbHr5crjfz6ROXTUXY"
+    //   },
+    //   body: JSON.stringify({
+    //     // data: {
+    //     prompt: stImgPrompt,
+    //     // image: base64Stripper(uploadedImg),
+    //     // image: `${base64Stripper(uploadedImg)}`,
+    //     image: base64Stripper(uploadedImg),
+    //   }),
+    // };
 
     // await fetch("https://api.getimg.ai/v1/stable-diffusion/instruct", options)
-    await fetch(
-      "https://api.getimg.ai/v1/stable-diffusion/image-to-image",
-      options
-    )
-      // await axios.post("https://api.getimg.ai/v1/stable-diffusion/instruct", options)
-      .then((response) => response.json())
+    // await fetch(
+    //   "https://api.getimg.ai/v1/stable-diffusion/image-to-image",
+    //   options
+    // )
+    await getFalImgtoImg(uploadedImg, stImgPrompt)
       .then((response) => {
-        // if (response.status === 200) {
-        if (!response.image) {
-          setBase64ImgLink("");
+        if (!response.data.images) {
+          setResponseImage("");
           setStDisplayMessage("It's not you, it's us. Please try again later.");
         }
-        setBase64ImgLink(response.image);
+        setResponseImage(response.data.images[0].url);
+        setResponseImage(response.data.images[0].url);
         // }
         // if (response.status === 500) {
-        //   setBase64ImgLink("");
+        //   setResponseImage("");
         //   setStDisplayMessage("It's not you, it's us. Please try again later.");
         // }
         // if (response.status > 400 && response.status < 500) {
-        //   setBase64ImgLink("");
+        //   setResponseImage("");
         //   setStDisplayMessage(response.data.error.type);
         // }
         setClicked(false);
@@ -298,7 +315,7 @@ const CompInstructImage = () => {
       .catch((err) => {
         console.error("err", err);
         if (err.response.status == 401) {
-          setBase64ImgLink("");
+          setResponseImage("");
           setStDisplayMessage(err.response.data.error.type);
         }
       });
@@ -372,7 +389,7 @@ const CompInstructImage = () => {
 
         <Textarea
           required
-          color="purple"
+          color="deep-purple"
           label="Prompt"
           onChange={(e) => setStImgPrompt(e.target.value)}
         />
@@ -385,24 +402,25 @@ const CompInstructImage = () => {
           Generate
         </MatButton>
 
-        {!base64ImgLink && !clicked && (
+        {!responseImage && !clicked && (
           <div className="mt-4 text-center text-md text-green-600">
             {stDisplayMessage}
           </div>
         )}
 
-        {!base64ImgLink && clicked && (
+        {!responseImage && clicked && (
           <div className="mt-0 text-center text-blue-600">
             <Lottie animationData={animationData} className="h-64" />
             {/* Generating Image... */}
           </div>
         )}
 
-        {/* { base64ImgLink && <img className="mt-4" src={`data:image/jpeg;base64, ${base64ImgLink}`} alt="" /> } */}
-        {base64ImgLink && !clicked && (
+        {/* { responseImage && <img className="mt-4" src={`data:image/jpeg;base64, ${responseImage}`} alt="" /> } */}
+        {responseImage && !clicked && (
           <div className="mt-4 h-32">
             <CustomImageComponent
-              preview={`data:image/jpeg;base64, ${base64ImgLink}`}
+              // preview={`data:image/jpeg;base64, ${responseImage}`} // if base64 Response
+              preview={`${responseImage}`}
             />
           </div>
         )}
