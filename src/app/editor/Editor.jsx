@@ -312,12 +312,13 @@ const Editor = () => {
 
         // create new canvas
         if (!canvasIdRef.current) {
-          createCanvasAsync({
+          const reqbody = {
             data: json,
             referredFrom: recipientDataCombiner().recipients,
             assetsRecipientElementData: recipientDataFilter().recipientsData,
             preview: canvasBase64Ref.current,
-          })
+          };
+          createCanvasAsync(reqbody)
             .then((res) => {
               if (res?.status === "success") {
                 canvasIdRef.current = res?.id;
@@ -334,14 +335,15 @@ const Editor = () => {
 
         // update existing canvas
         if (canvasIdRef.current) {
-          updateCanvasAsync({
+          const reqbody = {
             id: canvasIdRef.current,
             data: json,
             isPublic: false,
             referredFrom: recipientDataCombiner().recipients,
             assetsRecipientElementData: recipientDataFilter().recipientsData,
             preview: canvasBase64Ref.current,
-          })
+          };
+          updateCanvasAsync(reqbody)
             .then((res) => {
               if (res?.status === "success") {
                 console.log(res?.message);
@@ -398,7 +400,7 @@ const Editor = () => {
 
     let w = store.width;
     let h = store.height;
-    const watermarkbase64 = `data:image/png;base64,${watermarkBase64}`;
+    const watermarkbase64 = "/watermark.png";
 
     // Check if watermark is already added
     store.pages.forEach((page, index) => {
@@ -533,7 +535,7 @@ const Editor = () => {
   // useEffect(() => {
   //   console.log("isPageActive", store?.pages.length);
   //   if (isPageActive.current && !isWatermark.current) {
-  //     // waterMark(store);
+  // waterMark(store);
   //     isWatermark.current = true;
   //   } else {
   //     isWatermark.current = false;

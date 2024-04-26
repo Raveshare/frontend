@@ -6,7 +6,7 @@ export const getFrame = async (frameId) => {
 };
 
 export const postFrame = async (params) => {
-  const res = await api.post(`${API}/util//create-frame-data`, params);
+  const res = await api.post(`${API}/util/create-frame-data`, params);
   return res.data;
 };
 
