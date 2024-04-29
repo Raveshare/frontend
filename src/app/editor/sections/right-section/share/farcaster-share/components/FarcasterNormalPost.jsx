@@ -936,7 +936,7 @@ const FarcasterNormalPost = () => {
               color="red"
             >
               {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
-              {chain.id != chainId ? "base" : "a suported"} Network{" "}
+              {chain?.id != chainId ? "base" : "a suported"} Network{" "}
               {isLoadingSwitchNetwork && <Spinner />}
             </Button>
           </div>
