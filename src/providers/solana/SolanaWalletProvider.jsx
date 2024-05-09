@@ -60,6 +60,10 @@ const SolanaWalletProvider = ({ children }) => {
         title: "Poster.fun",
         clientId: TIPLINK_API_KEY,
         theme: "system",
+        installedOnAndroid: true,
+        installedOnIOS: true,
+        installedOnDesktop: true,
+        debug: true,
       }),
     ],
     [network]
