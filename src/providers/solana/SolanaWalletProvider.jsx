@@ -18,7 +18,9 @@ import {
 
 import { clusterApiUrl } from "@solana/web3.js";
 import { createContext, useCallback, useMemo, useState } from "react";
-import { ENVIRONMENT } from "../../services";
+import { ENVIRONMENT, TIPLINK_API_KEY } from "../../services";
+
+import { TipLinkWalletAdapter } from "@tiplink/wallet-adapter";
 
 export const SolanaWalletErrorContext = createContext();
 
@@ -53,6 +55,12 @@ const SolanaWalletProvider = ({ children }) => {
       new AvanaWalletAdapter(),
       new CloverWalletAdapter(),
       new CoinbaseWalletAdapter(),
+
+      new TipLinkWalletAdapter({
+        title: "Poster.fun",
+        clientId: TIPLINK_API_KEY,
+        theme: "system",
+      }),
     ],
     [network]
   );
