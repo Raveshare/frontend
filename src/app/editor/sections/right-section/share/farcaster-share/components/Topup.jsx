@@ -8,12 +8,12 @@ import {
   Spinner,
   Typography,
 } from "@material-tailwind/react";
-import { useFeeData, useNetwork, useSwitchNetwork } from "wagmi";
+import { useFeeData, useAccount, useSwitchChain } from "wagmi";
 import { base, baseSepolia } from "wagmi/chains";
 import {
   useSendTransaction,
-  usePrepareSendTransaction,
-  useWaitForTransaction,
+  useWriteContract,
+  useWaitForTransactionReceipt,
 } from "wagmi";
 import { parseEther } from "viem";
 import { toast } from "react-toastify";
@@ -24,14 +24,14 @@ const network = ENVIRONMENT === "production" ? base : baseSepolia;
 const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const {
     data: switchData,
     isLoading: switchLoading,
     isError: switchError,
     error: switchErrorData,
-    switchNetwork,
-  } = useSwitchNetwork();
+    switchChain,
+  } = useSwitchChain();
 
   const {
     data: feeData,
@@ -58,7 +58,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
-  const { config } = usePrepareSendTransaction({
+  const { config } = useWriteContract({
     to: topUpAccount, // users wallet
     value: extraPayForMints
       ? parseEther(extraPayForMints)
@@ -75,7 +75,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     error: txError,
     isLoading: isTxLoading,
     isSuccess: isTxSuccess,
-  } = useWaitForTransaction({
+  } = useWaitForTransactionReceipt({
     hash: data?.hash,
   });
 
@@ -134,7 +134,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchNetwork(network?.id)}
+            onClick={() => switchChain(network?.id)}
           >
             <Typography variant="h6" color="blue-gray">
               Please switch to {network?.name} network

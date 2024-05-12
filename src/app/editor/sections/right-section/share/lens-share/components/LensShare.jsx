@@ -2,9 +2,8 @@ import { useContext, useState, useEffect } from "react";
 import {
   useAccount,
   useChainId,
-  useNetwork,
   useSignMessage,
-  useSwitchNetwork,
+  useSwitchChain,
 } from "wagmi";
 import TiDelete from "@meronex/icons/ti/TiDelete";
 import BsArrowLeft from "@meronex/icons/bs/BsArrowLeft";
@@ -84,14 +83,14 @@ const LensShare = () => {
   const [totalPercentage, setTotalPercentage] = useState(0);
   const { isAuthenticated } = useAppAuth();
   const chainId = useChainId();
-  const { chains, chain } = useNetwork();
+  const { chains, chain } = useAccount();
   const {
     error: errorSwitchNetwork,
     isError: isErrorSwitchNetwork,
     isLoading: isLoadingSwitchNetwork,
     isSuccess: isSuccessSwitchNetwork,
-    switchNetwork,
-  } = useSwitchNetwork();
+    switchChain,
+  } = useSwitchChain();
 
   const {
     setIsLoading,
@@ -122,7 +121,7 @@ const LensShare = () => {
   const [currentTab, setCurrentTab] = useState("smartPost");
 
   const isUnsupportedChain = () => {
-    if (chain?.unsupported || chain?.id != chains[0]?.id) return true;
+    if (chain  || chain?.id != chains[0]?.id) return true;
   };
 
   const { mutateAsync: shareOnLens } = useMutation({
@@ -1007,7 +1006,7 @@ const LensShare = () => {
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
               disabled={isLoadingSwitchNetwork}
-              onClick={() => switchNetwork(chains[0]?.id)}
+              onClick={() => switchChain(chains[0]?.id)}
               color="red"
             >
               {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}

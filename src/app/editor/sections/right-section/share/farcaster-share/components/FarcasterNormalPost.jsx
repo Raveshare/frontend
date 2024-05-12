@@ -41,10 +41,9 @@ import Topup from "./Topup";
 import {
   useAccount,
   useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
-  useSwitchNetwork,
-  useWaitForTransaction,
+  useWriteContract,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
 } from "wagmi";
 import WithdrawFunds from "./WithdrawFunds";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
@@ -53,11 +52,11 @@ import { zoraURLErc721 } from "../../zora-mint/utils";
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
   const { address } = useAccount();
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const { userLOA } = useLocalStorage();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
-  const { switchNetwork, isLoading: isLoadingSwitchNetwork } =
-    useSwitchNetwork();
+  const { switchChain, isLoading: isLoadingSwitchNetwork } =
+    useSwitchChain();
 
   // farcaster states
   const [isShareLoading, setIsShareLoading] = useState(false);
@@ -218,7 +217,7 @@ const FarcasterNormalPost = () => {
     config,
     error: prepareError,
     isError: isPrepareError,
-  } = usePrepareContractWrite({
+  } = useWriteContract({
     abi: zoraNftCreatorV1Config.abi,
     address:
       chain?.id == 8453
@@ -239,7 +238,7 @@ const FarcasterNormalPost = () => {
     data: receipt,
     isLoading: isPending,
     isSuccess,
-  } = useWaitForTransaction({ hash: data?.hash });
+  } = useWaitForTransactionReceipt({ hash: data?.hash });
 
   // deploy zora contract
   const deployZoraContractFn = async () => {
@@ -932,7 +931,7 @@ const FarcasterNormalPost = () => {
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
               disabled={isLoadingSwitchNetwork}
-              onClick={() => switchNetwork(chainId)}
+              onClick={() => switchChain(chainId)}
               color="red"
             >
               {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}

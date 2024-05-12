@@ -1,4 +1,4 @@
-import { useAccount, useNetwork, useSwitchNetwork } from "wagmi";
+import {  useAccount, useSwitchChain } from "wagmi";
 import ShareButton from "./share/ShareButton";
 import DownloadBtn from "./download/DownloadBtn";
 import { ENVIRONMENT } from "../../../../services";
@@ -11,8 +11,8 @@ import Logo from "./logo/Logo";
 import PointsBtn from "./PointsBtn/PointsBtn";
 const TopbarSection = () => {
   const { isAuthenticated } = useAppAuth();
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
+  const { chain } = useAccount();
+  const { switchChain } = useSwitchChain();
 
   const isSupportedChain = () => {
     if (ENVIRONMENT === "production") {

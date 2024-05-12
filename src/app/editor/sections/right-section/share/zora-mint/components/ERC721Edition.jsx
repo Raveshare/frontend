@@ -22,10 +22,9 @@ import {
   useAccount,
   useChainId,
   useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
-  useSwitchNetwork,
-  useWaitForTransaction,
+  useWriteContract,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
 } from "wagmi";
 import { useAppAuth, useLocalStorage } from "../../../../../../../hooks/app";
 import {
@@ -67,7 +66,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { isAuthenticated } = useAppAuth();
   const { isFarcasterAuth, lensAuth, dispatcher } = useLocalStorage();
   const chainId = useChainId();
-  const { chains, chain } = useNetwork();
+  const { chains, chain } = useAccount();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
   const { openChainModal } = useChainModal();
   const [recipientsEns, setRecipientsEns] = useState([]);
@@ -96,8 +95,8 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     isError: isErrorSwitchNetwork,
     isLoading: isLoadingSwitchNetwork,
     isSuccess: isSuccessSwitchNetwork,
-    switchNetwork,
-  } = useSwitchNetwork();
+    switchChain,
+  } = useSwitchChain();
 
   const {
     zoraErc721Enabled,
@@ -198,7 +197,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
     const isUnsupportedChain = () => {
       if (
-        chain?.unsupported ||
+        chain ||
         (isOpenAction && !networks?.includes(chain?.id)) ||
         chainId === chains[0]?.id
       ) {
@@ -709,7 +708,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     config,
     error: prepareError,
     isError: isPrepareError,
-  } = usePrepareContractWrite({
+  } = useWriteContract({
     abi: zoraNftCreatorV1Config.abi,
     address:
       chain?.id == 8453
@@ -723,7 +722,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     data: receipt,
     isLoading: isPending,
     isSuccess,
-  } = useWaitForTransaction({ hash: data?.hash });
+  } = useWaitForTransactionReceipt({ hash: data?.hash });
 
   // mint on Zora
   const handleSubmit = () => {
@@ -1686,7 +1685,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
           <Button
             className="w-full outline-none flex justify-center items-center gap-2"
             disabled={isLoadingSwitchNetwork}
-            onClick={() => switchNetwork(selectedChainId)}
+            onClick={() => switchChain(selectedChainId)}
             color="red"
           >
             {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
