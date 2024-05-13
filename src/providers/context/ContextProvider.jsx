@@ -369,6 +369,9 @@ const ContextProvider = ({ children }) => {
 
       isExternalLinkError: false,
       externalLinkError: "",
+
+      isCustomCurrMint: false,
+      customCurrMint: "",
     },
   });
 
