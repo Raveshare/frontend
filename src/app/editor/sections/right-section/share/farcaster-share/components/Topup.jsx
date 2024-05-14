@@ -5,6 +5,8 @@ import {
   Card,
   List,
   ListItem,
+  Option,
+  Select,
   Spinner,
   Typography,
 } from "@material-tailwind/react";
@@ -18,8 +20,28 @@ import {
 import { parseEther } from "viem";
 import { toast } from "react-toastify";
 import { ENVIRONMENT } from "../../../../../../../services";
+import { NumberInputBox } from "../../../../../common";
 
 const network = ENVIRONMENT === "production" ? base : baseSepolia;
+const degenNetwork = {
+  id: 666666666,
+  name: "Degen",
+  network: "degen",
+  nativeCurrency: {
+    name: "Degen",
+    symbol: "DEGEN",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: "https://rpc.degen.tips",
+  },
+  blockExplorers: {
+    default: {
+      name: "Degen",
+      url: "https://explorer.degen.tips",
+    },
+  },
+};
 
 const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
@@ -48,6 +70,20 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const isTopup = farcasterStates.frameData?.isTopup;
   const TxFeeForDeployment = 0.00009;
   const txFeeForMint = 0.00002;
+
+  console.log({
+    allowedMints,
+    isSufficientBalance,
+    isTopup,
+    TxFeeForDeployment,
+    txFeeForMint,
+  });
+
+  console.log(
+    "Custom currency",
+    farcasterStates?.frameData?.customCurrName,
+    farcasterStates?.frameData?.customCurrAmount,
+  );
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
@@ -79,6 +115,21 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     hash: data?.hash,
   });
 
+  const handleChange = (e, key) => {
+    const { name, value } = e.target;
+
+    setFarcasterStates((prevState) => {
+      // Create a new state based on the previous state
+      const newState = {
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          [key]: value,
+        },
+      };
+      return newState;
+    });
+  };
   // change the frameData isTopup to true if transaction is success
   useEffect(() => {
     if (isTxSuccess) {
@@ -128,16 +179,39 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     }
   }, [isError, isTxError]);
 
-  if (chain?.id !== network?.id) {
+  if (
+    chain?.id !== network?.id &&
+    !farcasterStates.frameData.isCustomCurrMint
+  ) {
     return (
       <Card className="my-2">
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchNetwork(network?.id)}
+            onClick={() => switchNetwork && switchNetwork(network?.id)}
           >
             <Typography variant="h6" color="blue-gray">
-              Please switch to {network?.name} network
+              Click here to switch to {network?.name} network
+            </Typography>
+          </ListItem>
+        </List>
+      </Card>
+    );
+  }
+
+  if (
+    chain?.id !== degenNetwork?.id &&
+    !farcasterStates.frameData.isCustomCurrMint
+  ) {
+    return (
+      <Card className="my-2">
+        <List>
+          <ListItem
+            className="flex justify-between items-center gap-2"
+            onClick={() => switchNetwork && switchNetwork(degenNetwork?.id)}
+          >
+            <Typography variant="h6" color="blue-gray">
+              Click here to switch to {degenNetwork?.name} network
             </Typography>
           </ListItem>
         </List>
@@ -186,8 +260,60 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
               </Typography>
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}
-                {network?.name} {network?.nativeCurrency?.symbol}
+                {farcasterStates.frameData.isCustomCurrMint ? (
+                  <>
+                    {degenNetwork?.name} {degenNetwork?.nativeCurrency?.symbol}
+                  </>
+                ) : (
+                  <>
+                    {network?.name} {network?.nativeCurrency?.symbol}
+                  </>
+                )}
               </Typography>
+
+              <div className="flex">
+                <div className="flex flex-col py-2">
+                  <NumberInputBox
+                    min={"0.001"}
+                    step={"0.01"}
+                    label="Amount"
+                    name="customCurrAmount"
+                    onChange={(e) => handleChange(e, "customCurrAmount")}
+                    onFocus={(e) => handleChange(e, "customCurrAmount")}
+                    value={farcasterStates?.frameData?.customCurrAmount}
+                  />
+                </div>
+
+                <div className="flex flex-col py-2 mx-2">
+                  <Select
+                    animate={{
+                      mount: { y: 0 },
+                      unmount: { y: 25 },
+                    }}
+                    label="Custom Currency"
+                    name="Custom Currency"
+                    id="idCustomCurrency"
+                    value={farcasterStates?.frameData?.customCurrName}
+                  >
+                    {["DEGEN"].map((currency) => (
+                      <Option
+                        key={currency}
+                        onClick={() => {
+                          setFarcasterStates({
+                            ...farcasterStates,
+                            frameData: {
+                              ...farcasterStates.frameData,
+                              customCurrName: currency,
+                            },
+                          });
+                        }}
+                      >
+                        {currency.toUpperCase()}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
 
               <div className="w-full flex justify-between items-center">
                 {isTxLoading || isLoading ? (

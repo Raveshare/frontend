@@ -108,6 +108,8 @@ const FarcasterNormalPost = () => {
     refetchOnWindowFocus: false,
   });
 
+  console.log("walletData", walletData);
+
   const { mutateAsync: deployZoraContractMutation } = useMutation({
     mutationKey: "deployZoraContract",
     mutationFn: deployZoraContract,
@@ -972,7 +974,7 @@ const FarcasterNormalPost = () => {
                   {isWalletLoading || isWalletRefetching ? (
                     <span className="text-blue-500"> Loading balance... </span>
                   ) : (
-                    <span>{walletData?.balance} Base ETH</span>
+                    <span> {walletData?.balance} Base ETH</span>
                   )}
                 </p>
                 <div className="flex flex-col w-full py-2">

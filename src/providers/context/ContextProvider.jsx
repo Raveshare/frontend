@@ -372,6 +372,8 @@ const ContextProvider = ({ children }) => {
 
       isCustomCurrMint: false,
       customCurrMint: "",
+      customCurrAmount: "",
+      customCurrName: "DEGEN",
     },
   });
 
