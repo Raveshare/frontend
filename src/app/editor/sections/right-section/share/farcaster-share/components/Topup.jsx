@@ -82,8 +82,10 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   console.log(
     "Custom currency",
     farcasterStates?.frameData?.customCurrName,
-    farcasterStates?.frameData?.customCurrAmount,
+    farcasterStates?.frameData?.customCurrAmount
   );
+
+  console.log("Chain Id", chain?.id);
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
@@ -99,7 +101,8 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     value: extraPayForMints
       ? parseEther(extraPayForMints)
       : parseEther(payForMints),
-    chainId: network?.id,
+    // chainId: network?.id,
+    chainId: farcasterStates?.frameData?.isCustomCurrMint ? degenNetwork?.id : network?.id,
   });
 
   const { data, isLoading, isSuccess, isError, error, sendTransaction } =
@@ -201,14 +204,14 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
 
   if (
     chain?.id !== degenNetwork?.id &&
-    !farcasterStates.frameData.isCustomCurrMint
+    farcasterStates.frameData.isCustomCurrMint
   ) {
     return (
       <Card className="my-2">
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchNetwork && switchNetwork(degenNetwork?.id)}
+            onClick={() => switchNetwork && switchNetwork(666666666)}
           >
             <Typography variant="h6" color="blue-gray">
               Click here to switch to {degenNetwork?.name} network
@@ -258,32 +261,8 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
               <Typography variant="h6" color="red">
                 Insufficient balance please topup
               </Typography>
-              <Typography variant="h6" color="blue-gray">
-                {extraPayForMints ? extraPayForMints : payForMints}{" "}
-                {farcasterStates.frameData.isCustomCurrMint ? (
-                  <>
-                    {degenNetwork?.name} {degenNetwork?.nativeCurrency?.symbol}
-                  </>
-                ) : (
-                  <>
-                    {network?.name} {network?.nativeCurrency?.symbol}
-                  </>
-                )}
-              </Typography>
 
               <div className="flex">
-                <div className="flex flex-col py-2">
-                  <NumberInputBox
-                    min={"0.001"}
-                    step={"0.01"}
-                    label="Amount"
-                    name="customCurrAmount"
-                    onChange={(e) => handleChange(e, "customCurrAmount")}
-                    onFocus={(e) => handleChange(e, "customCurrAmount")}
-                    value={farcasterStates?.frameData?.customCurrAmount}
-                  />
-                </div>
-
                 <div className="flex flex-col py-2 mx-2">
                   <Select
                     animate={{
@@ -294,6 +273,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
                     name="Custom Currency"
                     id="idCustomCurrency"
                     value={farcasterStates?.frameData?.customCurrName}
+                    onChange={(e) => handleChange(e, "customCurrName")}
                   >
                     {["DEGEN"].map((currency) => (
                       <Option
@@ -314,6 +294,20 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
                   </Select>
                 </div>
               </div>
+
+
+              <Typography variant="h6" color="blue-gray">
+                {extraPayForMints ? extraPayForMints : payForMints}{" "}
+                {farcasterStates.frameData.isCustomCurrMint ? (
+                  <>
+                    {degenNetwork?.name} {degenNetwork?.nativeCurrency?.symbol}
+                  </>
+                ) : (
+                  <>
+                    {network?.name} {network?.nativeCurrency?.symbol}
+                  </>
+                )}
+              </Typography>
 
               <div className="w-full flex justify-between items-center">
                 {isTxLoading || isLoading ? (

@@ -36,6 +36,7 @@ import {
   WALLETCONNECT_PROJECT_ID,
 } from "../../services";
 import { publicActions } from "viem";
+import { degenChain } from "../../data";
 
 const { chains, publicClient } = configureChains(
   ENVIRONMENT === "production"

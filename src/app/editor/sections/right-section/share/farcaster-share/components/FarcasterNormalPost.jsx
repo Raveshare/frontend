@@ -21,6 +21,7 @@ import {
   FRAME_URL,
   LOCAL_STORAGE,
   URL_REGEX,
+  degenChain,
 } from "../../../../../../../data";
 import { Button, Spinner } from "@material-tailwind/react";
 import { EVMWallets } from "../../../../top-section/auth/wallets";
@@ -174,6 +175,28 @@ const FarcasterNormalPost = () => {
     APP_ETH_ADDRESS,
   ];
 
+  // const degenArgsArr = [
+  //   "contract_type": 721,
+  //   "chainId": 8453,
+  //   "canvasId": 3550,
+  //   "currency": "0x0xxx",
+  //   "args": [
+  //       "gm gm",
+  //       "GM",
+  //       500
+  //   ],
+  //   "recipients": [
+  //       {
+  //           "address": "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+  //           "percentAllocation": 20
+  //       },
+  //       {
+  //           "address": "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+  //           "percentAllocation": 80
+  //       }
+  //   ]
+  // ]
+
   const handleChange = (e, key) => {
     const { name, value } = e.target;
 
@@ -244,17 +267,15 @@ const FarcasterNormalPost = () => {
   } = useWaitForTransaction({ hash: data?.hash });
 
   // deploy zora contract
-  const deployZoraContractFn = async () => {
+  const deployZoraContractFn = async (deployArgs) => {
     setIsDeployingZoraContract(true);
 
-    deployZoraContractMutation({
-      contract_type: "721",
-      canvasId: contextCanvasIdRef.current,
-      chainId: chainId,
-      args: argsArr,
-    })
+    deployZoraContractMutation(deployArgs)
       .then((res) => {
         setZoraContractAddress(res?.contract_address);
+
+        console.log("Deploy Contract res", res);
+
         setIsDeployingZoraContractSuccess(true);
         setIsDeployingZoraContract(false);
       })
@@ -438,7 +459,38 @@ const FarcasterNormalPost = () => {
   useEffect(() => {
     if (isUploadSuccess && farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
-      deployZoraContractFn();
+
+      const deployArgs = {
+        contract_type: "721",
+        canvasId: contextCanvasIdRef.current,
+        chainId: chainId,
+        args: argsArr,
+      };
+      deployZoraContractFn(deployArgs);
+    } else if (isUploadSuccess && farcasterStates.frameData?.isCustomCurrMint) {
+      setIsPostingFrame(false);
+      console.log("Deploying custom currency Start");
+
+      const deployArgs = {
+        contract_type: 721,
+        chainId: 666666666,
+        canvasId: contextCanvasIdRef.current,
+        currency: "0x5A8e4e0dD630395B5AFB8D3ac5b3eF269f0c8356",
+        args: ["gm gm", "GM", 500],
+        recipients: [
+          {
+            address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+            percentAllocation: 20,
+          },
+          {
+            address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+            percentAllocation: 80,
+          },
+        ],
+      };
+
+      deployZoraContractFn(deployArgs);
+      console.log("Deploying custom currency End");
     }
   }, [isUploadSuccess]);
 
@@ -835,9 +887,9 @@ const FarcasterNormalPost = () => {
               {walletData?.sponsored > 0
                 ? `${
                     walletData?.sponsored
-                  } mints are free. Topup with Base ETH if you want
+                  } mints are free. Topup with your custom currency if you want
               to drop more than ${walletData?.sponsored} mints ${" "}`
-                : "You don't have any free mint. please Topup with Base ETH to mint"}{" "}
+                : "You don't have any free mint. please Topup with your custom currency to mint"}{" "}
             </p>
             <p className="text-end mt-4">
               <span>Topup account:</span>
@@ -861,7 +913,7 @@ const FarcasterNormalPost = () => {
               {isWalletLoading || isWalletRefetching ? (
                 <span className="text-blue-500"> Loading balance... </span>
               ) : (
-                <span>{walletData?.balance} Base ETH</span>
+                <span>{walletData?.balance} $DEGEN</span>
               )}
             </p>
             <div className="flex flex-col w-full py-2">
@@ -1044,22 +1096,28 @@ const FarcasterNormalPost = () => {
           <EVMWallets title="Login with EVM" className="mx-2" />
         ) : !isFarcasterAuth ? (
           <FarcasterAuth />
-        ) : farcasterStates?.frameData?.isFrame &&
-          !farcasterStates?.frameData?.isCreatorSponsored &&
-          chain?.id != chainId ? (
-          <div className="mx-2 outline-none">
-            <Button
-              className="w-full outline-none flex justify-center items-center gap-2"
-              disabled={isLoadingSwitchNetwork}
-              onClick={() => switchNetwork(chainId)}
-              color="red"
-            >
-              {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
-              {chain?.id != chainId ? "base" : "a suported"} Network{" "}
-              {isLoadingSwitchNetwork && <Spinner />}
-            </Button>
-          </div>
         ) : (
+          // farcasterStates?.frameData?.isFrame &&
+          //   !farcasterStates?.frameData?.isCreatorSponsored
+          //   && chain?.id != chainId ?
+          //   (
+          //   <div className="mx-2 outline-none">
+          //     <Button
+          //       className="w-full outline-none flex justify-center items-center gap-2"
+          //       disabled={isLoadingSwitchNetwork}
+          //       onClick={() => switchNetwork && switchNetwork(chainId)}
+          //       color="red"
+          //     >
+          //       {isLoadingSwitchNetwork ? "Switching" : "Switch"} to {chain?.name}
+          //       {chain?.id != chainId
+          //         ? farcasterStates?.frameData?.isCustomCurrMint
+          //           ? "degen"
+          //           : "base"
+          //         : "a suported"}{" "}
+          //       Network {isLoadingSwitchNetwork && <Spinner />}
+          //     </Button>
+          //   </div>
+          // ) :
           <div className="mx-2 my-2 outline-none">
             <Button
               className="w-full outline-none"
