@@ -1,23 +1,3 @@
-// const degenNetwork = {
-//     id: 666666666,
-//     name: "Degen",
-//     network: "degen",
-//     nativeCurrency: {
-//       name: "Degen",
-//       symbol: "DEGEN",
-//       decimals: 18,
-//     },
-//     rpcUrls: {
-//       default: "https://rpc.degen.tips",
-//     },
-//     blockExplorers: {
-//       default: {
-//         name: "Degen",
-//         url: "https://explorer.degen.tips",
-//       },
-//     },
-//   };
-
 export const degenChain = {
   id: 666666666,
   name: "Degen",
@@ -39,10 +19,4 @@ export const degenChain = {
       apiUrl: "https://explorer.degen.tips/api/v2",
     },
   },
-  // contracts: {
-  //   multicall3: {
-  //     address: "",
-  //     blockCreated: 0,
-  //   },
-  // },
 };

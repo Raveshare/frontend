@@ -262,7 +262,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
                 Insufficient balance please topup
               </Typography>
 
-              <div className="flex">
+              {/* <div className="flex">
                 <div className="flex flex-col py-2 mx-2">
                   <Select
                     animate={{
@@ -293,7 +293,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
                     ))}
                   </Select>
                 </div>
-              </div>
+              </div> */}
 
 
               <Typography variant="h6" color="blue-gray">

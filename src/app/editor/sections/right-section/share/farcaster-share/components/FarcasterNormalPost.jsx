@@ -23,7 +23,13 @@ import {
   URL_REGEX,
   degenChain,
 } from "../../../../../../../data";
-import { Button, Spinner } from "@material-tailwind/react";
+import {
+  Button,
+  Option,
+  Select,
+  Spinner,
+  Typography,
+} from "@material-tailwind/react";
 import { EVMWallets } from "../../../../top-section/auth/wallets";
 import FarcasterAuth from "./FarcasterAuth";
 import FarcasterChannel from "./FarcasterChannel";
@@ -50,6 +56,8 @@ import {
 import WithdrawFunds from "./WithdrawFunds";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 import { zoraURLErc721 } from "../../zora-mint/utils";
+import TiDelete from "@meronex/icons/ti/TiDelete";
+import BsPlus from "@meronex/icons/bs/BsPlus";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -65,6 +73,10 @@ const FarcasterNormalPost = () => {
   const [isShareSuccess, setIsShareSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
   const [farTxHash, setFarTxHash] = useState("");
+
+  // FC Split recipients
+  const [recipientsLensHandle, setRecipientsLensHandle] = useState([]);
+  const [totalPercentage, setTotalPercentage] = useState(0);
 
   // zora contract deploy states
   // const [isDeployingZoraContract, setIsDeployingZoraContract] = useState(false);
@@ -89,6 +101,9 @@ const FarcasterNormalPost = () => {
     contextCanvasIdRef,
     canvasBase64Ref,
     setFarcasterStates,
+    splitError,
+    setSplitError,
+    parentRecipientListRef,
     farcasterStates, // don't remove this
     lensAuthState, // don't remove this
   } = useContext(Context);
@@ -454,6 +469,157 @@ const FarcasterNormalPost = () => {
       .catch((error) => {
         console.log("StoreZoraLinkErr", errorMessage(error));
       });
+  };
+
+  const addRecipientInputBox = () => {
+    if (farcasterStates?.frameData?.fcSplitRevenueRecipients.length < 5) {
+      setFarcasterStates({
+        ...farcasterStates,
+        frameData: {
+          ...farcasterStates?.frameData,
+          fcSplitRevenueRecipients: [
+            ...farcasterStates?.frameData?.fcSplitRevenueRecipients,
+            { recipient: "", split: 1.0 },
+          ],
+        },
+      });
+    }
+  };
+
+  const handleRecipientChange = (index, field, value) => {
+    // check index 0 price should min 10
+    if (field === "split" && index === 0) {
+      if (value < 10 || value > 100 || isNaN(value)) {
+        setSplitError({
+          isError: true,
+          message: "Platform fee should be between 10% to 100%",
+        });
+      } else {
+        setSplitError({
+          isError: false,
+          message: "",
+        });
+      }
+    }
+
+    // any index price should be greater min 1 and max 100
+    if (field === "split" && index !== 0) {
+      if (value < 1 || value > 100 || isNaN(value)) {
+        setSplitError({
+          isError: true,
+          message: "Split should be between 1% to 100%",
+        });
+      } else {
+        setSplitError({
+          isError: false,
+          message: "",
+        });
+      }
+    }
+
+    // check if the address is not same
+    if (field === "recipient") {
+      // check if the address is valid
+      if (value.startsWith("0x") && !isEthAddress(value)) {
+        setSplitError({
+          isError: true,
+          message: "Invalid recipient address",
+        });
+        // check if the handle is valid
+      } else if (value.startsWith("@") && !isLensHandle(value)) {
+        setSplitError({
+          isError: true,
+          message: "Invalid recipient handle",
+        });
+        // check if  its a random text
+      } else if (!value.startsWith("0x") && !value.startsWith("@")) {
+        setSplitError({
+          isError: true,
+          message: "Invalid recipient value",
+        });
+      } else {
+        setSplitError({
+          isError: false,
+          message: "",
+        });
+      }
+    }
+
+    const updatedRecipients = [
+      ...farcasterStates?.frameData?.fcSplitRevenueRecipients,
+    ];
+    updatedRecipients[index][field] = value;
+    setFarcasterStates({
+      ...farcasterStates,
+      frameData: {
+        ...farcasterStates?.frameData,
+        splitRevenueRecipients: updatedRecipients,
+      },
+    });
+  };
+
+  const restrictRecipientInput = (e, index, recipient) => {
+    const isRecipient = parentRecipientListRef.current.includes(
+      recipient.recipient
+    );
+    const isUserAddress = recipient.recipient === address;
+    if (index === 0 || isRecipient) {
+      if (isUserAddress) {
+        handleRecipientChange(index, "recipient", e.target.value);
+      }
+    } else {
+      handleRecipientChange(index, "recipient", e.target.value);
+    }
+  };
+
+  const restrictRemoveRecipientInputBox = (index, recipient) => {
+    const isRecipient = parentRecipientListRef.current.includes(
+      recipient.recipient
+    );
+    if (index === 0 || isRecipient) {
+      return true;
+    }
+  };
+
+  const removeRecipientInputBox = (index) => {
+    const updatedRecipients =
+      farcasterStates?.frameData?.fcSplitRevenueRecipients.filter(
+        (_, i) => i !== index
+      );
+    setFarcasterStates({
+      ...farcasterStates,
+      frameData: {
+        ...farcasterStates?.frameData,
+        fcSplitRevenueRecipients: updatedRecipients,
+      },
+    });
+    setSplitError({
+      isError: false,
+      message: "",
+    });
+  };
+
+  const splitEvenPercentage = () => {
+    const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+      (item) => {
+        return {
+          recipient: item.recipient,
+          split: Math.floor(
+            (
+              100 / farcasterStates?.frameData?.fcSplitRevenueRecipients.length
+            ).toFixed(2)
+          ),
+        };
+      }
+    );
+
+    setFarcasterStates({
+      ...farcasterStates,
+      frameData: {
+        ...farcasterStates?.frameData,
+        fcSplitRevenueRecipients: result,
+      },
+    });
   };
 
   useEffect(() => {
@@ -916,7 +1082,69 @@ const FarcasterNormalPost = () => {
                 <span>{walletData?.balance} $DEGEN</span>
               )}
             </p>
-            <div className="flex flex-col w-full py-2">
+
+            <div
+              className={`${
+                !farcasterStates.frameData?.isCustomCurrMint && "hidden"
+              } `}
+            >
+              <div className="flex flex-row justify-between">
+                <div className="flex flex-col py-4">
+                  <NumberInputBox
+                    min={"0.001"}
+                    step={"0.01"}
+                    label="Price"
+                    name="customCurrAmount"
+                    onChange={(e) => handleChange(e, "customCurrAmount")}
+                    onFocus={(e) => handleChange(e, "customCurrAmount")}
+                    value={farcasterStates?.frameData?.customCurrAmount}
+                  />
+                </div>
+
+                <div className="flex flex-col py-4 mx-2">
+                  {/* <label htmlFor="price"></label> */}
+                  <Select
+                    animate={{
+                      mount: { y: 0 },
+                      unmount: { y: 25 },
+                    }}
+                    label="Currency"
+                    name="customCurrName"
+                    id="customCurrName"
+                    value={farcasterStates.frameData.customCurrName}
+                  >
+                    {["DEGEN"].map((currency) => (
+                      <Option
+                        key={currency}
+                        onClick={() => {
+                          setFarcasterStates({
+                            ...farcasterStates,
+                            frameData: {
+                              ...farcasterStates.frameData,
+                              customCurrName: currency,
+                            },
+                          });
+                        }}
+                      >
+                        {currency.toUpperCase()}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+
+              {farcasterStates?.frameData.isCustomCurrMintErr && (
+                <InputErrorMsg
+                  message={farcasterStates?.frameData.customCurrMintErrMsg}
+                />
+              )}
+            </div>
+
+            <div
+              className={`flex flex-col w-full py-2 ${
+                !farcasterStates.frameData?.isCustomCurrMint && "hidden"
+              }`}
+            >
               <NumberInputBox
                 min={1}
                 step={1}
@@ -947,6 +1175,102 @@ const FarcasterNormalPost = () => {
           </div>
         </div>
         {/* End */}
+
+        <div
+          className={`mb-4 ${
+            !farcasterStates.frameData?.isCustomCurrMint && "hidden"
+          }`}
+        >
+          <h2 className="text-lg mb-2">Split Recipients</h2>
+          <div className="flex justify-between">
+            <Switch.Group>
+              <Switch.Label className="w-4/5 opacity-60">
+                Split revenue between multiple recipients
+              </Switch.Label>
+            </Switch.Group>
+          </div>
+          <div className="relative">
+            {farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+              (recipient, index) => {
+                return (
+                  <>
+                    <div
+                      key={index}
+                      className="flex justify-between gap-2 items-center w-full py-2"
+                    >
+                      <InputBox
+                        label={"ERC20 Address"}
+                        // placeholder="erc20 address or @xyz.lens"
+                        value={recipient.recipient}
+                        onChange={(e) =>
+                          restrictRecipientInput(e, index, recipient)
+                        }
+                      />
+                      <div className="flex justify-between items-center w-1/3">
+                        <NumberInputBox
+                          min={0}
+                          max={100}
+                          step={1}
+                          label={"%"}
+                          // placeholder="0.0%"
+                          value={recipient.split}
+                          onChange={(e) => {
+                            handleRecipientChange(
+                              index,
+                              "split",
+                              Number(parseFloat(e.target.value).toFixed(2))
+                            );
+                          }}
+                        />
+                        {!restrictRemoveRecipientInputBox(index, recipient) && (
+                          <TiDelete
+                            className="h-6 w-6 cursor-pointer"
+                            color="red"
+                            onClick={() => removeRecipientInputBox(index)}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </>
+                );
+              }
+            )}
+            {splitError.isError && (
+              <>
+                <InputErrorMsg message={splitError.message} />
+                <Typography variant="h6" color="blue-gray">
+                  {totalPercentage} %
+                </Typography>
+              </>
+            )}
+
+            <div className="flex justify-between">
+              {farcasterStates?.frameData?.fcSplitRevenueRecipients.length <
+                5 && (
+                <Button
+                  color=""
+                  size="sm"
+                  variant="filled"
+                  className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
+                  onClick={addRecipientInputBox}
+                >
+                  <BsPlus />
+                  Add Recipient
+                </Button>
+              )}
+              <Button
+                color="yellow"
+                size="sm"
+                variant="filled"
+                className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
+                onClick={splitEvenPercentage}
+              >
+                Split Even
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* End Degen-L3 Mint */}
 
         {!farcasterStates.frameData?.isCustomCurrMint && (
@@ -1096,28 +1420,30 @@ const FarcasterNormalPost = () => {
           <EVMWallets title="Login with EVM" className="mx-2" />
         ) : !isFarcasterAuth ? (
           <FarcasterAuth />
+        ) : (farcasterStates?.frameData?.isFrame &&
+            !farcasterStates?.frameData?.isCustomCurrMint &&
+            !farcasterStates?.frameData?.isCreatorSponsored &&
+            chain?.id != chainId) ||
+          (farcasterStates?.frameData?.isFrame &&
+            !farcasterStates?.frameData?.isCreatorSponsored &&
+            !farcasterStates?.frameData?.isCustomCurrMint) ? (
+          <div className="mx-2 outline-none">
+            <Button
+              className="w-full outline-none flex justify-center items-center gap-2"
+              disabled={isLoadingSwitchNetwork}
+              onClick={() => switchNetwork && switchNetwork(chainId)}
+              color="red"
+            >
+              {isLoadingSwitchNetwork ? "Switching" : "Switch"} to {chain?.name}
+              {chain?.id != chainId
+                ? farcasterStates?.frameData?.isCustomCurrMint
+                  ? "degen"
+                  : "base"
+                : "a suported"}{" "}
+              Network {isLoadingSwitchNetwork && <Spinner />}
+            </Button>
+          </div>
         ) : (
-          // farcasterStates?.frameData?.isFrame &&
-          //   !farcasterStates?.frameData?.isCreatorSponsored
-          //   && chain?.id != chainId ?
-          //   (
-          //   <div className="mx-2 outline-none">
-          //     <Button
-          //       className="w-full outline-none flex justify-center items-center gap-2"
-          //       disabled={isLoadingSwitchNetwork}
-          //       onClick={() => switchNetwork && switchNetwork(chainId)}
-          //       color="red"
-          //     >
-          //       {isLoadingSwitchNetwork ? "Switching" : "Switch"} to {chain?.name}
-          //       {chain?.id != chainId
-          //         ? farcasterStates?.frameData?.isCustomCurrMint
-          //           ? "degen"
-          //           : "base"
-          //         : "a suported"}{" "}
-          //       Network {isLoadingSwitchNetwork && <Spinner />}
-          //     </Button>
-          //   </div>
-          // ) :
           <div className="mx-2 my-2 outline-none">
             <Button
               className="w-full outline-none"

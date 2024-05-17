@@ -371,9 +371,20 @@ const ContextProvider = ({ children }) => {
       externalLinkError: "",
 
       isCustomCurrMint: false,
-      customCurrMint: "",
       customCurrAmount: "",
       customCurrName: "DEGEN",
+
+      fcSplitRevenueRecipients: [
+        {
+          recipient: "",
+          split: 0.0,
+        },
+      ],
+      fcStatesError: {
+        isCustomCurrMintErr: false,
+        customCurrMintErrMsg: "",
+      }
+  
     },
   });
 
