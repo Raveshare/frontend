@@ -309,6 +309,25 @@ const ShareSection = () => {
         </div>
         <hr />
 
+        <hr />
+        <div className={`relative mt-6 px-4 sm:px-6`}>
+          <p className="text-lg">Withdraw your earnings</p>
+          <div className="flex items-center space-x-12 py-5">
+              <div onClick={() => setMenu("withdrawdegen")}>
+                {" "}
+                <img
+                  className="w-10 cursor-pointer"
+                  src="/withdraw/Degen.png"
+                  alt="Lens"
+                />{" "}
+                <Typography className="text-md font-semibold">
+                    Degen
+                  </Typography>
+              </div>
+            </div>
+        </div>
+        <hr />
+
         <div className={`relative mt-6 px-4 sm:px-6`}>
           <p className="text-lg">Mint as an NFT on Solana</p>
           <div className="flex flex-wrap items-center gap-10 my-3">

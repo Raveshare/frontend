@@ -8,6 +8,7 @@ import {
 } from "../../right-section";
 import { Drawer } from "@blueprintjs/core";
 import { Context } from "../../../../../providers/context";
+import DegenWithdraw from "../../right-section/share/withdraw/DegenWithdraw";
 import FarcasterShareWrapper from "../../right-section/share/farcaster-share/FarcasterShareWrapper";
 import { LensShare } from "../../right-section/share/lens-share/components";
 import { AllTasksNRewards } from "../../right-section/profile/components/section/AllTasksNRewards";
@@ -55,6 +56,7 @@ const ShareButton = () => {
                 {/* {menu === "lensmonetization" && <LensShare />} */}
                 {menu === "farcasterShare" && <FarcasterShareWrapper />}
                 {menu === "lensmonetization" && <LensShareWrapper />}
+                {menu === "withdrawdegen" && <DegenWithdraw />}
                 {menu === "solanaMint" && <SolanaMint />}
                 {typeof menu === "number" && (
                   <ZoraMint selectedChainId={menu} />
