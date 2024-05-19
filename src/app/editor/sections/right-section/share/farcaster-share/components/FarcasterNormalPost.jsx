@@ -282,6 +282,8 @@ const FarcasterNormalPost = () => {
       contractAddress: zoraContractAddress,
       chainId: chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
+      gatedChannel: "farcaster",
+      gatedCollection: "farcaster"
     };
     postFrameData(params)
       .then((res) => {
@@ -727,6 +729,65 @@ const FarcasterNormalPost = () => {
                 />{" "}
               </Switch>
             </div>
+
+          <div className="flex justify-between py-2">
+            <h2 className="text-lg mb-2"> Channel </h2>
+            <Switch
+              checked={farcasterStates.frameData?.isChannel}
+              onChange={() =>
+                setFarcasterStates({
+                  ...farcasterStates,
+                  frameData: {
+                    ...farcasterStates.frameData,
+                    isChannel: !farcasterStates.frameData?.isChannel,
+                  },
+                })
+              }
+              className={`${
+                farcasterStates.frameData?.isChannel
+                  ? "bg-[#e1f16b]"
+                  : "bg-gray-200"
+              } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
+            >
+              <span
+                className={`${
+                  farcasterStates.frameData?.isChannel
+                    ? "translate-x-6"
+                    : "translate-x-1"
+                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+              />{" "}
+            </Switch>
+          </div>
+
+          <div className="flex justify-between py-2">
+            <h2 className="text-lg mb-2"> Collection </h2>
+            <Switch
+              checked={farcasterStates.frameData?.isCollection}
+              onChange={() =>
+                setFarcasterStates({
+                  ...farcasterStates,
+                  frameData: {
+                    ...farcasterStates.frameData,
+                    isCollection: !farcasterStates.frameData?.isCollection,
+                  },
+                })
+              }
+              className={`${
+                farcasterStates.frameData?.isCollection
+                  ? "bg-[#e1f16b]"
+                  : "bg-gray-200"
+              } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
+            >
+              <span
+                className={`${
+                  farcasterStates.frameData?.isCollection
+                    ? "translate-x-6"
+                    : "translate-x-1"
+                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+              />{" "}
+            </Switch>
+          </div>
+          
           </div>
         </div>
 

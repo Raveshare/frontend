@@ -354,6 +354,8 @@ const ContextProvider = ({ children }) => {
       isLike: false,
       isRecast: false,
       isFollow: false,
+      isChannel: false,
+      isCollection: false,
 
       allowedMints: "",
       allowedMintsIsError: false,
