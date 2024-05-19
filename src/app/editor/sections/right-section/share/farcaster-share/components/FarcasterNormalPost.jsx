@@ -208,6 +208,15 @@ const FarcasterNormalPost = () => {
         }
       }
 
+      if (name === "collectionAddress") {
+        if (!value) {
+          newState.frameData.isCollectionAddressError = true;
+          newState.frameData.collectionAddressError = "Please enter a valid address";
+        } else {
+          newState.frameData.isCollectionAddressError = false;
+          newState.frameData.collectionAddressError = "";
+        }
+      }
       // Return the new state
       return newState;
     });
@@ -283,7 +292,7 @@ const FarcasterNormalPost = () => {
       chainId: chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
       gatedChannel: "farcaster",
-      gatedCollection: "farcaster"
+      gatedCollection: farcasterStates.frameData?.collectionAddress
     };
     postFrameData(params)
       .then((res) => {
@@ -787,6 +796,25 @@ const FarcasterNormalPost = () => {
               />{" "}
             </Switch>
           </div>
+
+          <div
+            className={`${
+              !farcasterStates.frameData?.isCollection && "hidden"
+            } mt-2`}
+          >
+            <InputBox
+              label="Collection address"
+              name="collectionAddress"
+              onChange={(e) => handleChange(e, "collectionAddress")}
+              onFocus={(e) => handleChange(e, "collectionAddress")}
+            />
+             {farcasterStates.frameData?.isCollectionAddressError && (
+            <InputErrorMsg
+              message={farcasterStates.frameData?.collectionAddressError}
+            />
+          )}
+          </div>
+
           
           </div>
         </div>

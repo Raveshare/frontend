@@ -356,6 +356,7 @@ const ContextProvider = ({ children }) => {
       isFollow: false,
       isChannel: false,
       isCollection: false,
+      collectionAddress: "",
 
       allowedMints: "",
       allowedMintsIsError: false,
@@ -368,6 +369,9 @@ const ContextProvider = ({ children }) => {
 
       isExternalLink: false,
       externalLink: "",
+
+      isCollectionAddressError: false,
+      collectionAddressError: "",
 
       isExternalLinkError: false,
       externalLinkError: "",
