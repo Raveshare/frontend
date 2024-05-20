@@ -767,6 +767,9 @@ const FarcasterNormalPost = () => {
               />{" "}
             </Switch>
           </div>
+          <div className={`${!farcasterStates.frameData?.isChannel && "hidden"}`}>
+            <FarcasterChannel />
+          </div>
 
           <div className="flex justify-between py-2">
             <h2 className="text-lg mb-2"> Collection </h2>
