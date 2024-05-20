@@ -13,6 +13,8 @@ import {
   jsConfettiFn,
   addressCrop,
   saveToLocalStorage,
+  isEthAddress,
+  isLensHandle,
 } from "../../../../../../../utils";
 import { useLocalStorage, useReset } from "../../../../../../../hooks/app";
 import {
@@ -84,7 +86,7 @@ const FarcasterNormalPost = () => {
     useState(false);
   const [isDeployingZoraContractSuccess, setIsDeployingZoraContractSuccess] =
     useState(false);
-  const [zoraContractAddress, setZoraContractAddress] = useState(null);
+  const [respContractAddress, setRespContractAddress] = useState(null);
 
   // frame POST states
   const [isPostingFrame, setIsPostingFrame] = useState(false);
@@ -287,7 +289,7 @@ const FarcasterNormalPost = () => {
 
     deployZoraContractMutation(deployArgs)
       .then((res) => {
-        setZoraContractAddress(res?.contract_address);
+        setRespContractAddress(res?.contract_address);
 
         console.log("Deploy Contract res", res);
 
@@ -317,8 +319,10 @@ const FarcasterNormalPost = () => {
       isRecast: farcasterStates.frameData?.isRecast,
       isFollow: farcasterStates.frameData?.isFollow,
       redirectLink: farcasterStates.frameData?.externalLink,
-      contractAddress: zoraContractAddress,
-      chainId: chainId,
+      contractAddress: respContractAddress,
+      chainId: farcasterStates?.frameData?.isCustomCurrMint
+        ? degenChain?.id
+        : chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
     };
     postFrameData(params)
@@ -553,7 +557,7 @@ const FarcasterNormalPost = () => {
       ...farcasterStates,
       frameData: {
         ...farcasterStates?.frameData,
-        splitRevenueRecipients: updatedRecipients,
+        fcSplitRevenueRecipients: updatedRecipients,
       },
     });
   };
@@ -637,22 +641,31 @@ const FarcasterNormalPost = () => {
       setIsPostingFrame(false);
       console.log("Deploying custom currency Start");
 
+      // Deploy custom currency arguments
       const deployArgs = {
         contract_type: 721,
         chainId: 666666666,
         canvasId: contextCanvasIdRef.current,
         currency: "0x5A8e4e0dD630395B5AFB8D3ac5b3eF269f0c8356",
         args: ["gm gm", "GM", 500],
-        recipients: [
-          {
-            address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-            percentAllocation: 20,
-          },
-          {
-            address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-            percentAllocation: 80,
-          },
-        ],
+        recipients: farcasterStates.frameData?.fcSplitRevenueRecipients?.map(
+          (item) => {
+            return {
+              address: item.recipient,
+              percentAllocation: item.split,
+            };
+          }
+        ),
+        // [
+        //   {
+        //     address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+        //     percentAllocation: 20,
+        //   },
+        //   {
+        //     address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+        //     percentAllocation: 80,
+        //   },
+        // ],
       };
 
       deployZoraContractFn(deployArgs);
@@ -670,7 +683,7 @@ const FarcasterNormalPost = () => {
   useEffect(() => {
     if (isSuccess) {
       setIsDeployingZoraContractSuccess(true);
-      setZoraContractAddress(receipt?.logs[0]?.address);
+      setRespContractAddress(receipt?.logs[0]?.address);
 
       storeZoraLink();
     }
@@ -1190,51 +1203,55 @@ const FarcasterNormalPost = () => {
             </Switch.Group>
           </div>
           <div className="relative">
-            {farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
-              (recipient, index) => {
-                return (
-                  <>
-                    <div
-                      key={index}
-                      className="flex justify-between gap-2 items-center w-full py-2"
-                    >
-                      <InputBox
-                        label={"ERC20 Address"}
-                        // placeholder="erc20 address or @xyz.lens"
-                        value={recipient.recipient}
-                        onChange={(e) =>
-                          restrictRecipientInput(e, index, recipient)
-                        }
-                      />
-                      <div className="flex justify-between items-center w-1/3">
-                        <NumberInputBox
-                          min={0}
-                          max={100}
-                          step={1}
-                          label={"%"}
-                          // placeholder="0.0%"
-                          value={recipient.split}
-                          onChange={(e) => {
-                            handleRecipientChange(
-                              index,
-                              "split",
-                              Number(parseFloat(e.target.value).toFixed(2))
-                            );
-                          }}
+            {farcasterStates &&
+              farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+                (recipient, index) => {
+                  return (
+                    <>
+                      <div
+                        key={index}
+                        className="flex justify-between gap-2 items-center w-full py-2"
+                      >
+                        <InputBox
+                          label={"ERC20 Address"}
+                          // placeholder="erc20 address or @xyz.lens"
+                          value={recipient.recipient}
+                          onChange={(e) =>
+                            restrictRecipientInput(e, index, recipient)
+                          }
                         />
-                        {!restrictRemoveRecipientInputBox(index, recipient) && (
-                          <TiDelete
-                            className="h-6 w-6 cursor-pointer"
-                            color="red"
-                            onClick={() => removeRecipientInputBox(index)}
+                        <div className="flex justify-between items-center w-1/3">
+                          <NumberInputBox
+                            min={0}
+                            max={100}
+                            step={1}
+                            label={"%"}
+                            // placeholder="0.0%"
+                            value={recipient.split}
+                            onChange={(e) => {
+                              handleRecipientChange(
+                                index,
+                                "split",
+                                Number(parseFloat(e.target.value).toFixed(2))
+                              );
+                            }}
                           />
-                        )}
+                          {!restrictRemoveRecipientInputBox(
+                            index,
+                            recipient
+                          ) && (
+                            <TiDelete
+                              className="h-6 w-6 cursor-pointer"
+                              color="red"
+                              onClick={() => removeRecipientInputBox(index)}
+                            />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </>
-                );
-              }
-            )}
+                    </>
+                  );
+                }
+              )}
             {splitError.isError && (
               <>
                 <InputErrorMsg message={splitError.message} />
