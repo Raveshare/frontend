@@ -355,6 +355,7 @@ const ContextProvider = ({ children }) => {
       isRecast: false,
       isFollow: false,
       isChannel: false,
+      channelValue: "", //Gating channel value
       isCollection: false,
       collectionAddress: "",
 

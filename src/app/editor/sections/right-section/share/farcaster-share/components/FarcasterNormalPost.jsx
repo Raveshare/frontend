@@ -291,9 +291,10 @@ const FarcasterNormalPost = () => {
       contractAddress: zoraContractAddress,
       chainId: chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
-      gatedChannel: "farcaster",
+      gatedChannel: farcasterStates.frameData?.channelValue,
       gatedCollection: farcasterStates.frameData?.collectionAddress
     };
+    console.log("Hello",params.gatedChannel, params.gatedCollection)
     postFrameData(params)
       .then((res) => {
         if (res?.status === "success") {
@@ -574,7 +575,12 @@ const FarcasterNormalPost = () => {
         </div>
       </div>
       <div className={`m-4 ${!farcasterStates.isChannel && "hidden"}`}>
-        <FarcasterChannel />
+      <FarcasterChannel
+      channelState={farcasterStates.channel}
+      setChannelState={(channel) =>
+        setFarcasterStates({ ...farcasterStates, channel })
+      }
+    />
       </div>
 
       <div className="mb-4 m-4">
@@ -768,8 +774,19 @@ const FarcasterNormalPost = () => {
             </Switch>
           </div>
           <div className={`${!farcasterStates.frameData?.isChannel && "hidden"}`}>
-            <FarcasterChannel />
-          </div>
+          <FarcasterChannel
+            channelState={farcasterStates.frameData.channelValue}
+            setChannelState={(channelValue) =>
+              setFarcasterStates({
+                ...farcasterStates,
+                frameData: {
+                  ...farcasterStates.frameData,
+                  channelValue,
+                },
+              })
+            }
+          />          
+         </div>
 
           <div className="flex justify-between py-2">
             <h2 className="text-lg mb-2"> Collection </h2>
