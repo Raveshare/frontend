@@ -79,14 +79,6 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     txFeeForMint,
   });
 
-  console.log(
-    "Custom currency",
-    farcasterStates?.frameData?.customCurrName,
-    farcasterStates?.frameData?.customCurrAmount
-  );
-
-  console.log("Chain Id", chain?.id);
-
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
 
@@ -102,7 +94,9 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
       ? parseEther(extraPayForMints)
       : parseEther(payForMints),
     // chainId: network?.id,
-    chainId: farcasterStates?.frameData?.isCustomCurrMint ? degenNetwork?.id : network?.id,
+    chainId: farcasterStates?.frameData?.isCustomCurrMint
+      ? degenNetwork?.id
+      : network?.id,
   });
 
   const { data, isLoading, isSuccess, isError, error, sendTransaction } =
@@ -294,7 +288,6 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
                   </Select>
                 </div>
               </div> */}
-
 
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}

@@ -376,15 +376,14 @@ const ContextProvider = ({ children }) => {
 
       fcSplitRevenueRecipients: [
         {
-          recipient: "",
-          split: 0.0,
+          address: "",
+          percentAllocation: null,
         },
       ],
       fcStatesError: {
         isCustomCurrMintErr: false,
         customCurrMintErrMsg: "",
-      }
-  
+      },
     },
   });
 
@@ -473,7 +472,7 @@ const ContextProvider = ({ children }) => {
     dispatcherStatus: false,
   });
 
-  // console.log("ContextProvider", farcasterStates?.frameData);
+  console.log("ContextProvider", farcasterStates?.frameData);
   // console.log("ContextProvider", zoraErc721StatesError);
 
   return (

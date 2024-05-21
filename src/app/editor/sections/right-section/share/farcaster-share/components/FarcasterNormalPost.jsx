@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import {
   ENVIRONMENT,
+  getENSDomain,
   shareOnSocials,
   uploadUserAssetToIPFS,
 } from "../../../../../../../services";
@@ -16,7 +17,11 @@ import {
   isEthAddress,
   isLensHandle,
 } from "../../../../../../../utils";
-import { useLocalStorage, useReset } from "../../../../../../../hooks/app";
+import {
+  useAppAuth,
+  useLocalStorage,
+  useReset,
+} from "../../../../../../../hooks/app";
 import {
   APP_ETH_ADDRESS,
   ERROR,
@@ -60,6 +65,7 @@ import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 import { zoraURLErc721 } from "../../zora-mint/utils";
 import TiDelete from "@meronex/icons/ti/TiDelete";
 import BsPlus from "@meronex/icons/bs/BsPlus";
+import { XCircleIcon } from "@heroicons/react/24/outline";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -96,6 +102,9 @@ const FarcasterNormalPost = () => {
   const [isDeployingZoraContract, setIsDeployingZoraContract] = useState(false);
   const [isUploadSuccess, setIsUploadSuccess] = useState(false);
   const [frameId, setFrameId] = useState(null);
+  const [recipientsEns, setRecipientsEns] = useState([]);
+  const [totalPercent, setTotalPercent] = useState(0);
+  const { isAuthenticated } = useAppAuth();
 
   const {
     postName,
@@ -125,8 +134,6 @@ const FarcasterNormalPost = () => {
     queryFn: () => getOrCreateWallet(),
     refetchOnWindowFocus: false,
   });
-
-  console.log("walletData", walletData);
 
   const { mutateAsync: deployZoraContractMutation } = useMutation({
     mutationKey: "deployZoraContract",
@@ -170,9 +177,9 @@ const FarcasterNormalPost = () => {
   const allowedMints = farcasterStates?.frameData?.allowedMints;
 
   const argsArr = [
-    postName || "My Frame",
-    postName?.split(" ")[0].toUpperCase() || "MYFRAME",
-    allowedMints || "10",
+    postName,
+    postName?.split(" ")[0].toUpperCase(),
+    allowedMints,
     "500",
     address,
     isCreatorSponsored ? LOA : address,
@@ -289,9 +296,7 @@ const FarcasterNormalPost = () => {
 
     deployZoraContractMutation(deployArgs)
       .then((res) => {
-        setRespContractAddress(res?.contract_address);
-
-        console.log("Deploy Contract res", res);
+        setRespContractAddress(res?.contract_address || res?.contract);
 
         setIsDeployingZoraContractSuccess(true);
         setIsDeployingZoraContract(false);
@@ -447,6 +452,12 @@ const FarcasterNormalPost = () => {
       return;
     }
 
+    // if (!isPercentage100()) {
+    //   console.log(isPercentage100());
+    //   toast.error("Total percentage should be 100");
+    //   return;
+    // }
+
     if (farcasterStates.frameData?.isFrame) {
       setIsPostingFrame(true);
       // deploy zora contract
@@ -475,84 +486,67 @@ const FarcasterNormalPost = () => {
       });
   };
 
-  const addRecipientInputBox = () => {
-    if (farcasterStates?.frameData?.fcSplitRevenueRecipients.length < 5) {
-      setFarcasterStates({
-        ...farcasterStates,
-        frameData: {
-          ...farcasterStates?.frameData,
-          fcSplitRevenueRecipients: [
-            ...farcasterStates?.frameData?.fcSplitRevenueRecipients,
-            { recipient: "", split: 1.0 },
-          ],
-        },
-      });
-    }
-  };
-
-  const handleRecipientChange = (index, field, value) => {
+  // funtion adding data for split revenues recipients
+  const handleRecipientChange = (index, key, value) => {
     // check index 0 price should min 10
-    if (field === "split" && index === 0) {
+    if (key === "percentAllocation" && index === 0) {
       if (value < 10 || value > 100 || isNaN(value)) {
-        setSplitError({
-          isError: true,
-          message: "Platform fee should be between 10% to 100%",
-        });
+        // setZoraErc721StatesError({
+        //   ...zoraErc721StatesError,
+        //   isRoyaltySplitError: true,
+        //   royaltySplitErrorMessage:
+        //     "Platform fee should be between 10% to 100%",
+        // });
+        console.log("Platform fee should be between 10% to 100%");
       } else {
-        setSplitError({
-          isError: false,
-          message: "",
-        });
+        // setZoraErc721StatesError({
+        //   ...zoraErc721StatesError,
+        //   isRoyaltySplitError: false,
+        //   royaltySplitErrorMessage: "",
+        // });
+        console.log("no error");
       }
-    }
-
-    // any index price should be greater min 1 and max 100
-    if (field === "split" && index !== 0) {
+    } else if (key === "percentAllocation" && index !== 0) {
+      // any index price should be greater min 1 and max 100
       if (value < 1 || value > 100 || isNaN(value)) {
-        setSplitError({
-          isError: true,
-          message: "Split should be between 1% to 100%",
-        });
+        // setZoraErc721StatesError({
+        //   zoraErc721StatesError,
+        //   isRoyaltySplitError: true,
+        //   royaltySplitErrorMessage: "Split should be between 1% to 100%",
+        // });
+        console.log("Split should be between 1% to 100%");
       } else {
-        setSplitError({
-          isError: false,
-          message: "",
-        });
+        // setZoraErc721StatesError({
+        //   ...zoraErc721StatesError,
+        //   isRoyaltySplitError: false,
+        //   royaltySplitErrorMessage: "",
+        // });
+        console.log("no error");
       }
     }
-
-    // check if the address is not same
-    if (field === "recipient") {
-      // check if the address is valid
-      if (value.startsWith("0x") && !isEthAddress(value)) {
-        setSplitError({
-          isError: true,
-          message: "Invalid recipient address",
-        });
-        // check if the handle is valid
-      } else if (value.startsWith("@") && !isLensHandle(value)) {
-        setSplitError({
-          isError: true,
-          message: "Invalid recipient handle",
-        });
-        // check if  its a random text
-      } else if (!value.startsWith("0x") && !value.startsWith("@")) {
-        setSplitError({
-          isError: true,
-          message: "Invalid recipient value",
-        });
+    // check if recipient address is not provided
+    if (key === "address") {
+      if (!value) {
+        // setZoraErc721StatesError({
+        //   ...zoraErc721StatesError,
+        //   isRoyaltySplitError: true,
+        //   royaltySplitErrorMessage: "Recipient address is required",
+        // });
+        console.log("Recipient address is required");
       } else {
-        setSplitError({
-          isError: false,
-          message: "",
-        });
+        // setZoraErc721StatesError({
+        //   ...zoraErc721StatesError,
+        //   isRoyaltySplitError: false,
+        //   royaltySplitErrorMessage: "",
+        // });
+        console.log("no error");
       }
     }
 
     const updatedRecipients = [
       ...farcasterStates?.frameData?.fcSplitRevenueRecipients,
     ];
-    updatedRecipients[index][field] = value;
+    updatedRecipients[index][key] = value;
     setFarcasterStates({
       ...farcasterStates,
       frameData: {
@@ -562,53 +556,56 @@ const FarcasterNormalPost = () => {
     });
   };
 
+  // restrict the input box if the recipient is in the parent list
   const restrictRecipientInput = (e, index, recipient) => {
-    const isRecipient = parentRecipientListRef.current.includes(
-      recipient.recipient
-    );
-    const isUserAddress = recipient.recipient === address;
+    const isRecipient = parentRecipientListRef.current.includes(recipient);
+    const isUserAddress = recipient === address;
     if (index === 0 || isRecipient) {
       if (isUserAddress) {
-        handleRecipientChange(index, "recipient", e.target.value);
+        handleRecipientChange(index, "address", e.target.value);
       }
     } else {
-      handleRecipientChange(index, "recipient", e.target.value);
+      handleRecipientChange(index, "address", e.target.value);
     }
   };
 
+  // restrict the delete button if recipient is in the parent list
   const restrictRemoveRecipientInputBox = (index, recipient) => {
-    const isRecipient = parentRecipientListRef.current.includes(
-      recipient.recipient
-    );
+    const isRecipient = parentRecipientListRef.current.includes(recipient);
     if (index === 0 || isRecipient) {
       return true;
     }
   };
 
-  const removeRecipientInputBox = (index) => {
-    const updatedRecipients =
-      farcasterStates?.frameData?.fcSplitRevenueRecipients.filter(
-        (_, i) => i !== index
-      );
+  // funtion to remove input box for multi addresses
+  const removeArrlistInputBox = (index, key, isErrKey, errKeyMsg) => {
     setFarcasterStates({
       ...farcasterStates,
       frameData: {
         ...farcasterStates?.frameData,
-        fcSplitRevenueRecipients: updatedRecipients,
+        [key]: farcasterStates?.frameData[key].filter((_, i) => i !== index),
       },
     });
-    setSplitError({
-      isError: false,
-      message: "",
-    });
+
+    if (isErrKey) {
+      setFarcasterStates({
+        ...farcasterStates,
+        frameData: {
+          ...farcasterStates?.frameData,
+          [isErrKey]: false,
+          [errKeyMsg]: "",
+        },
+      });
+    }
   };
 
+  // split even percentage
   const splitEvenPercentage = () => {
     const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
       (item) => {
         return {
-          recipient: item.recipient,
-          split: Math.floor(
+          address: item.address,
+          percentAllocation: Math.floor(
             (
               100 / farcasterStates?.frameData?.fcSplitRevenueRecipients.length
             ).toFixed(2)
@@ -626,6 +623,85 @@ const FarcasterNormalPost = () => {
     });
   };
 
+  // check if recipient percentage is more than 100
+  const isPercentage100 = () => {
+    const result = farcasterStates?.fcSplitRevenueRecipients?.reduce(
+      (acc, item) => {
+        return acc + item.percentAllocation;
+      },
+      0
+    );
+
+    setTotalPercent(result);
+
+    if (result === 100) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  // funtion to add new input box for multi addresses
+  const addArrlistInputBox = (key) => {
+    if (key === "fcSplitRevenueRecipients") {
+      setFarcasterStates({
+        ...farcasterStates,
+        frameData: {
+          ...farcasterStates?.frameData,
+          [key]: [
+            ...farcasterStates?.frameData[key],
+            { address: "", percentAllocation: "" },
+          ],
+        },
+      });
+      return;
+    }
+
+    setFarcasterStates({
+      ...farcasterStates,
+      frameData: {
+        ...farcasterStates?.frameData,
+        [key]: [...farcasterStates?.frameData[key], ""],
+      },
+    });
+  };
+
+  // add recipient to the split list
+  useEffect(() => {
+    if (isAuthenticated) {
+      const updatedRecipients = parentRecipientListRef.current.map((item) => ({
+        address: item,
+        percentAllocation: 1.0,
+      }));
+
+      setFarcasterStates((prevEnabled) => ({
+        ...prevEnabled,
+        frameData: {
+          ...prevEnabled?.frameData,
+          fcSplitRevenueRecipients: [
+            {
+              address: APP_ETH_ADDRESS,
+              percentAllocation: 10.0,
+            },
+            ...updatedRecipients,
+          ],
+        },
+      }));
+
+      const recipients = updatedRecipients.map((item) => {
+        return item.address;
+      });
+
+      const addresses = [APP_ETH_ADDRESS, ...recipients];
+
+      // getting ENS domain
+      (async () => {
+        const domains = await getENSDomain(addresses);
+        setRecipientsEns(domains);
+      })();
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (isUploadSuccess && farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
@@ -639,7 +715,6 @@ const FarcasterNormalPost = () => {
       deployZoraContractFn(deployArgs);
     } else if (isUploadSuccess && farcasterStates.frameData?.isCustomCurrMint) {
       setIsPostingFrame(false);
-      console.log("Deploying custom currency Start");
 
       // Deploy custom currency arguments
       const deployArgs = {
@@ -647,29 +722,20 @@ const FarcasterNormalPost = () => {
         chainId: 666666666,
         canvasId: contextCanvasIdRef.current,
         currency: "0x5A8e4e0dD630395B5AFB8D3ac5b3eF269f0c8356",
-        args: ["gm gm", "GM", 500],
-        recipients: farcasterStates.frameData?.fcSplitRevenueRecipients?.map(
-          (item) => {
-            return {
-              address: item.recipient,
-              percentAllocation: item.split,
-            };
-          }
-        ),
-        // [
-        //   {
-        //     address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-        //     percentAllocation: 20,
-        //   },
-        //   {
-        //     address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-        //     percentAllocation: 80,
-        //   },
-        // ],
+        args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
+        recipients: [
+          {
+            address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+            percentAllocation: 20,
+          },
+          {
+            address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+            percentAllocation: 80,
+          },
+        ],
       };
 
       deployZoraContractFn(deployArgs);
-      console.log("Deploying custom currency End");
     }
   }, [isUploadSuccess]);
 
@@ -1204,79 +1270,102 @@ const FarcasterNormalPost = () => {
           </div>
           <div className="relative">
             {farcasterStates &&
-              farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+              farcasterStates?.frameData?.fcSplitRevenueRecipients?.map(
                 (recipient, index) => {
                   return (
-                    <>
-                      <div
-                        key={index}
-                        className="flex justify-between gap-2 items-center w-full py-2"
-                      >
+                    <div
+                      key={index}
+                      className="flex justify-between gap-2 items-center w-full py-2"
+                    >
+                      <div className="flex-1">
                         <InputBox
-                          label={"ERC20 Address"}
-                          // placeholder="erc20 address or @xyz.lens"
-                          value={recipient.recipient}
+                          label="Wallet Address"
+                          value={recipientsEns[index] || recipient.address}
+                          onFocus={(e) =>
+                            restrictRecipientInput(e, index, recipient.address)
+                          }
                           onChange={(e) =>
-                            restrictRecipientInput(e, index, recipient)
+                            restrictRecipientInput(e, index, recipient.address)
                           }
                         />
-                        <div className="flex justify-between items-center w-1/3">
-                          <NumberInputBox
-                            min={0}
-                            max={100}
-                            step={1}
-                            label={"%"}
-                            // placeholder="0.0%"
-                            value={recipient.split}
-                            onChange={(e) => {
-                              handleRecipientChange(
-                                index,
-                                "split",
-                                Number(parseFloat(e.target.value).toFixed(2))
-                              );
-                            }}
-                          />
-                          {!restrictRemoveRecipientInputBox(
-                            index,
-                            recipient
-                          ) && (
-                            <TiDelete
-                              className="h-6 w-6 cursor-pointer"
-                              color="red"
-                              onClick={() => removeRecipientInputBox(index)}
-                            />
-                          )}
-                        </div>
                       </div>
-                    </>
+                      <div className="">
+                        <NumberInputBox
+                          min={0}
+                          max={100}
+                          step={1}
+                          label="%"
+                          value={recipient.percentAllocation}
+                          onFocus={(e) => {
+                            handleRecipientChange(
+                              index,
+                              "percentAllocation",
+                              Number(parseFloat(e.target.value).toFixed(4))
+                            );
+                          }}
+                          onChange={(e) => {
+                            handleRecipientChange(
+                              index,
+                              "percentAllocation",
+                              Number(parseFloat(e.target.value).toFixed(4))
+                            );
+                          }}
+                        />
+                      </div>
+                      {!restrictRemoveRecipientInputBox(
+                        index,
+                        recipient.address
+                      ) && (
+                        <span>
+                          <XCircleIcon
+                            className="h-6 w-6 cursor-pointer"
+                            color="red"
+                            onClick={() =>
+                              removeArrlistInputBox(
+                                index,
+                                "fcSplitRevenueRecipients",
+                                "isCustomCurrMintErr",
+                                "customCurrMintErrMsg"
+                              )
+                            }
+                          />
+                        </span>
+                      )}
+                    </div>
                   );
                 }
               )}
-            {splitError.isError && (
-              <>
-                <InputErrorMsg message={splitError.message} />
-                <Typography variant="h6" color="blue-gray">
-                  {totalPercentage} %
-                </Typography>
-              </>
-            )}
+
+            <div className="flex justify-between items-center">
+              {farcasterStates?.frameData?.fcStatesError
+                ?.isCustomCurrMintErr && (
+                <>
+                  <InputErrorMsg
+                    message={
+                      farcasterStates?.frameData?.fcStatesError
+                        ?.customCurrMintErrMsg
+                    }
+                  />
+                  <Typography variant="h6" color="blue-gray">
+                    {totalPercent} %
+                  </Typography>
+                </>
+              )}
+            </div>
 
             <div className="flex justify-between">
-              {farcasterStates?.frameData?.fcSplitRevenueRecipients.length <
-                5 && (
-                <Button
-                  color=""
-                  size="sm"
-                  variant="filled"
-                  className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
-                  onClick={addRecipientInputBox}
-                >
-                  <BsPlus />
-                  Add Recipient
-                </Button>
-              )}
               <Button
-                color="yellow"
+                // color="yellow"
+                size="sm"
+                variant="filled"
+                className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
+                onClick={() => addArrlistInputBox("fcSplitRevenueRecipients")}
+              >
+                <BsPlus />
+                Add Recipient
+              </Button>
+              <Button
+                // color="yellow"
                 size="sm"
                 variant="filled"
                 className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
