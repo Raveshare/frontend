@@ -1,4 +1,4 @@
-module.exports  = [
+export const degenAbi  = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   { inputs: [], name: "Create2Error", type: "error" },
   { inputs: [], name: "CreateError", type: "error" },
