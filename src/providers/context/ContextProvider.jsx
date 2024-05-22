@@ -371,7 +371,7 @@ const ContextProvider = ({ children }) => {
       externalLinkError: "",
 
       isCustomCurrMint: false,
-      customCurrAmount: "",
+      customCurrAmount: 0,
       customCurrName: "DEGEN",
 
       fcSplitRevenueRecipients: [

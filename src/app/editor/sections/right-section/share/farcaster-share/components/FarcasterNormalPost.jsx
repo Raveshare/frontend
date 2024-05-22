@@ -702,6 +702,11 @@ const FarcasterNormalPost = () => {
     }
   }, [isAuthenticated]);
 
+  console.log(
+    "FarcasterStates",
+    Number(farcasterStates?.frameData?.customCurrAmount)
+  );
+
   useEffect(() => {
     if (isUploadSuccess && farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
@@ -722,15 +727,16 @@ const FarcasterNormalPost = () => {
         chainId: 666666666,
         canvasId: contextCanvasIdRef.current,
         currency: "0x5A8e4e0dD630395B5AFB8D3ac5b3eF269f0c8356",
+        pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
         recipients: [
           {
             address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-            percentAllocation: 20,
+            percentAllocation: 5,
           },
           {
             address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-            percentAllocation: 80,
+            percentAllocation: 95,
           },
         ],
       };

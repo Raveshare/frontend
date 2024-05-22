@@ -9,7 +9,9 @@ export const degenChain = {
   rpcUrls: {
     default: {
       http: ["https://rpc.degen.tips"],
-      webSocket: ["wss://rpc.degen.tips"],
+    },
+    public: {
+      http: ["https://sepolia.base.org"],
     },
   },
   blockExplorers: {

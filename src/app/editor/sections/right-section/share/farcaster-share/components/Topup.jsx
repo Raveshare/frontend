@@ -11,7 +11,6 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { useFeeData, useNetwork, useSwitchNetwork } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
 import {
   useSendTransaction,
   usePrepareSendTransaction,
@@ -20,28 +19,6 @@ import {
 import { parseEther } from "viem";
 import { toast } from "react-toastify";
 import { ENVIRONMENT } from "../../../../../../../services";
-import { NumberInputBox } from "../../../../../common";
-
-const network = ENVIRONMENT === "production" ? base : baseSepolia;
-const degenNetwork = {
-  id: 666666666,
-  name: "Degen",
-  network: "degen",
-  nativeCurrency: {
-    name: "Degen",
-    symbol: "DEGEN",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: "https://rpc.degen.tips",
-  },
-  blockExplorers: {
-    default: {
-      name: "Degen",
-      url: "https://explorer.degen.tips",
-    },
-  },
-};
 
 const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
@@ -61,7 +38,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     error: feeError,
     isLoading: isFeeLoading,
   } = useFeeData({
-    chainId: network?.id,
+    chainId: chain?.id,
     formatUnits: "ether",
   });
 
@@ -88,15 +65,12 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
-  const { config } = usePrepareSendTransaction({
+  const { config, error: prapareError } = usePrepareSendTransaction({
     to: topUpAccount, // users wallet
     value: extraPayForMints
       ? parseEther(extraPayForMints)
       : parseEther(payForMints),
-    // chainId: network?.id,
-    chainId: farcasterStates?.frameData?.isCustomCurrMint
-      ? degenNetwork?.id
-      : network?.id,
+    chainId: chain?.id,
   });
 
   const { data, isLoading, isSuccess, isError, error, sendTransaction } =
@@ -176,19 +150,16 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     }
   }, [isError, isTxError]);
 
-  if (
-    chain?.id !== network?.id &&
-    !farcasterStates.frameData.isCustomCurrMint
-  ) {
+  if (!farcasterStates.frameData.isCustomCurrMint) {
     return (
       <Card className="my-2">
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchNetwork && switchNetwork(network?.id)}
+            onClick={() => switchNetwork && switchNetwork(8453)}
           >
             <Typography variant="h6" color="blue-gray">
-              Click here to switch to {network?.name} network
+              Click here to switch to Base chain
             </Typography>
           </ListItem>
         </List>
@@ -196,10 +167,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     );
   }
 
-  if (
-    chain?.id !== degenNetwork?.id &&
-    farcasterStates.frameData.isCustomCurrMint
-  ) {
+  if (farcasterStates.frameData.isCustomCurrMint) {
     return (
       <Card className="my-2">
         <List>
@@ -208,7 +176,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
             onClick={() => switchNetwork && switchNetwork(666666666)}
           >
             <Typography variant="h6" color="blue-gray">
-              Click here to switch to {degenNetwork?.name} network
+              Click here to switch to Degen chain
             </Typography>
           </ListItem>
         </List>
@@ -291,15 +259,9 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
 
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}
-                {farcasterStates.frameData.isCustomCurrMint ? (
-                  <>
-                    {degenNetwork?.name} {degenNetwork?.nativeCurrency?.symbol}
-                  </>
-                ) : (
-                  <>
-                    {network?.name} {network?.nativeCurrency?.symbol}
-                  </>
-                )}
+                <>
+                  {chain?.name} {chain?.nativeCurrency?.symbol}
+                </>
               </Typography>
 
               <div className="w-full flex justify-between items-center">
