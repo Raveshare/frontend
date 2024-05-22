@@ -221,7 +221,76 @@ const FarcasterNormalPost = () => {
   //       }
   //   ]
   // ]
+  // check if recipient address is same
+  const isRecipientAddDuplicate = () => {
+    const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.filter(
+      (item, index) => {
+        return (
+          farcasterStates?.frameData?.fcSplitRevenueRecipients.findIndex(
+            (item2) => item2.address === item.address
+          ) !== index
+        );
+      }
+    );
+  
+    if (result.length > 0) {
+      setFarcasterStates((prevState) => ({
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          isFcSplitError: true,
+          fcSplitError: "Recipient address should be unique",
+        },
+      }));
+      return true;
+    } else {
+      return false;
+    }
+  };
+  
 
+  // check if recipient percentage is more than 100
+  const isPercentage100 = () => {
+    const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.reduce(
+      (acc, item) => acc + item.percentAllocation,
+      0
+    );
+  
+    setTotalPercent(result);
+  
+    console.log("result", result);
+  
+    if (result === 100) {
+      return true;
+    } else {
+      setFarcasterStates((prevState) => ({
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          isFcSplitError: true,
+          fcSplitError: "Total percentage should be 100",
+        },
+      }));
+      return false;
+    }
+  };
+  
+  const checkCustomCurrAmt = () => {
+    if (farcasterStates?.frameData?.customCurrAmount < 0.01) {
+      setFarcasterStates((prevState) => ({
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          isFcSplitError: true,
+          fcSplitError: "Minimum price is 0.01",
+        },
+      }));
+      return false;
+    } else {
+      return true;
+    }
+  };
+  
   const handleChange = (e, key) => {
     const { name, value } = e.target;
 
@@ -269,7 +338,6 @@ const FarcasterNormalPost = () => {
           newState.frameData.customCurrAmountError = "";
         }
       }
-
       // Return the new state
       return newState;
     });
@@ -468,12 +536,30 @@ const FarcasterNormalPost = () => {
     }
 
     // if price is valid
-    if (farcasterStates.frameData?.iScustomCurrAmountError) {
+    if (farcasterStates.frameData?.isCustomCurrAmountError) {
       return;
     }
 
     // check if recipient address is same
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates.frameData?.fcSplitRevenueRecipients?.length > 0
+    ) {
+      if (isRecipientAddDuplicate()) {
+        toast.error("Please enter unique addresses");
+        return;
+      }
+    }
+
     // check if percentage is 100
+    if (farcasterStates.frameData?.isFrame && !isPercentage100()) {
+      toast.error("Total percentage should be 100");
+      return;
+    }
+    if (checkCustomCurrAmt()) {
+      toast.error("Please enter a valid price for the token");
+      return;
+    }
 
     if (farcasterStates.frameData?.isFrame) {
       setIsPostingFrame(true);
@@ -505,71 +591,61 @@ const FarcasterNormalPost = () => {
 
   // funtion adding data for split revenues recipients
   const handleRecipientChange = (index, key, value) => {
-    // check index 0 price should min 10
-    if (key === "percentAllocation" && index === 0) {
-      if (value < 10 || value > 100 || isNaN(value)) {
-        // setZoraErc721StatesError({
-        //   ...zoraErc721StatesError,
-        //   isRoyaltySplitError: true,
-        //   royaltySplitErrorMessage:
-        //     "Platform fee should be between 10% to 100%",
-        // });
-        console.log("Platform fee should be between 10% to 100%");
-      } else {
-        // setZoraErc721StatesError({
-        //   ...zoraErc721StatesError,
-        //   isRoyaltySplitError: false,
-        //   royaltySplitErrorMessage: "",
-        // });
-        console.log("no error");
-      }
-    } else if (key === "percentAllocation" && index !== 0) {
-      // any index price should be greater min 1 and max 100
-      if (value < 1 || value > 100 || isNaN(value)) {
-        // setZoraErc721StatesError({
-        //   zoraErc721StatesError,
-        //   isRoyaltySplitError: true,
-        //   royaltySplitErrorMessage: "Split should be between 1% to 100%",
-        // });
-        console.log("Split should be between 1% to 100%");
-      } else {
-        // setZoraErc721StatesError({
-        //   ...zoraErc721StatesError,
-        //   isRoyaltySplitError: false,
-        //   royaltySplitErrorMessage: "",
-        // });
-        console.log("no error");
-      }
-    }
-    // check if recipient address is not provided
-    if (key === "address") {
-      if (!value) {
-        // setZoraErc721StatesError({
-        //   ...zoraErc721StatesError,
-        //   isRoyaltySplitError: true,
-        //   royaltySplitErrorMessage: "Recipient address is required",
-        // });
-        console.log("Recipient address is required");
-      } else {
-        // setZoraErc721StatesError({
-        //   ...zoraErc721StatesError,
-        //   isRoyaltySplitError: false,
-        //   royaltySplitErrorMessage: "",
-        // });
-        console.log("no error");
-      }
-    }
+    setFarcasterStates((prevState) => {
+      // Create a new state based on the previous state
+      const newState = {
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          [key]: value,
+        },
+      };
 
-    const updatedRecipients = [
-      ...farcasterStates?.frameData?.fcSplitRevenueRecipients,
-    ];
-    updatedRecipients[index][key] = value;
-    setFarcasterStates({
-      ...farcasterStates,
-      frameData: {
-        ...farcasterStates?.frameData,
-        fcSplitRevenueRecipients: updatedRecipients,
-      },
+      // Check index 0 price should be min 10
+      if (key === "percentAllocation" && index === 0) {
+        if (value < 10 || value > 100 || isNaN(value)) {
+          newState.frameData.isFcSplitError = true;
+          newState.frameData.fcSplitErrorMsg =
+            "Platform fee should be between 10% to 100%";
+          console.log("Platform fee should be between 10% to 100%");
+        } else {
+          newState.frameData.isFcSplitError = false;
+          console.log("no error - Platform fee should be between 10% to 100%");
+        }
+      } else if (key === "percentAllocation" && index !== 0) {
+        // Any index price should be greater min 1 and max 100
+        if (value < 1 || value > 100 || isNaN(value)) {
+          newState.frameData.isFcSplitError = true;
+          newState.frameData.fcSplitErrorMsg =
+            "Split should be between 1% to 100%";
+          console.log("Split should be between 1% to 100%");
+        } else {
+          newState.frameData.isFcSplitError = false;
+          console.log("no error - Split should be between 1% to 100%");
+        }
+      }
+
+      // Check if recipient address is not provided
+      if (key === "address") {
+        if (!value) {
+          newState.frameData.isFcSplitError = true;
+          newState.frameData.fcSplitErrorMsg = "Recipient address is required";
+          console.log("Recipient address is required");
+        } else {
+          newState.frameData.isFcSplitError = false;
+          console.log("no error - Recipient address is required");
+        }
+      }
+
+      // Update the recipients array
+      const updatedRecipients = [
+        ...newState.frameData.fcSplitRevenueRecipients,
+      ];
+      updatedRecipients[index][key] = value;
+      newState.frameData.fcSplitRevenueRecipients = updatedRecipients;
+
+      // Return the new state
+      return newState;
     });
   };
 
@@ -596,25 +672,24 @@ const FarcasterNormalPost = () => {
 
   // funtion to remove input box for multi addresses
   const removeArrlistInputBox = (index, key, isErrKey, errKeyMsg) => {
-    setFarcasterStates({
-      ...farcasterStates,
-      frameData: {
-        ...farcasterStates?.frameData,
-        [key]: farcasterStates?.frameData[key].filter((_, i) => i !== index),
-      },
+    setFarcasterStates((prevState) => {
+      const updatedFrameData = {
+        ...prevState.frameData,
+        [key]: prevState.frameData[key].filter((_, i) => i !== index),
+      };
+  
+      if (isErrKey) {
+        updatedFrameData[isErrKey] = false;
+        updatedFrameData[errKeyMsg] = "";
+      }
+  
+      return {
+        ...prevState,
+        frameData: updatedFrameData,
+      };
     });
-
-    if (isErrKey) {
-      setFarcasterStates({
-        ...farcasterStates,
-        frameData: {
-          ...farcasterStates?.frameData,
-          [isErrKey]: false,
-          [errKeyMsg]: "",
-        },
-      });
-    }
   };
+  
 
   // split even percentage
   const splitEvenPercentage = () => {
@@ -638,24 +713,6 @@ const FarcasterNormalPost = () => {
         fcSplitRevenueRecipients: result,
       },
     });
-  };
-
-  // check if recipient percentage is more than 100
-  const isPercentage100 = () => {
-    const result = farcasterStates?.fcSplitRevenueRecipients?.reduce(
-      (acc, item) => {
-        return acc + item.percentAllocation;
-      },
-      0
-    );
-
-    setTotalPercent(result);
-
-    if (result === 100) {
-      return true;
-    } else {
-      return false;
-    }
   };
 
   // funtion to add new input box for multi addresses
@@ -1236,7 +1293,7 @@ const FarcasterNormalPost = () => {
                 </div>
               </div>
 
-              {farcasterStates?.frameData.iScustomCurrAmountError && (
+              {farcasterStates?.frameData?.isCustomCurrAmountError && (
                 <InputErrorMsg
                   message={farcasterStates?.frameData.customCurrAmountError}
                 />
@@ -1348,8 +1405,8 @@ const FarcasterNormalPost = () => {
                               removeArrlistInputBox(
                                 index,
                                 "fcSplitRevenueRecipients",
-                                "isCustomCurrMintErr",
-                                "customCurrMintErrMsg"
+                                "isFcSplitError",
+                                "fcSplitErrorMsg"
                               )
                             }
                           />
@@ -1361,18 +1418,11 @@ const FarcasterNormalPost = () => {
               )}
 
             <div className="flex justify-between items-center">
-              {farcasterStates?.frameData?.fcStatesError
-                ?.isCustomCurrMintErr && (
+              {farcasterStates?.frameData?.isFcSplitError && (
                 <>
                   <InputErrorMsg
-                    message={
-                      farcasterStates?.frameData?.fcStatesError
-                        ?.customCurrMintErrMsg
-                    }
+                    message={farcasterStates?.frameData?.fcSplitErrorMsg}
                   />
-                  <Typography variant="h6" color="blue-gray">
-                    {totalPercent} %
-                  </Typography>
                 </>
               )}
             </div>

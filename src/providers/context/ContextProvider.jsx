@@ -374,7 +374,7 @@ const ContextProvider = ({ children }) => {
 
       customCurrAmount: 0,
 
-      iScustomCurrAmountError: false,
+      isCustomCurrAmountError: false,
       customCurrAmountError: "",
 
       customCurrName: "DEGEN",
@@ -387,6 +387,8 @@ const ContextProvider = ({ children }) => {
       ],
 
       // split recipient error
+      isFcSplitError: false,
+      fcSplitErrorMsg: "",
     },
   });
 
