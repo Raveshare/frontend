@@ -150,7 +150,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     }
   }, [isError, isTxError]);
 
-  if (!farcasterStates.frameData.isCustomCurrMint) {
+  if (!farcasterStates.frameData.isCustomCurrMint && chain?.id !== 8453) {
     return (
       <Card className="my-2">
         <List>
@@ -167,7 +167,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     );
   }
 
-  if (farcasterStates.frameData.isCustomCurrMint) {
+  if (farcasterStates.frameData.isCustomCurrMint && chain?.id !== 666666666) {
     return (
       <Card className="my-2">
         <List>

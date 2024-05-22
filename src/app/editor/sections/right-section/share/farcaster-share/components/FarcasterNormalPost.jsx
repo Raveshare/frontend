@@ -232,7 +232,7 @@ const FarcasterNormalPost = () => {
         );
       }
     );
-  
+
     if (result.length > 0) {
       setFarcasterStates((prevState) => ({
         ...prevState,
@@ -247,7 +247,6 @@ const FarcasterNormalPost = () => {
       return false;
     }
   };
-  
 
   // check if recipient percentage is more than 100
   const isPercentage100 = () => {
@@ -255,11 +254,11 @@ const FarcasterNormalPost = () => {
       (acc, item) => acc + item.percentAllocation,
       0
     );
-  
+
     setTotalPercent(result);
-  
+
     console.log("result", result);
-  
+
     if (result === 100) {
       return true;
     } else {
@@ -274,7 +273,7 @@ const FarcasterNormalPost = () => {
       return false;
     }
   };
-  
+
   const checkCustomCurrAmt = () => {
     if (farcasterStates?.frameData?.customCurrAmount < 0.01) {
       setFarcasterStates((prevState) => ({
@@ -290,7 +289,7 @@ const FarcasterNormalPost = () => {
       return true;
     }
   };
-  
+
   const handleChange = (e, key) => {
     const { name, value } = e.target;
 
@@ -556,6 +555,7 @@ const FarcasterNormalPost = () => {
       toast.error("Total percentage should be 100");
       return;
     }
+
     if (checkCustomCurrAmt()) {
       toast.error("Please enter a valid price for the token");
       return;
@@ -677,19 +677,18 @@ const FarcasterNormalPost = () => {
         ...prevState.frameData,
         [key]: prevState.frameData[key].filter((_, i) => i !== index),
       };
-  
+
       if (isErrKey) {
         updatedFrameData[isErrKey] = false;
         updatedFrameData[errKeyMsg] = "";
       }
-  
+
       return {
         ...prevState,
         frameData: updatedFrameData,
       };
     });
   };
-  
 
   // split even percentage
   const splitEvenPercentage = () => {
