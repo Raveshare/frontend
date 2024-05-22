@@ -24,6 +24,7 @@ import {
 } from "../../../../../../../hooks/app";
 import {
   APP_ETH_ADDRESS,
+  DEGEN_CURRENCY_ADDRESS,
   ERROR,
   FRAME_URL,
   LOCAL_STORAGE,
@@ -254,6 +255,18 @@ const FarcasterNormalPost = () => {
         } else {
           newState.frameData.isExternalLinkError = false;
           newState.frameData.isExternalLinkError = "";
+        }
+      }
+
+      // check if custom currency amount is a valid number
+      if (name === "customCurrAmount") {
+        if (!value || value <= 0.01) {
+          newState.frameData.isCustomCurrAmountError = true;
+          newState.frameData.customCurrAmountError =
+            "Price should not be less than 0.01";
+        } else {
+          newState.frameData.isCustomCurrAmountError = false;
+          newState.frameData.customCurrAmountError = "";
         }
       }
 
@@ -726,8 +739,9 @@ const FarcasterNormalPost = () => {
         contract_type: 721,
         chainId: 666666666,
         canvasId: contextCanvasIdRef.current,
-        currency: "0x5A8e4e0dD630395B5AFB8D3ac5b3eF269f0c8356",
+        currency: DEGEN_CURRENCY_ADDRESS,
         pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
+        maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
         recipients: [
           {

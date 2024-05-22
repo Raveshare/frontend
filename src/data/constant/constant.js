@@ -16,3 +16,7 @@ export const APP_ETH_ADDRESS = "0x77fAD8D0FcfD481dAf98D0D156970A281e66761b";
 
 export const FREE_MINTS = 10;
 export const FRAME_URL = "https://frames.poster.fun";
+
+// this is wrap degen
+export const DEGEN_CURRENCY_ADDRESS =
+  "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387";
