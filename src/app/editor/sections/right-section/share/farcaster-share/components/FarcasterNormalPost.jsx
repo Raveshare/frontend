@@ -447,6 +447,7 @@ const FarcasterNormalPost = () => {
       return;
     }
 
+    // sufficient balance check
     if (
       farcasterStates.frameData?.isFrame &&
       farcasterStates.frameData?.isCreatorSponsored &&
@@ -457,6 +458,7 @@ const FarcasterNormalPost = () => {
       return;
     }
 
+    // check if external link is a valid URL
     if (
       farcasterStates.frameData?.isFrame &&
       farcasterStates.frameData?.isExternalLinkError
@@ -465,11 +467,13 @@ const FarcasterNormalPost = () => {
       return;
     }
 
-    // if (!isPercentage100()) {
-    //   console.log(isPercentage100());
-    //   toast.error("Total percentage should be 100");
-    //   return;
-    // }
+    // if price is valid
+    if (farcasterStates.frameData?.iScustomCurrAmountError) {
+      return;
+    }
+
+    // check if recipient address is same
+    // check if percentage is 100
 
     if (farcasterStates.frameData?.isFrame) {
       setIsPostingFrame(true);
@@ -1232,9 +1236,9 @@ const FarcasterNormalPost = () => {
                 </div>
               </div>
 
-              {farcasterStates?.frameData.isCustomCurrMintErr && (
+              {farcasterStates?.frameData.iScustomCurrAmountError && (
                 <InputErrorMsg
-                  message={farcasterStates?.frameData.customCurrMintErrMsg}
+                  message={farcasterStates?.frameData.customCurrAmountError}
                 />
               )}
             </div>

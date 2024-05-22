@@ -385,10 +385,8 @@ const ContextProvider = ({ children }) => {
           percentAllocation: null,
         },
       ],
-      fcStatesError: {
-        isCustomCurrMintErr: false,
-        customCurrMintErrMsg: "",
-      },
+
+      // split recipient error
     },
   });
 
