@@ -11,11 +11,8 @@ import { Context } from "../../../../../../../providers/context/ContextProvider"
 import {
   getFromLocalStorage,
   errorMessage,
-  jsConfettiFn,
   addressCrop,
   saveToLocalStorage,
-  isEthAddress,
-  isLensHandle,
 } from "../../../../../../../utils";
 import {
   useAppAuth,
@@ -68,6 +65,7 @@ import TiDelete from "@meronex/icons/ti/TiDelete";
 import BsPlus from "@meronex/icons/bs/BsPlus";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { useBalance } from "wagmi";
+import { base } from "viem/chains";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -146,11 +144,11 @@ const FarcasterNormalPost = () => {
     refetch: refetchCurrency,
     isRefetching: isCurrencyRefetching,
   } = useBalance({
-    address: walletData?.publicAddress,
+    address: "0x62b14E5D09BC0C340116B5BC87d787377C07A820",
     chainId: degenChain?.id,
   });
 
-  console.log("balanceForDegen", currencyData);
+  console.log("CurrencyData", currencyData);
 
   const { mutateAsync: deployZoraContractMutation } = useMutation({
     mutationKey: "deployZoraContract",
@@ -251,8 +249,6 @@ const FarcasterNormalPost = () => {
     );
 
     setTotalPercent(result);
-
-    console.log("result", result);
 
     if (result === 100) {
       return true;
@@ -440,7 +436,7 @@ const FarcasterNormalPost = () => {
       contractAddress: respContractAddress,
       chainId: farcasterStates?.frameData?.isCustomCurrMint
         ? degenChain?.id
-        : chainId,
+        : base?.id,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
     };
     postFrameData(params)
@@ -537,13 +533,18 @@ const FarcasterNormalPost = () => {
       return;
     }
 
+    // if price is valid
+    if (farcasterStates.frameData?.isCustomCurrAmountError) {
+      return;
+    }
+
     // check if allowed mint is provided
     if (
       farcasterStates.frameData?.isFrame &&
       (farcasterStates.frameData?.allowedMintsIsError ||
         !farcasterStates.frameData?.allowedMints)
     ) {
-      toast.error("Please enter number of mints");
+      toast.error("Please enter allowed mints");
       return;
     }
 
@@ -564,11 +565,6 @@ const FarcasterNormalPost = () => {
       farcasterStates.frameData?.isExternalLinkError
     ) {
       toast.error("Please enter a valid URL");
-      return;
-    }
-
-    // if price is valid
-    if (farcasterStates.frameData?.isCustomCurrAmountError) {
       return;
     }
 
@@ -648,10 +644,9 @@ const FarcasterNormalPost = () => {
           newState.frameData.isFcSplitError = true;
           newState.frameData.fcSplitErrorMsg =
             "Platform fee should be between 10% to 100%";
-          console.log("Platform fee should be between 10% to 100%");
         } else {
           newState.frameData.isFcSplitError = false;
-          console.log("no error - Platform fee should be between 10% to 100%");
+          newState.frameData.fcSplitErrorMsg = "";
         }
       } else if (key === "percentAllocation" && index !== 0) {
         // Any index price should be greater min 1 and max 100
@@ -659,10 +654,9 @@ const FarcasterNormalPost = () => {
           newState.frameData.isFcSplitError = true;
           newState.frameData.fcSplitErrorMsg =
             "Split should be between 1% to 100%";
-          console.log("Split should be between 1% to 100%");
         } else {
           newState.frameData.isFcSplitError = false;
-          console.log("no error - Split should be between 1% to 100%");
+          newState.frameData.fcSplitErrorMsg = "";
         }
       }
 
@@ -671,10 +665,9 @@ const FarcasterNormalPost = () => {
         if (!value) {
           newState.frameData.isFcSplitError = true;
           newState.frameData.fcSplitErrorMsg = "Recipient address is required";
-          console.log("Recipient address is required");
         } else {
           newState.frameData.isFcSplitError = false;
-          console.log("no error - Recipient address is required");
+          newState.frameData.fcSplitErrorMsg = "";
         }
       }
 
@@ -816,11 +809,6 @@ const FarcasterNormalPost = () => {
     }
   }, [isAuthenticated]);
 
-  console.log(
-    "FarcasterStates",
-    Number(farcasterStates?.frameData?.customCurrAmount)
-  );
-
   useEffect(() => {
     if (isUploadSuccess && farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
@@ -828,7 +816,7 @@ const FarcasterNormalPost = () => {
       const deployArgs = {
         contract_type: "721",
         canvasId: contextCanvasIdRef.current,
-        chainId: chainId,
+        chainId: base?.id,
         args: argsArr,
       };
       deployZoraContractFn(deployArgs);
@@ -838,36 +826,18 @@ const FarcasterNormalPost = () => {
       // Deploy custom currency arguments
       const deployArgs = {
         contract_type: 721,
-        chainId: 666666666,
+        chainId: degenChain?.id,
         canvasId: contextCanvasIdRef.current,
         currency: DEGEN_CURRENCY_ADDRESS,
         pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
-        recipients:
-          // {
-          //   address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-          //   percentAllocation: 5,
-          // },
-          // {
-          //   address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-          //   percentAllocation: 95,
-          // },
-          // farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
-          //   (item) => (
-          //     {
-          //     address: item.address,
-          //     percentAllocation: item.percentAllocation,
-          //   })
-          // ),
-          sortRecipientsByAddress(
-            farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
-              (item) => ({
-                address: item.address,
-                percentAllocation: item.percentAllocation,
-              })
-            )
-          ),
+        recipients: sortRecipientsByAddress(
+          farcasterStates?.frameData?.fcSplitRevenueRecipients.map((item) => ({
+            address: item.address,
+            percentAllocation: item.percentAllocation,
+          }))
+        ),
       };
 
       deployZoraContractFn(deployArgs);
@@ -876,7 +846,6 @@ const FarcasterNormalPost = () => {
 
   useEffect(() => {
     if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
-      console.log("Upload success", isUploadSuccess);
       setIsPostingFrame(false);
       write?.();
     }
@@ -1272,33 +1241,6 @@ const FarcasterNormalPost = () => {
               to drop more than ${walletData?.sponsored} mints ${" "}`
                 : "You don't have any free mint. please Topup with your custom currency to mint"}{" "}
             </p>
-            <p className="text-end mt-4">
-              <span>Topup account:</span>
-              {isWalletLoading || isWalletRefetching ? (
-                <span className="text-blue-500"> Loading address... </span>
-              ) : (
-                <span
-                  className="text-blue-500 cursor-pointer"
-                  onClick={() => {
-                    navigator.clipboard.writeText(walletData?.publicAddress);
-                    toast.success("Copied topup account address");
-                  }}
-                >
-                  {" "}
-                  {addressCrop(walletData?.publicAddress)}
-                </span>
-              )}
-            </p>
-            <p className="text-end">
-              <span>Topup balance:</span>
-              {isCurrencyLoading || isCurrencyRefetching ? (
-                <span className="text-blue-500"> Loading balance... </span>
-              ) : (
-                // add here wagmi balance
-                <span>{currencyData?.formatted} DEGEN</span>
-              )}
-            </p>
-
             <div
               className={`${
                 !farcasterStates.frameData?.isCustomCurrMint && "hidden"
@@ -1307,8 +1249,8 @@ const FarcasterNormalPost = () => {
               <div className="flex flex-row justify-between">
                 <div className="flex flex-col py-4">
                   <NumberInputBox
-                    min={"0.001"}
-                    step={"0.01"}
+                    min={"1"}
+                    step={"1"}
                     label="Price"
                     name="customCurrAmount"
                     onChange={(e) => handleChange(e, "customCurrAmount")}
@@ -1377,18 +1319,6 @@ const FarcasterNormalPost = () => {
                 message={farcasterStates.frameData?.allowedMintsError}
               />
             )}
-
-            {farcasterStates.frameData?.isCustomCurrMint &&
-              farcasterStates.frameData?.allowedMints >
-                walletData?.sponsored && (
-                <Topup
-                  topUpAccount={walletData?.publicAddress}
-                  balance={walletData?.balance}
-                  refetchWallet={refetchWallet}
-                  refetchCurrency={refetchCurrency}
-                  sponsored={walletData?.sponsored}
-                />
-              )}
           </div>
         </div>
         {/* End */}
