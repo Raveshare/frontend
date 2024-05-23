@@ -290,6 +290,44 @@ const FarcasterNormalPost = () => {
     }
   };
 
+  // Sort the recipients by address in ascending order
+  const sortRecipientsByAddress = (recipients) => {
+    return recipients.sort((a, b) =>
+      a.address
+        .toLowerCase()
+        .localeCompare(b.address.toLowerCase(), undefined, {
+          sensitivity: "base",
+        })
+    );
+  };
+
+  // function to remove duplicate recipients and aggregate percentAllocations
+  // usecase : some xyz address and ens handle address being same
+  const removeAndAggregateDuplicates = (recipients) => {
+    const addressMap = new Map();
+
+    // Aggregate percent allocations by address
+    recipients.forEach((recipient) => {
+      const address = recipient.address.toLowerCase();
+      if (addressMap.has(address)) {
+        addressMap.set(
+          address,
+          addressMap.get(address) + recipient.percentAllocation
+        );
+      } else {
+        addressMap.set(address, recipient.percentAllocation);
+      }
+    });
+
+    // Convert the map back to an array
+    return Array.from(addressMap.entries()).map(
+      ([address, percentAllocation]) => ({
+        address,
+        percentAllocation,
+      })
+    );
+  };
+
   const handleChange = (e, key) => {
     const { name, value } = e.target;
 
@@ -556,7 +594,7 @@ const FarcasterNormalPost = () => {
       return;
     }
 
-    if (checkCustomCurrAmt()) {
+    if (!checkCustomCurrAmt()) {
       toast.error("Please enter a valid price for the token");
       return;
     }
@@ -803,16 +841,30 @@ const FarcasterNormalPost = () => {
         pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
-        recipients: [
-          {
-            address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-            percentAllocation: 5,
-          },
-          {
-            address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-            percentAllocation: 95,
-          },
-        ],
+        recipients:
+          // {
+          //   address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+          //   percentAllocation: 5,
+          // },
+          // {
+          //   address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+          //   percentAllocation: 95,
+          // },
+          // farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+          //   (item) => (
+          //     {
+          //     address: item.address,
+          //     percentAllocation: item.percentAllocation,
+          //   })
+          // ),
+          sortRecipientsByAddress(
+            farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+              (item) => ({
+                address: item.address,
+                percentAllocation: item.percentAllocation,
+              })
+            )
+          ),
       };
 
       deployZoraContractFn(deployArgs);
