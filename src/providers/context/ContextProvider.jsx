@@ -477,7 +477,7 @@ const ContextProvider = ({ children }) => {
     dispatcherStatus: false,
   });
 
-  console.log("ContextProvider", farcasterStates?.frameData);
+  // console.log("ContextProvider", farcasterStates?.frameData);
   // console.log("ContextProvider", zoraErc721StatesError);
 
   return (

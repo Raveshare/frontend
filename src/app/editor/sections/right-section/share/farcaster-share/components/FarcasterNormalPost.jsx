@@ -67,6 +67,7 @@ import { zoraURLErc721 } from "../../zora-mint/utils";
 import TiDelete from "@meronex/icons/ti/TiDelete";
 import BsPlus from "@meronex/icons/bs/BsPlus";
 import { XCircleIcon } from "@heroicons/react/24/outline";
+import { useBalance } from "wagmi";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -136,6 +137,21 @@ const FarcasterNormalPost = () => {
     refetchOnWindowFocus: false,
   });
 
+  const {
+    data: currencyData,
+    isError: isCurrencyError,
+    isLoading: isCurrencyLoading,
+    error: currencyError,
+    isSuccess: isCurrencySuccess,
+    refetch: refetchCurrency,
+    isRefetching: isCurrencyRefetching,
+  } = useBalance({
+    address: walletData?.publicAddress,
+    chainId: degenChain?.id,
+  });
+
+  console.log("balanceForDegen", currencyData);
+
   const { mutateAsync: deployZoraContractMutation } = useMutation({
     mutationKey: "deployZoraContract",
     mutationFn: deployZoraContract,
@@ -200,27 +216,6 @@ const FarcasterNormalPost = () => {
     APP_ETH_ADDRESS,
   ];
 
-  // const degenArgsArr = [
-  //   "contract_type": 721,
-  //   "chainId": 8453,
-  //   "canvasId": 3550,
-  //   "currency": "0x0xxx",
-  //   "args": [
-  //       "gm gm",
-  //       "GM",
-  //       500
-  //   ],
-  //   "recipients": [
-  //       {
-  //           "address": "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
-  //           "percentAllocation": 20
-  //       },
-  //       {
-  //           "address": "0xc3313847E2c4A506893999f9d53d07cDa961a675",
-  //           "percentAllocation": 80
-  //       }
-  //   ]
-  // ]
   // check if recipient address is same
   const isRecipientAddDuplicate = () => {
     const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.filter(
@@ -1296,10 +1291,11 @@ const FarcasterNormalPost = () => {
             </p>
             <p className="text-end">
               <span>Topup balance:</span>
-              {isWalletLoading || isWalletRefetching ? (
+              {isCurrencyLoading || isCurrencyRefetching ? (
                 <span className="text-blue-500"> Loading balance... </span>
               ) : (
-                <span>{walletData?.balance} $DEGEN</span>
+                // add here wagmi balance
+                <span>{currencyData?.formatted} DEGEN</span>
               )}
             </p>
 
@@ -1388,7 +1384,8 @@ const FarcasterNormalPost = () => {
                 <Topup
                   topUpAccount={walletData?.publicAddress}
                   balance={walletData?.balance}
-                  refetch={refetchWallet}
+                  refetchWallet={refetchWallet}
+                  refetchCurrency={refetchCurrency}
                   sponsored={walletData?.sponsored}
                 />
               )}

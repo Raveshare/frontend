@@ -19,8 +19,15 @@ import {
 import { parseEther } from "viem";
 import { toast } from "react-toastify";
 import { ENVIRONMENT } from "../../../../../../../services";
+import { base } from "viem/chains";
 
-const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
+const Topup = ({
+  topUpAccount,
+  refetchWallet,
+  refetchCurrency,
+  balance,
+  sponsored,
+}) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
   const { chain } = useNetwork();
@@ -45,16 +52,8 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
-  const TxFeeForDeployment = 0.00009;
-  const txFeeForMint = 0.00002;
-
-  console.log({
-    allowedMints,
-    isSufficientBalance,
-    isTopup,
-    TxFeeForDeployment,
-    txFeeForMint,
-  });
+  const TxFeeForDeployment = chain?.id === base?.id ? 0.00009 : 0.000002;
+  const txFeeForMint = chain?.id === base?.id ? 0.00002 : 0.000001;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
@@ -86,6 +85,13 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     hash: data?.hash,
   });
 
+  console.log({
+    data,
+    error,
+    txError,
+    isTxSuccess,
+  });
+
   const handleChange = (e, key) => {
     const { name, value } = e.target;
 
@@ -101,6 +107,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
       return newState;
     });
   };
+
   // change the frameData isTopup to true if transaction is success
   useEffect(() => {
     if (isTxSuccess) {
@@ -113,7 +120,8 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
       });
 
       setTimeout(() => {
-        refetch();
+        refetchWallet();
+        refetchCurrency();
       }, 2000);
     }
   }, [isTxSuccess]);
