@@ -52,8 +52,8 @@ const Topup = ({
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
-  const TxFeeForDeployment = chain?.id === base?.id ? 0.00009 : 0.000002;
-  const txFeeForMint = chain?.id === base?.id ? 0.00002 : 0.000001;
+  const TxFeeForDeployment = chain?.id === base?.id ? 0.00009 : 0.00009;
+  const txFeeForMint = chain?.id === base?.id ? 0.00002 : 0.00002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
@@ -86,8 +86,10 @@ const Topup = ({
   });
 
   console.log({
+    config,
     data,
     error,
+    txData,
     txError,
     isTxSuccess,
   });
