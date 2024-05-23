@@ -372,7 +372,7 @@ const ContextProvider = ({ children }) => {
 
       isCustomCurrMint: false,
 
-      customCurrAmount: 0,
+      customCurrAmount: 0.01,
 
       isCustomCurrAmountError: false,
       customCurrAmountError: "",

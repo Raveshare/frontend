@@ -275,13 +275,13 @@ const FarcasterNormalPost = () => {
   };
 
   const checkCustomCurrAmt = () => {
-    if (farcasterStates?.frameData?.customCurrAmount < 0.01) {
+    if (farcasterStates?.frameData?.customCurrAmount <= 0.01) {
       setFarcasterStates((prevState) => ({
         ...prevState,
         frameData: {
           ...prevState.frameData,
-          isFcSplitError: true,
-          fcSplitError: "Minimum price is 0.01",
+          isCustomCurrAmountError: true,
+          customCurrAmountError: "Minimum price is 0.01",
         },
       }));
       return false;
@@ -589,13 +589,21 @@ const FarcasterNormalPost = () => {
     }
 
     // check if percentage is 100
-    if (farcasterStates.frameData?.isFrame && !isPercentage100()) {
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates?.frameData?.isCustomCurrMint &&
+      !isPercentage100()
+    ) {
       toast.error("Total percentage should be 100");
       return;
     }
 
-    if (!checkCustomCurrAmt()) {
-      toast.error("Please enter a valid price for the token");
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates.frameData?.isCustomCurrMint &&
+      !checkCustomCurrAmt()
+    ) {
+      // toast.error("Please enter a valid price for the token");
       return;
     }
 
@@ -873,6 +881,7 @@ const FarcasterNormalPost = () => {
 
   useEffect(() => {
     if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
+      console.log("Upload success", isUploadSuccess);
       setIsPostingFrame(false);
       write?.();
     }
@@ -1651,27 +1660,20 @@ const FarcasterNormalPost = () => {
           <EVMWallets title="Login with EVM" className="mx-2" />
         ) : !isFarcasterAuth ? (
           <FarcasterAuth />
-        ) : (farcasterStates?.frameData?.isFrame &&
-            !farcasterStates?.frameData?.isCustomCurrMint &&
-            !farcasterStates?.frameData?.isCreatorSponsored &&
-            chain?.id != chainId) ||
-          (farcasterStates?.frameData?.isFrame &&
-            !farcasterStates?.frameData?.isCreatorSponsored &&
-            !farcasterStates?.frameData?.isCustomCurrMint) ? (
+        ) : farcasterStates?.frameData?.isFrame &&
+          !farcasterStates?.frameData?.isCustomCurrMint &&
+          !farcasterStates?.frameData?.isCreatorSponsored &&
+          chain?.id != 8453 ? (
           <div className="mx-2 outline-none">
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
               disabled={isLoadingSwitchNetwork}
-              onClick={() => switchNetwork && switchNetwork(chainId)}
+              onClick={() => switchNetwork && switchNetwork(8453)}
               color="red"
             >
-              {isLoadingSwitchNetwork ? "Switching" : "Switch"} to {chain?.name}
-              {chain?.id != chainId
-                ? farcasterStates?.frameData?.isCustomCurrMint
-                  ? "degen"
-                  : "base"
-                : "a suported"}{" "}
-              Network {isLoadingSwitchNetwork && <Spinner />}
+              {isLoadingSwitchNetwork ? "Switching" : "Switch"} to
+              {chain?.id != 8453 ? " base" : "a suported"} Network{" "}
+              {isLoadingSwitchNetwork && <Spinner />}
             </Button>
           </div>
         ) : (
