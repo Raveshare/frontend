@@ -26,6 +26,8 @@
     "@solana/web3.js": "^1.87.1",
     "@tanstack/react-query": "^4.29.19",
     "@tanstack/react-query-devtools": "^4.29.19",
+    "@tiplink/wallet-adapter": "^2.1.13",
+    "@tiplink/wallet-adapter-react-ui": "^0.1.11",
     "@xmtp/xmtp-js": "^11.2.3",
     "@zoralabs/zora-1155-contracts": "^2.5.0",
     "@zoralabs/zora-721-contracts": "^1.14.1",

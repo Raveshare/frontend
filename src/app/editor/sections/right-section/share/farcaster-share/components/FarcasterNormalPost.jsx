@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import {
   ENVIRONMENT,
+  getENSDomain,
   shareOnSocials,
   uploadUserAssetToIPFS,
 } from "../../../../../../../services";
@@ -13,16 +14,30 @@ import {
   jsConfettiFn,
   addressCrop,
   saveToLocalStorage,
+  isEthAddress,
+  isLensHandle,
 } from "../../../../../../../utils";
-import { useLocalStorage, useReset } from "../../../../../../../hooks/app";
+import {
+  useAppAuth,
+  useLocalStorage,
+  useReset,
+} from "../../../../../../../hooks/app";
 import {
   APP_ETH_ADDRESS,
+  DEGEN_CURRENCY_ADDRESS,
   ERROR,
   FRAME_URL,
   LOCAL_STORAGE,
   URL_REGEX,
+  degenChain,
 } from "../../../../../../../data";
-import { Button, Spinner } from "@material-tailwind/react";
+import {
+  Button,
+  Option,
+  Select,
+  Spinner,
+  Typography,
+} from "@material-tailwind/react";
 import { EVMWallets } from "../../../../top-section/auth/wallets";
 import FarcasterAuth from "./FarcasterAuth";
 import FarcasterChannel from "./FarcasterChannel";
@@ -49,6 +64,10 @@ import {
 import WithdrawFunds from "./WithdrawFunds";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 import { zoraURLErc721 } from "../../zora-mint/utils";
+import TiDelete from "@meronex/icons/ti/TiDelete";
+import BsPlus from "@meronex/icons/bs/BsPlus";
+import { XCircleIcon } from "@heroicons/react/24/outline";
+import { useBalance } from "wagmi";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -65,13 +84,17 @@ const FarcasterNormalPost = () => {
   const [isError, setIsError] = useState(false);
   const [farTxHash, setFarTxHash] = useState("");
 
+  // FC Split recipients
+  const [recipientsLensHandle, setRecipientsLensHandle] = useState([]);
+  const [totalPercentage, setTotalPercentage] = useState(0);
+
   // zora contract deploy states
   // const [isDeployingZoraContract, setIsDeployingZoraContract] = useState(false);
   const [isDeployingZoraContractError, setIsDeployingZoraContractError] =
     useState(false);
   const [isDeployingZoraContractSuccess, setIsDeployingZoraContractSuccess] =
     useState(false);
-  const [zoraContractAddress, setZoraContractAddress] = useState(null);
+  const [respContractAddress, setRespContractAddress] = useState(null);
 
   // frame POST states
   const [isPostingFrame, setIsPostingFrame] = useState(false);
@@ -81,6 +104,9 @@ const FarcasterNormalPost = () => {
   const [isDeployingZoraContract, setIsDeployingZoraContract] = useState(false);
   const [isUploadSuccess, setIsUploadSuccess] = useState(false);
   const [frameId, setFrameId] = useState(null);
+  const [recipientsEns, setRecipientsEns] = useState([]);
+  const [totalPercent, setTotalPercent] = useState(0);
+  const { isAuthenticated } = useAppAuth();
 
   const {
     postName,
@@ -88,6 +114,9 @@ const FarcasterNormalPost = () => {
     contextCanvasIdRef,
     canvasBase64Ref,
     setFarcasterStates,
+    splitError,
+    setSplitError,
+    parentRecipientListRef,
     farcasterStates, // don't remove this
     lensAuthState, // don't remove this
   } = useContext(Context);
@@ -107,6 +136,21 @@ const FarcasterNormalPost = () => {
     queryFn: () => getOrCreateWallet(),
     refetchOnWindowFocus: false,
   });
+
+  const {
+    data: currencyData,
+    isError: isCurrencyError,
+    isLoading: isCurrencyLoading,
+    error: currencyError,
+    isSuccess: isCurrencySuccess,
+    refetch: refetchCurrency,
+    isRefetching: isCurrencyRefetching,
+  } = useBalance({
+    address: walletData?.publicAddress,
+    chainId: degenChain?.id,
+  });
+
+  console.log("balanceForDegen", currencyData);
 
   const { mutateAsync: deployZoraContractMutation } = useMutation({
     mutationKey: "deployZoraContract",
@@ -150,9 +194,9 @@ const FarcasterNormalPost = () => {
   const allowedMints = farcasterStates?.frameData?.allowedMints;
 
   const argsArr = [
-    postName || "My Frame",
-    postName?.split(" ")[0].toUpperCase() || "MYFRAME",
-    allowedMints || "10",
+    postName,
+    postName?.split(" ")[0].toUpperCase(),
+    allowedMints,
     "500",
     address,
     isCreatorSponsored ? LOA : address,
@@ -171,6 +215,113 @@ const FarcasterNormalPost = () => {
     `ipfs://${uploadData?.message}`,
     APP_ETH_ADDRESS,
   ];
+
+  // check if recipient address is same
+  const isRecipientAddDuplicate = () => {
+    const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.filter(
+      (item, index) => {
+        return (
+          farcasterStates?.frameData?.fcSplitRevenueRecipients.findIndex(
+            (item2) => item2.address === item.address
+          ) !== index
+        );
+      }
+    );
+
+    if (result.length > 0) {
+      setFarcasterStates((prevState) => ({
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          isFcSplitError: true,
+          fcSplitError: "Recipient address should be unique",
+        },
+      }));
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  // check if recipient percentage is more than 100
+  const isPercentage100 = () => {
+    const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.reduce(
+      (acc, item) => acc + item.percentAllocation,
+      0
+    );
+
+    setTotalPercent(result);
+
+    console.log("result", result);
+
+    if (result === 100) {
+      return true;
+    } else {
+      setFarcasterStates((prevState) => ({
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          isFcSplitError: true,
+          fcSplitError: "Total percentage should be 100",
+        },
+      }));
+      return false;
+    }
+  };
+
+  const checkCustomCurrAmt = () => {
+    if (farcasterStates?.frameData?.customCurrAmount <= 0.01) {
+      setFarcasterStates((prevState) => ({
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          isCustomCurrAmountError: true,
+          customCurrAmountError: "Minimum price is 0.01",
+        },
+      }));
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  // Sort the recipients by address in ascending order
+  const sortRecipientsByAddress = (recipients) => {
+    return recipients.sort((a, b) =>
+      a.address
+        .toLowerCase()
+        .localeCompare(b.address.toLowerCase(), undefined, {
+          sensitivity: "base",
+        })
+    );
+  };
+
+  // function to remove duplicate recipients and aggregate percentAllocations
+  // usecase : some xyz address and ens handle address being same
+  const removeAndAggregateDuplicates = (recipients) => {
+    const addressMap = new Map();
+
+    // Aggregate percent allocations by address
+    recipients.forEach((recipient) => {
+      const address = recipient.address.toLowerCase();
+      if (addressMap.has(address)) {
+        addressMap.set(
+          address,
+          addressMap.get(address) + recipient.percentAllocation
+        );
+      } else {
+        addressMap.set(address, recipient.percentAllocation);
+      }
+    });
+
+    // Convert the map back to an array
+    return Array.from(addressMap.entries()).map(
+      ([address, percentAllocation]) => ({
+        address,
+        percentAllocation,
+      })
+    );
+  };
 
   const handleChange = (e, key) => {
     const { name, value } = e.target;
@@ -208,6 +359,17 @@ const FarcasterNormalPost = () => {
         }
       }
 
+      // check if custom currency amount is a valid number
+      if (name === "customCurrAmount") {
+        if (!value || value <= 0.01) {
+          newState.frameData.isCustomCurrAmountError = true;
+          newState.frameData.customCurrAmountError =
+            "Price should not be less than 0.01";
+        } else {
+          newState.frameData.isCustomCurrAmountError = false;
+          newState.frameData.customCurrAmountError = "";
+        }
+      }
       // Return the new state
       return newState;
     });
@@ -242,17 +404,13 @@ const FarcasterNormalPost = () => {
   } = useWaitForTransaction({ hash: data?.hash });
 
   // deploy zora contract
-  const deployZoraContractFn = async () => {
+  const deployZoraContractFn = async (deployArgs) => {
     setIsDeployingZoraContract(true);
 
-    deployZoraContractMutation({
-      contract_type: "721",
-      canvasId: contextCanvasIdRef.current,
-      chainId: chainId,
-      args: argsArr,
-    })
+    deployZoraContractMutation(deployArgs)
       .then((res) => {
-        setZoraContractAddress(res?.contract_address);
+        setRespContractAddress(res?.contract_address || res?.contract);
+
         setIsDeployingZoraContractSuccess(true);
         setIsDeployingZoraContract(false);
       })
@@ -279,8 +437,10 @@ const FarcasterNormalPost = () => {
       isRecast: farcasterStates.frameData?.isRecast,
       isFollow: farcasterStates.frameData?.isFollow,
       redirectLink: farcasterStates.frameData?.externalLink,
-      contractAddress: zoraContractAddress,
-      chainId: chainId,
+      contractAddress: respContractAddress,
+      chainId: farcasterStates?.frameData?.isCustomCurrMint
+        ? degenChain?.id
+        : chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
     };
     postFrameData(params)
@@ -387,6 +547,7 @@ const FarcasterNormalPost = () => {
       return;
     }
 
+    // sufficient balance check
     if (
       farcasterStates.frameData?.isFrame &&
       farcasterStates.frameData?.isCreatorSponsored &&
@@ -397,11 +558,47 @@ const FarcasterNormalPost = () => {
       return;
     }
 
+    // check if external link is a valid URL
     if (
       farcasterStates.frameData?.isFrame &&
       farcasterStates.frameData?.isExternalLinkError
     ) {
       toast.error("Please enter a valid URL");
+      return;
+    }
+
+    // if price is valid
+    if (farcasterStates.frameData?.isCustomCurrAmountError) {
+      return;
+    }
+
+    // check if recipient address is same
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates.frameData?.fcSplitRevenueRecipients?.length > 0
+    ) {
+      if (isRecipientAddDuplicate()) {
+        toast.error("Please enter unique addresses");
+        return;
+      }
+    }
+
+    // check if percentage is 100
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates?.frameData?.isCustomCurrMint &&
+      !isPercentage100()
+    ) {
+      toast.error("Total percentage should be 100");
+      return;
+    }
+
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates.frameData?.isCustomCurrMint &&
+      !checkCustomCurrAmt()
+    ) {
+      // toast.error("Please enter a valid price for the token");
       return;
     }
 
@@ -433,15 +630,253 @@ const FarcasterNormalPost = () => {
       });
   };
 
+  // funtion adding data for split revenues recipients
+  const handleRecipientChange = (index, key, value) => {
+    setFarcasterStates((prevState) => {
+      // Create a new state based on the previous state
+      const newState = {
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          [key]: value,
+        },
+      };
+
+      // Check index 0 price should be min 10
+      if (key === "percentAllocation" && index === 0) {
+        if (value < 10 || value > 100 || isNaN(value)) {
+          newState.frameData.isFcSplitError = true;
+          newState.frameData.fcSplitErrorMsg =
+            "Platform fee should be between 10% to 100%";
+          console.log("Platform fee should be between 10% to 100%");
+        } else {
+          newState.frameData.isFcSplitError = false;
+          console.log("no error - Platform fee should be between 10% to 100%");
+        }
+      } else if (key === "percentAllocation" && index !== 0) {
+        // Any index price should be greater min 1 and max 100
+        if (value < 1 || value > 100 || isNaN(value)) {
+          newState.frameData.isFcSplitError = true;
+          newState.frameData.fcSplitErrorMsg =
+            "Split should be between 1% to 100%";
+          console.log("Split should be between 1% to 100%");
+        } else {
+          newState.frameData.isFcSplitError = false;
+          console.log("no error - Split should be between 1% to 100%");
+        }
+      }
+
+      // Check if recipient address is not provided
+      if (key === "address") {
+        if (!value) {
+          newState.frameData.isFcSplitError = true;
+          newState.frameData.fcSplitErrorMsg = "Recipient address is required";
+          console.log("Recipient address is required");
+        } else {
+          newState.frameData.isFcSplitError = false;
+          console.log("no error - Recipient address is required");
+        }
+      }
+
+      // Update the recipients array
+      const updatedRecipients = [
+        ...newState.frameData.fcSplitRevenueRecipients,
+      ];
+      updatedRecipients[index][key] = value;
+      newState.frameData.fcSplitRevenueRecipients = updatedRecipients;
+
+      // Return the new state
+      return newState;
+    });
+  };
+
+  // restrict the input box if the recipient is in the parent list
+  const restrictRecipientInput = (e, index, recipient) => {
+    const isRecipient = parentRecipientListRef.current.includes(recipient);
+    const isUserAddress = recipient === address;
+    if (index === 0 || isRecipient) {
+      if (isUserAddress) {
+        handleRecipientChange(index, "address", e.target.value);
+      }
+    } else {
+      handleRecipientChange(index, "address", e.target.value);
+    }
+  };
+
+  // restrict the delete button if recipient is in the parent list
+  const restrictRemoveRecipientInputBox = (index, recipient) => {
+    const isRecipient = parentRecipientListRef.current.includes(recipient);
+    if (index === 0 || isRecipient) {
+      return true;
+    }
+  };
+
+  // funtion to remove input box for multi addresses
+  const removeArrlistInputBox = (index, key, isErrKey, errKeyMsg) => {
+    setFarcasterStates((prevState) => {
+      const updatedFrameData = {
+        ...prevState.frameData,
+        [key]: prevState.frameData[key].filter((_, i) => i !== index),
+      };
+
+      if (isErrKey) {
+        updatedFrameData[isErrKey] = false;
+        updatedFrameData[errKeyMsg] = "";
+      }
+
+      return {
+        ...prevState,
+        frameData: updatedFrameData,
+      };
+    });
+  };
+
+  // split even percentage
+  const splitEvenPercentage = () => {
+    const result = farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+      (item) => {
+        return {
+          address: item.address,
+          percentAllocation: Math.floor(
+            (
+              100 / farcasterStates?.frameData?.fcSplitRevenueRecipients.length
+            ).toFixed(2)
+          ),
+        };
+      }
+    );
+
+    setFarcasterStates({
+      ...farcasterStates,
+      frameData: {
+        ...farcasterStates?.frameData,
+        fcSplitRevenueRecipients: result,
+      },
+    });
+  };
+
+  // funtion to add new input box for multi addresses
+  const addArrlistInputBox = (key) => {
+    if (key === "fcSplitRevenueRecipients") {
+      setFarcasterStates({
+        ...farcasterStates,
+        frameData: {
+          ...farcasterStates?.frameData,
+          [key]: [
+            ...farcasterStates?.frameData[key],
+            { address: "", percentAllocation: "" },
+          ],
+        },
+      });
+      return;
+    }
+
+    setFarcasterStates({
+      ...farcasterStates,
+      frameData: {
+        ...farcasterStates?.frameData,
+        [key]: [...farcasterStates?.frameData[key], ""],
+      },
+    });
+  };
+
+  // add recipient to the split list
+  useEffect(() => {
+    if (isAuthenticated) {
+      const updatedRecipients = parentRecipientListRef.current.map((item) => ({
+        address: item,
+        percentAllocation: 1.0,
+      }));
+
+      setFarcasterStates((prevEnabled) => ({
+        ...prevEnabled,
+        frameData: {
+          ...prevEnabled?.frameData,
+          fcSplitRevenueRecipients: [
+            {
+              address: APP_ETH_ADDRESS,
+              percentAllocation: 10.0,
+            },
+            ...updatedRecipients,
+          ],
+        },
+      }));
+
+      const recipients = updatedRecipients.map((item) => {
+        return item.address;
+      });
+
+      const addresses = [APP_ETH_ADDRESS, ...recipients];
+
+      // getting ENS domain
+      (async () => {
+        const domains = await getENSDomain(addresses);
+        setRecipientsEns(domains);
+      })();
+    }
+  }, [isAuthenticated]);
+
+  console.log(
+    "FarcasterStates",
+    Number(farcasterStates?.frameData?.customCurrAmount)
+  );
+
   useEffect(() => {
     if (isUploadSuccess && farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
-      deployZoraContractFn();
+
+      const deployArgs = {
+        contract_type: "721",
+        canvasId: contextCanvasIdRef.current,
+        chainId: chainId,
+        args: argsArr,
+      };
+      deployZoraContractFn(deployArgs);
+    } else if (isUploadSuccess && farcasterStates.frameData?.isCustomCurrMint) {
+      setIsPostingFrame(false);
+
+      // Deploy custom currency arguments
+      const deployArgs = {
+        contract_type: 721,
+        chainId: 666666666,
+        canvasId: contextCanvasIdRef.current,
+        currency: DEGEN_CURRENCY_ADDRESS,
+        pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
+        maxSupply: farcasterStates?.frameData?.allowedMints,
+        args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
+        recipients:
+          // {
+          //   address: "0x442C01498ED8205bFD9aaB6B8cc5C810Ed070C8f",
+          //   percentAllocation: 5,
+          // },
+          // {
+          //   address: "0xc3313847E2c4A506893999f9d53d07cDa961a675",
+          //   percentAllocation: 95,
+          // },
+          // farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+          //   (item) => (
+          //     {
+          //     address: item.address,
+          //     percentAllocation: item.percentAllocation,
+          //   })
+          // ),
+          sortRecipientsByAddress(
+            farcasterStates?.frameData?.fcSplitRevenueRecipients.map(
+              (item) => ({
+                address: item.address,
+                percentAllocation: item.percentAllocation,
+              })
+            )
+          ),
+      };
+
+      deployZoraContractFn(deployArgs);
     }
   }, [isUploadSuccess]);
 
   useEffect(() => {
     if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
+      console.log("Upload success", isUploadSuccess);
       setIsPostingFrame(false);
       write?.();
     }
@@ -450,7 +885,7 @@ const FarcasterNormalPost = () => {
   useEffect(() => {
     if (isSuccess) {
       setIsDeployingZoraContractSuccess(true);
-      setZoraContractAddress(receipt?.logs[0]?.address);
+      setRespContractAddress(receipt?.logs[0]?.address);
 
       storeZoraLink();
     }
@@ -784,30 +1219,32 @@ const FarcasterNormalPost = () => {
           )}
         </div>
 
+        {/* Start  */}
+        {/* Start Degen-L3 Mint */}
         <div className="mb-4">
           <div className="flex justify-between">
-            <h2 className="text-lg mb-2"> Sponsor Mints </h2>
+            <h2 className="text-lg mb-2"> Custom currency Mint </h2>
             <Switch
-              checked={farcasterStates.frameData?.isCreatorSponsored}
+              checked={farcasterStates.frameData?.isCustomCurrMint}
               onChange={() =>
                 setFarcasterStates({
                   ...farcasterStates,
                   frameData: {
                     ...farcasterStates.frameData,
-                    isCreatorSponsored:
-                      !farcasterStates.frameData?.isCreatorSponsored,
+                    isCustomCurrMint:
+                      !farcasterStates.frameData?.isCustomCurrMint,
                   },
                 })
               }
               className={`${
-                farcasterStates.frameData?.isCreatorSponsored
+                farcasterStates.frameData?.isCustomCurrMint
                   ? "bg-[#e1f16b]"
                   : "bg-gray-200"
               } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
             >
               <span
                 className={`${
-                  farcasterStates.frameData?.isCreatorSponsored
+                  farcasterStates.frameData?.isCustomCurrMint
                     ? "translate-x-6"
                     : "translate-x-1"
                 } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
@@ -816,13 +1253,13 @@ const FarcasterNormalPost = () => {
           </div>
           <div className="w-4/5 opacity-75">
             {" "}
-            Let your audience mint your frame for free.{" "}
+            Mint NFTs with custom currencies like $DEGEN{" "}
           </div>
         </div>
 
         <div
           className={`${
-            !farcasterStates.frameData?.isCreatorSponsored && "hidden"
+            !farcasterStates.frameData?.isCustomCurrMint && "hidden"
           } mt-2`}
         >
           <div className="my-2">
@@ -831,9 +1268,9 @@ const FarcasterNormalPost = () => {
               {walletData?.sponsored > 0
                 ? `${
                     walletData?.sponsored
-                  } mints are free. Topup with Base ETH if you want
+                  } mints are free. Topup with your custom currency if you want
               to drop more than ${walletData?.sponsored} mints ${" "}`
-                : "You don't have any free mint. please Topup with Base ETH to mint"}{" "}
+                : "You don't have any free mint. please Topup with your custom currency to mint"}{" "}
             </p>
             <p className="text-end mt-4">
               <span>Topup account:</span>
@@ -854,13 +1291,76 @@ const FarcasterNormalPost = () => {
             </p>
             <p className="text-end">
               <span>Topup balance:</span>
-              {isWalletLoading || isWalletRefetching ? (
+              {isCurrencyLoading || isCurrencyRefetching ? (
                 <span className="text-blue-500"> Loading balance... </span>
               ) : (
-                <span>{walletData?.balance} Base ETH</span>
+                // add here wagmi balance
+                <span>{currencyData?.formatted} DEGEN</span>
               )}
             </p>
-            <div className="flex flex-col w-full py-2">
+
+            <div
+              className={`${
+                !farcasterStates.frameData?.isCustomCurrMint && "hidden"
+              } `}
+            >
+              <div className="flex flex-row justify-between">
+                <div className="flex flex-col py-4">
+                  <NumberInputBox
+                    min={"0.001"}
+                    step={"0.01"}
+                    label="Price"
+                    name="customCurrAmount"
+                    onChange={(e) => handleChange(e, "customCurrAmount")}
+                    onFocus={(e) => handleChange(e, "customCurrAmount")}
+                    value={farcasterStates?.frameData?.customCurrAmount}
+                  />
+                </div>
+
+                <div className="flex flex-col py-4 mx-2">
+                  {/* <label htmlFor="price"></label> */}
+                  <Select
+                    animate={{
+                      mount: { y: 0 },
+                      unmount: { y: 25 },
+                    }}
+                    label="Currency"
+                    name="customCurrName"
+                    id="customCurrName"
+                    value={farcasterStates.frameData.customCurrName}
+                  >
+                    {["DEGEN"].map((currency) => (
+                      <Option
+                        key={currency}
+                        onClick={() => {
+                          setFarcasterStates({
+                            ...farcasterStates,
+                            frameData: {
+                              ...farcasterStates.frameData,
+                              customCurrName: currency,
+                            },
+                          });
+                        }}
+                      >
+                        {currency.toUpperCase()}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+
+              {farcasterStates?.frameData?.isCustomCurrAmountError && (
+                <InputErrorMsg
+                  message={farcasterStates?.frameData.customCurrAmountError}
+                />
+              )}
+            </div>
+
+            <div
+              className={`flex flex-col w-full py-2 ${
+                !farcasterStates.frameData?.isCustomCurrMint && "hidden"
+              }`}
+            >
               <NumberInputBox
                 min={1}
                 step={1}
@@ -878,42 +1378,274 @@ const FarcasterNormalPost = () => {
               />
             )}
 
-            {farcasterStates.frameData?.isCreatorSponsored &&
+            {farcasterStates.frameData?.isCustomCurrMint &&
               farcasterStates.frameData?.allowedMints >
                 walletData?.sponsored && (
                 <Topup
                   topUpAccount={walletData?.publicAddress}
                   balance={walletData?.balance}
-                  refetch={refetchWallet}
+                  refetchWallet={refetchWallet}
+                  refetchCurrency={refetchCurrency}
                   sponsored={walletData?.sponsored}
                 />
               )}
           </div>
         </div>
+        {/* End */}
 
         <div
-          className={`${
-            farcasterStates.frameData?.isCreatorSponsored && "hidden"
-          } mt-2`}
+          className={`mb-4 ${
+            !farcasterStates.frameData?.isCustomCurrMint && "hidden"
+          }`}
         >
-          <div className="flex flex-col w-full py-2">
-            <NumberInputBox
-              min={1}
-              step={1}
-              label="Allowed Mints"
-              name="allowedMints"
-              onChange={(e) => handleChange(e, "allowedMints")}
-              onFocus={(e) => handleChange(e, "allowedMints")}
-              value={farcasterStates.frameData.allowedMints}
-            />
+          <h2 className="text-lg mb-2">Split Recipients</h2>
+          <div className="flex justify-between">
+            <Switch.Group>
+              <Switch.Label className="w-4/5 opacity-60">
+                Split revenue between multiple recipients
+              </Switch.Label>
+            </Switch.Group>
           </div>
+          <div className="relative">
+            {farcasterStates &&
+              farcasterStates?.frameData?.fcSplitRevenueRecipients?.map(
+                (recipient, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="flex justify-between gap-2 items-center w-full py-2"
+                    >
+                      <div className="flex-1">
+                        <InputBox
+                          label="Wallet Address"
+                          value={recipientsEns[index] || recipient.address}
+                          onFocus={(e) =>
+                            restrictRecipientInput(e, index, recipient.address)
+                          }
+                          onChange={(e) =>
+                            restrictRecipientInput(e, index, recipient.address)
+                          }
+                        />
+                      </div>
+                      <div className="">
+                        <NumberInputBox
+                          min={0}
+                          max={100}
+                          step={1}
+                          label="%"
+                          value={recipient.percentAllocation}
+                          onFocus={(e) => {
+                            handleRecipientChange(
+                              index,
+                              "percentAllocation",
+                              Number(parseFloat(e.target.value).toFixed(4))
+                            );
+                          }}
+                          onChange={(e) => {
+                            handleRecipientChange(
+                              index,
+                              "percentAllocation",
+                              Number(parseFloat(e.target.value).toFixed(4))
+                            );
+                          }}
+                        />
+                      </div>
+                      {!restrictRemoveRecipientInputBox(
+                        index,
+                        recipient.address
+                      ) && (
+                        <span>
+                          <XCircleIcon
+                            className="h-6 w-6 cursor-pointer"
+                            color="red"
+                            onClick={() =>
+                              removeArrlistInputBox(
+                                index,
+                                "fcSplitRevenueRecipients",
+                                "isFcSplitError",
+                                "fcSplitErrorMsg"
+                              )
+                            }
+                          />
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+              )}
 
-          {farcasterStates.frameData?.allowedMintsIsError && (
-            <InputErrorMsg
-              message={farcasterStates.frameData?.allowedMintsError}
-            />
-          )}
+            <div className="flex justify-between items-center">
+              {farcasterStates?.frameData?.isFcSplitError && (
+                <>
+                  <InputErrorMsg
+                    message={farcasterStates?.frameData?.fcSplitErrorMsg}
+                  />
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-between">
+              <Button
+                // color="yellow"
+                size="sm"
+                variant="filled"
+                className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
+                onClick={() => addArrlistInputBox("fcSplitRevenueRecipients")}
+              >
+                <BsPlus />
+                Add Recipient
+              </Button>
+              <Button
+                // color="yellow"
+                size="sm"
+                variant="filled"
+                className="flex items-center gap-3 mt-2 ml-0 outline-none bg-[#e1f16b] text-black"
+                onClick={splitEvenPercentage}
+              >
+                Split Even
+              </Button>
+            </div>
+          </div>
         </div>
+
+        {/* End Degen-L3 Mint */}
+
+        {!farcasterStates.frameData?.isCustomCurrMint && (
+          <>
+            <div className="mb-4">
+              <div className="flex justify-between">
+                <h2 className="text-lg mb-2"> Sponsor Mints </h2>
+                <Switch
+                  checked={farcasterStates.frameData?.isCreatorSponsored}
+                  onChange={() =>
+                    setFarcasterStates({
+                      ...farcasterStates,
+                      frameData: {
+                        ...farcasterStates.frameData,
+                        isCreatorSponsored:
+                          !farcasterStates.frameData?.isCreatorSponsored,
+                      },
+                    })
+                  }
+                  className={`${
+                    farcasterStates.frameData?.isCreatorSponsored
+                      ? "bg-[#e1f16b]"
+                      : "bg-gray-200"
+                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
+                >
+                  <span
+                    className={`${
+                      farcasterStates.frameData?.isCreatorSponsored
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                  />{" "}
+                </Switch>
+              </div>
+              <div className="w-4/5 opacity-75">
+                {" "}
+                Let your audience mint your frame for free.{" "}
+              </div>
+            </div>
+
+            <div
+              className={`${
+                !farcasterStates.frameData?.isCreatorSponsored && "hidden"
+              } mt-2`}
+            >
+              <div className="my-2">
+                <p className="text-sm">
+                  {" "}
+                  {walletData?.sponsored > 0
+                    ? `${
+                        walletData?.sponsored
+                      } mints are free. Topup with Base ETH if you want
+              to drop more than ${walletData?.sponsored} mints ${" "}`
+                    : "You don't have any free mint. please Topup with Base ETH to mint"}{" "}
+                </p>
+                <p className="text-end mt-4">
+                  <span>Topup account:</span>
+                  {isWalletLoading || isWalletRefetching ? (
+                    <span className="text-blue-500"> Loading address... </span>
+                  ) : (
+                    <span
+                      className="text-blue-500 cursor-pointer"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          walletData?.publicAddress
+                        );
+                        toast.success("Copied topup account address");
+                      }}
+                    >
+                      {" "}
+                      {addressCrop(walletData?.publicAddress)}
+                    </span>
+                  )}
+                </p>
+                <p className="text-end">
+                  <span>Topup balance:</span>
+                  {isWalletLoading || isWalletRefetching ? (
+                    <span className="text-blue-500"> Loading balance... </span>
+                  ) : (
+                    <span> {walletData?.balance} Base ETH</span>
+                  )}
+                </p>
+                <div className="flex flex-col w-full py-2">
+                  <NumberInputBox
+                    min={1}
+                    step={1}
+                    label="Allowed Mints"
+                    name="allowedMints"
+                    onChange={(e) => handleChange(e, "allowedMints")}
+                    onFocus={(e) => handleChange(e, "allowedMints")}
+                    value={farcasterStates.frameData.allowedMints}
+                  />
+                </div>
+
+                {farcasterStates.frameData?.allowedMintsIsError && (
+                  <InputErrorMsg
+                    message={farcasterStates.frameData?.allowedMintsError}
+                  />
+                )}
+
+                {farcasterStates.frameData?.isCreatorSponsored &&
+                  farcasterStates.frameData?.allowedMints >
+                    walletData?.sponsored && (
+                    <Topup
+                      topUpAccount={walletData?.publicAddress}
+                      balance={walletData?.balance}
+                      refetch={refetchWallet}
+                      sponsored={walletData?.sponsored}
+                    />
+                  )}
+              </div>
+            </div>
+
+            <div
+              className={`${
+                farcasterStates.frameData?.isCreatorSponsored && "hidden"
+              } mt-2`}
+            >
+              <div className="flex flex-col w-full py-2">
+                <NumberInputBox
+                  min={1}
+                  step={1}
+                  label="Allowed Mints"
+                  name="allowedMints"
+                  onChange={(e) => handleChange(e, "allowedMints")}
+                  onFocus={(e) => handleChange(e, "allowedMints")}
+                  value={farcasterStates.frameData.allowedMints}
+                />
+              </div>
+
+              {farcasterStates.frameData?.allowedMintsIsError && (
+                <InputErrorMsg
+                  message={farcasterStates.frameData?.allowedMintsError}
+                />
+              )}
+            </div>
+          </>
+        )}
 
         {walletData?.balance > 0 && (
           <WithdrawFunds refetchWallet={refetchWallet} />
@@ -926,17 +1658,18 @@ const FarcasterNormalPost = () => {
         ) : !isFarcasterAuth ? (
           <FarcasterAuth />
         ) : farcasterStates?.frameData?.isFrame &&
+          !farcasterStates?.frameData?.isCustomCurrMint &&
           !farcasterStates?.frameData?.isCreatorSponsored &&
-          chain?.id != chainId ? (
+          chain?.id != 8453 ? (
           <div className="mx-2 outline-none">
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
               disabled={isLoadingSwitchNetwork}
-              onClick={() => switchNetwork(chainId)}
+              onClick={() => switchNetwork && switchNetwork(8453)}
               color="red"
             >
-              {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
-              {chain?.id != chainId ? "base" : "a suported"} Network{" "}
+              {isLoadingSwitchNetwork ? "Switching" : "Switch"} to
+              {chain?.id != 8453 ? " base" : "a suported"} Network{" "}
               {isLoadingSwitchNetwork && <Spinner />}
             </Button>
           </div>
