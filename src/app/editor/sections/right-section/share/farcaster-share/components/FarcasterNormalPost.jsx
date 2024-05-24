@@ -619,7 +619,7 @@ const FarcasterNormalPost = () => {
     storeZoraLinkMutation(paramsData)
       .then((res) => {
         console.log("StoreZoraLink", res?.slug);
-        setSlug;
+        setSlug(res?.slug);
       })
       .catch((error) => {
         console.log("StoreZoraLinkErr", errorMessage(error));
