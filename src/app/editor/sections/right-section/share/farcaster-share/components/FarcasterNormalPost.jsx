@@ -104,6 +104,7 @@ const FarcasterNormalPost = () => {
   const [frameId, setFrameId] = useState(null);
   const [recipientsEns, setRecipientsEns] = useState([]);
   const [totalPercent, setTotalPercent] = useState(0);
+  const [slug, setSlug] = useState("");
   const { isAuthenticated } = useAppAuth();
 
   const {
@@ -147,8 +148,6 @@ const FarcasterNormalPost = () => {
     address: "0x62b14E5D09BC0C340116B5BC87d787377C07A820",
     chainId: degenChain?.id,
   });
-
-  console.log("CurrencyData", currencyData);
 
   const { mutateAsync: deployZoraContractMutation } = useMutation({
     mutationKey: "deployZoraContract",
@@ -610,7 +609,7 @@ const FarcasterNormalPost = () => {
   const storeZoraLink = () => {
     let paramsData = {
       canvasId: contextCanvasIdRef.current,
-      mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
+      mintLink: receipt?.logs[0]?.address,
       chain: chain?.name,
       contractType: 721,
       chainId: chain?.id,
@@ -620,6 +619,7 @@ const FarcasterNormalPost = () => {
     storeZoraLinkMutation(paramsData)
       .then((res) => {
         console.log("StoreZoraLink", res?.slug);
+        setSlug(res?.slug);
       })
       .catch((error) => {
         console.log("StoreZoraLinkErr", errorMessage(error));
@@ -938,6 +938,7 @@ const FarcasterNormalPost = () => {
         frameId={frameId}
         isStoringFrameData={isStoringFrameData}
         isDeployingZoraContract={isDeployingZoraContract}
+        slug={slug}
       />
       <div className="mb-4 m-4">
         <div className="flex justify-between">
