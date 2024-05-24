@@ -42,6 +42,7 @@ import {
 } from "../../../../../../../services";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 import {
+  chainLogo,
   errorMessage,
   getFromLocalStorage,
   saveToLocalStorage,
@@ -61,7 +62,6 @@ import {
   mintToXchain,
 } from "../../../../../../../services/apis/BE-apis";
 import { zoraURLErc721 } from "../utils/zoraURL";
-import { ZoraLogo } from "../../../../../../../assets";
 
 const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { address } = useAccount();
@@ -196,7 +196,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       ? chains.filter((chain) => {
           return networks?.includes(chain?.id);
         })
-      : chains.slice(1);
+      : chains.slice(1, -1);
 
     const isUnsupportedChain = () => {
       if (
@@ -1003,8 +1003,8 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   return (
     <>
       <ZoraDialog
-        title=" Zora ERC721 Edition"
-        icon={ZoraLogo}
+        title="ERC721 Edition"
+        icon={chainLogo(selectedChainId)}
         isError={isUploadError || isCreateSplitError || isError || isShareError}
         isLoading={isLoading}
         isCreatingSplit={isCreateSplitLoading}

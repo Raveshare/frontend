@@ -64,7 +64,7 @@ const Networks = ({ className, chains, isUnsupportedChain }) => {
           />
         </DialogHeader>
         <DialogBody>
-          {chains.map((network, index) => (
+          {chains?.map((network, index) => (
             <>
               <List className="border rounded-lg my-2 p-0">
                 <ListItem
