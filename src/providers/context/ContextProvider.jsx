@@ -369,6 +369,26 @@ const ContextProvider = ({ children }) => {
 
       isExternalLinkError: false,
       externalLinkError: "",
+
+      isCustomCurrMint: false,
+
+      customCurrAmount: 1,
+
+      isCustomCurrAmountError: false,
+      customCurrAmountError: "",
+
+      customCurrName: "DEGEN",
+
+      fcSplitRevenueRecipients: [
+        {
+          address: "",
+          percentAllocation: null,
+        },
+      ],
+
+      // split recipient error
+      isFcSplitError: false,
+      fcSplitErrorMsg: "",
     },
   });
 
