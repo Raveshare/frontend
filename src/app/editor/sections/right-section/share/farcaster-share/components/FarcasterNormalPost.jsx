@@ -1191,7 +1191,7 @@ const FarcasterNormalPost = () => {
 
         {/* Start  */}
         {/* Start Degen-L3 Mint */}
-        {/* <div className="mb-4">
+        <div className="mb-4">
           <div className="flex justify-between">
             <h2 className="text-lg mb-2"> Custom currency Mint </h2>
             <Switch
@@ -1225,7 +1225,7 @@ const FarcasterNormalPost = () => {
             {" "}
             Mint NFTs with custom currencies like $DEGEN{" "}
           </div>
-        </div> */}
+        </div>
 
         <div
           className={`${
