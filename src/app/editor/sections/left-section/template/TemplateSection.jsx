@@ -313,8 +313,8 @@ const LenspostTemplates = () => {
           />
           <CustomHorizontalScroller
             type="props"
-            author="cybershakti"
-            campaign="shakti"
+            author="base"
+            campaign={null}
           />
 
           <div className="ml-2 mt-4 mb-1 "> Lenspost Templates </div>
