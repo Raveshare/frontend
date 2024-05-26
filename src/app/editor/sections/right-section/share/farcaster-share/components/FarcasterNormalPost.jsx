@@ -405,9 +405,11 @@ const FarcasterNormalPost = () => {
     deployZoraContractMutation(deployArgs)
       .then((res) => {
         setRespContractAddress(res?.contract_address || res?.contract);
-
         setIsDeployingZoraContractSuccess(true);
         setIsDeployingZoraContract(false);
+        if (farcasterStates?.frameData?.isCustomCurrMint) {
+          setSlug(res?.slug);
+        }
       })
       .catch((err) => {
         setIsDeployingZoraContractError(true);
@@ -1539,7 +1541,9 @@ const FarcasterNormalPost = () => {
 
           <div
             className={`${
-              farcasterStates.frameData?.isCreatorSponsored && "hidden"
+              (farcasterStates.frameData?.isCreatorSponsored ||
+                farcasterStates?.frameData?.isCustomCurrMint) &&
+              "hidden"
             } mt-2`}
           >
             <div className="flex flex-col w-full py-2">
