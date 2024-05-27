@@ -6,11 +6,14 @@ import { DateTimePicker } from "@atlaskit/datetime-picker";
 import { chainLogo, getFromLocalStorage } from "../../../../../utils";
 import { Context } from "../../../../../providers/context/ContextProvider";
 import BsX from "@meronex/icons/bs/BsX";
-import { Textarea, Typography } from "@material-tailwind/react";
+import { Button, Textarea, Typography } from "@material-tailwind/react";
 import logoSolana from "../../../../../assets/logos/logoSolana.png";
 import logoZora from "../../../../../assets/logos/logoZora.png";
 import logoFarcaster from "../../../../../assets/logos/logoFarcaster.jpg";
 import { InputBox } from "../../../common";
+import { useStore } from "../../../../../hooks/polotno";
+import { apiClaimReward } from "../../../../../services/apis/BE-apis/loayalty";
+import { useUser } from "../../../../../hooks/user";
 
 const ShareSection = () => {
   const { address, isConnected } = useAccount();
@@ -34,6 +37,9 @@ const ShareSection = () => {
   const getTwitterAuth = getFromLocalStorage("twitterAuth");
   const [stClickedEmojiIcon, setStClickedEmojiIcon] = useState(false);
   const [charLimitError, setCharLimitError] = useState("");
+
+  const store = useStore();
+  const { points } = useUser();
 
   const chainsArray = [
     {
@@ -127,6 +133,29 @@ const ShareSection = () => {
         setPostDescription(value);
       }
     }
+  };
+
+  const fnRemoveWatermark = () => {
+    // Store will remove watermark for all pages
+    store.pages.forEach((page, index) => {
+      let watermarkAdded = false;
+      page.children.forEach((pageItem) => {
+        if (pageItem.name === "watermark") {
+          console.log("Watermark already added to the page");
+          // pageItem.x = w - w / 8; // Adjusted x position to bottom-right
+          // pageItem.y = h - h / 8; // Adjusted y position to bottom-right
+          watermarkAdded = true;
+          pageItem.set({
+            name: `removed-watermark`,
+            width: 0,
+            height: 0,
+          });
+        }
+      });
+    });
+
+    const claimRewRes = apiClaimReward(1);
+    console.log(claimRewRes);
   };
 
   return (
@@ -323,6 +352,11 @@ const ShareSection = () => {
           </div>
         </div>
         <hr />
+
+        <div className="">
+          <div className="">{points}</div>
+          <Button onClick={fnRemoveWatermark}>Remove Watermark</Button>
+        </div>
       </div>
     </>
   );
