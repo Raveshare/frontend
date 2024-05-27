@@ -55,8 +55,8 @@ const TopbarSection = () => {
             <DownloadBtn />
 
             <div className="" id="first-step">
-              <ProfileMenu />
-              {/* <PointsBtn/> */}
+              {/* <ProfileMenu /> */}
+              <PointsBtn/>
             </div>
           </div>
         ) : null}

@@ -36,7 +36,7 @@ const UserCardV2 = ({ username }) => {
   return (
     <>
       <div className="shadow-md rounded-md">
-        <div className="flex justify-between m-2 mx-4">
+        <div className="flex justify-around m-2 mx-4">
           {/* <div className="flex flex-col gap-8 justify-normal align-baseline"> */}
           <div className="flex flex-col gap-8 justify-center align-middle items-center">
             <div className="inline-flex flex-col items-center justify-center relative">
@@ -79,7 +79,7 @@ const UserCardV2 = ({ username }) => {
                 />
               </div>
             </div>
-            <div className="">
+            {/* <div className="">
               {(userLevel === "Normie" || userLevel === "Pleb") && (
                 <>
                   <div className="text-gray-600">
@@ -97,8 +97,8 @@ const UserCardV2 = ({ username }) => {
                       : "Normie"}
                   </div>
 
+
                   <div className="flex gap-1 w-48 items-center">
-                    {/* Dynamic progress Bar based on the Points */}
                     <div
                       style={{
                         backgroundColor:
@@ -135,10 +135,10 @@ const UserCardV2 = ({ username }) => {
                   </div>
                 </>
               )}
-            </div>
+            </div> */}
           </div>
           <div className="flex flex-col mt-2">
-            <div className="">@{username ? username : "lenspostuser"}</div>
+            <div className="">@{username ? username : "posteruser"}</div>
             <div
               onClick={() => handleCopy(address)}
               className="flex align-middle mt-2 bg-blue-gray-50 p-1 pl-2 pr-2 rounded-md cursor-pointer w-fit"
@@ -146,7 +146,7 @@ const UserCardV2 = ({ username }) => {
               {address && addressCrop(address)}
               <BiCopy className="ml-1 mt-0.5 " />
             </div>
-            <div className="text-gray-600 mt-8">Points to Spend</div>
+            <div className="text-gray-600 mt-8">$POSTER</div>
             <div className="flex align-middle justify-between border border-gray-200 rounded-md w-26 mt-1">
               <div className="m-1 text-lg mr-2 ml-2">{points}</div>
               <div className="m-1">
