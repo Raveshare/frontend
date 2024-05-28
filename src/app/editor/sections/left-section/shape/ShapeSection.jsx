@@ -5,7 +5,7 @@ import { Shapes } from "polotno/side-panel/elements-panel";
 import { Icon } from "@blueprintjs/core";
 import { useStore } from "../../../../../hooks/polotno";
 
- const ShapePanel = () => {
+export const ShapePanel = () => {
   const store = useStore();
   return <Shapes store={store} />;
 };

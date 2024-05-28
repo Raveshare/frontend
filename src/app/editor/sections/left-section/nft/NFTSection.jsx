@@ -50,7 +50,7 @@ import {
 import { LOCAL_STORAGE } from "../../../../../data";
 import { EVMWallets, SolanaWallets } from "../../top-section/auth/wallets";
 
-const NFTPanel = () => {
+export const NFTPanel = () => {
   const [tab, setTab] = useState("wallet");
   const { isConnected } = useAccount();
   return (

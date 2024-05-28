@@ -80,7 +80,7 @@ const AVAILABLE_SIZES = [
 
 // define the new custom section
 
-const ResizePanel = () => {
+export const ResizePanel = () => {
   const store = useStore();
   const [width, setWidth] = useState(store.width);
   const [height, setHeight] = useState(store.height);
