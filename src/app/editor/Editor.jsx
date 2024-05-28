@@ -59,6 +59,7 @@ import { useAppAuth, useLocalStorage } from "../../hooks/app";
 import { getFarUserDetails } from "../../services/apis/BE-apis";
 import { useLocation, useNavigate } from "react-router-dom";
 import { watermarkBase64 } from "../../assets/base64/watermark";
+import BottomBar from "./new-bottombar/BottomBar";
 
 // enable animations
 unstable_setAnimationsEnabled(true);
@@ -560,9 +561,9 @@ const Editor = () => {
           </div>
           <PolotnoContainer className="min-h-400 md:min-h-full">
             <div id="second-step" className="mx-2">
-              <SidePanelWrap>
+              {/* <SidePanelWrap>
                 <SidePanel store={store} sections={sections} />
-              </SidePanelWrap>
+              </SidePanelWrap> */}
             </div>
             <WorkspaceWrap>
               <div className="mb-2 mr-2">
@@ -576,14 +577,15 @@ const Editor = () => {
                 backgroundColor="#e8e8ec"
               />
 
-              {/* Bottom section */}
-              <div className="mt-2 mb-2 mr-2 p-1/2 flex flex-row justify-between align-middle border border-black-300 rounded-lg ">
+              <BottomBar />
+
+              {/* <div className="mt-2 mb-2 mr-2 p-1/2 flex flex-row justify-between align-middle border border-black-300 rounded-lg ">
                 <BgRemover />
                 <ZoomButtons store={store} />
 
-                {/* Quick Tour on the main page */}
+
                 <div className="flex flex-row ">
-                  {/* Speed Dial - Clear Canvas, etc.. Utility Fns */}
+
                   <SpeedDialX />
 
                   <div
@@ -605,7 +607,7 @@ const Editor = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </WorkspaceWrap>
           </PolotnoContainer>
         </div>

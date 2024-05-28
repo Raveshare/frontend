@@ -182,7 +182,7 @@ const DesignCard = ({
 
 // Design card component end
 
-const TemplatePanel = () => {
+export const TemplatePanel = () => {
   const [tab, setTab] = useState("lenspost");
   const [stIsModalOpen, setStIsModalOpen] = useState(false);
 
