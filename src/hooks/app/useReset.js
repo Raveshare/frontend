@@ -362,17 +362,20 @@ const useReset = () => {
 
     // reset all the states for farcaster
     setFarcasterStates({
-      ...farcasterStates,
+      isFarcasterAuth: false,
+
       isChannel: false,
       channel: "",
 
       frameData: {
         isFrame: false,
+
+        isGateWith: false,
         isLike: false,
         isRecast: false,
         isFollow: false,
 
-        allowedMints: null,
+        allowedMints: "",
         allowedMintsIsError: false,
         allowedMintsError: "",
 
@@ -386,6 +389,32 @@ const useReset = () => {
 
         isExternalLinkError: false,
         externalLinkError: "",
+
+        isCustomCurrMint: false,
+
+        customCurrAmount: 1,
+
+        isCustomCurrAmountError: false,
+        customCurrAmountError: "",
+
+        customCurrSymbol: "",
+        customCurrAddress: "",
+
+        fcSplitRevenueRecipients: [
+          {
+            address: "",
+            percentAllocation: null,
+          },
+        ],
+
+        // split recipient error
+        isFcSplitError: false,
+        fcSplitErrorMsg: "",
+
+        selectedNetwork: {
+          id: "8453",
+          name: "Base",
+        },
       },
     });
   };

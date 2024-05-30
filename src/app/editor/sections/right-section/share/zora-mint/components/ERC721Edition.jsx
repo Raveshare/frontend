@@ -196,13 +196,13 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       ? chains.filter((chain) => {
           return networks?.includes(chain?.id);
         })
-      : chains.slice(1, -1);
+      : chains.slice(0, -2);
 
     const isUnsupportedChain = () => {
       if (
         chain?.unsupported ||
-        (isOpenAction && !networks?.includes(chain?.id)) ||
-        chainId === chains[0]?.id
+        (isOpenAction && !networks?.includes(chain?.id))
+        // chainId === chains[0]?.id
       ) {
         return true;
       }

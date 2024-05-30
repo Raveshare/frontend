@@ -13,6 +13,7 @@ import {
   errorMessage,
   addressCrop,
   saveToLocalStorage,
+  chainLogo,
 } from "../../../../../../../utils";
 import {
   useAppAuth,
@@ -25,10 +26,12 @@ import {
   ERROR,
   FRAME_URL,
   LOCAL_STORAGE,
+  TOKEN_LIST,
   URL_REGEX,
   degenChain,
 } from "../../../../../../../data";
 import {
+  Avatar,
   Button,
   Option,
   Select,
@@ -66,6 +69,7 @@ import BsPlus from "@meronex/icons/bs/BsPlus";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { useBalance } from "wagmi";
 import { base } from "viem/chains";
+import { LENSPOST_721_ENALBED_CHAINS } from "../../../../../../../data/constant/enabledChain";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -132,7 +136,7 @@ const FarcasterNormalPost = () => {
     isRefetching: isWalletRefetching,
   } = useQuery({
     queryKey: ["getOrCreateWallet"],
-    queryFn: () => getOrCreateWallet(),
+    queryFn: () => getOrCreateWallet(chain?.id),
     refetchOnWindowFocus: false,
   });
 
@@ -265,13 +269,13 @@ const FarcasterNormalPost = () => {
   };
 
   const checkCustomCurrAmt = () => {
-    if (farcasterStates?.frameData?.customCurrAmount <= 0.01) {
+    if (farcasterStates?.frameData?.customCurrAmount <= 0.0001) {
       setFarcasterStates((prevState) => ({
         ...prevState,
         frameData: {
           ...prevState.frameData,
           isCustomCurrAmountError: true,
-          customCurrAmountError: "Minimum price is 0.01",
+          customCurrAmountError: "Minimum price is 0.0001",
         },
       }));
       return false;
@@ -356,10 +360,10 @@ const FarcasterNormalPost = () => {
 
       // check if custom currency amount is a valid number
       if (name === "customCurrAmount") {
-        if (!value || value <= 0.01) {
+        if (!value || value <= 0.0001) {
           newState.frameData.isCustomCurrAmountError = true;
           newState.frameData.customCurrAmountError =
-            "Price should not be less than 0.01";
+            "Price should not be less than 0.0001";
         } else {
           newState.frameData.isCustomCurrAmountError = false;
           newState.frameData.customCurrAmountError = "";
@@ -436,7 +440,7 @@ const FarcasterNormalPost = () => {
       redirectLink: farcasterStates.frameData?.externalLink,
       contractAddress: respContractAddress,
       chainId: farcasterStates?.frameData?.isCustomCurrMint
-        ? degenChain?.id
+        ? farcasterStates?.frameData?.selectedNetwork?.id
         : base?.id,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
     };
@@ -828,9 +832,9 @@ const FarcasterNormalPost = () => {
       // Deploy custom currency arguments
       const deployArgs = {
         contract_type: 721,
-        chainId: degenChain?.id,
+        chainId: farcasterStates?.frameData?.selectedNetwork?.id,
         canvasId: contextCanvasIdRef.current,
-        currency: DEGEN_CURRENCY_ADDRESS,
+        currency: farcasterStates?.frameData?.customCurrAddress,
         pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
@@ -841,13 +845,21 @@ const FarcasterNormalPost = () => {
           }))
         ),
       };
-
       deployZoraContractFn(deployArgs);
     }
   }, [isUploadSuccess]);
 
   useEffect(() => {
-    if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
+    console.log(
+      "isWrite",
+      isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored
+    );
+    if (
+      isUploadSuccess &&
+      !farcasterStates.frameData?.isCreatorSponsored &&
+      !farcasterStates.frameData?.isCustomCurrMint
+    ) {
+      console.log("Write contract");
       setIsPostingFrame(false);
       write?.();
     }
@@ -1232,6 +1244,70 @@ const FarcasterNormalPost = () => {
             !farcasterStates.frameData?.isCustomCurrMint && "hidden"
           } mt-2`}
         >
+          {chain?.id === 8453 ? (
+            <>
+              <p className="text-end mt-4">
+                <span>Topup account:</span>
+                {isWalletLoading || isWalletRefetching ? (
+                  <span className="text-blue-500"> Loading address... </span>
+                ) : (
+                  <span
+                    className="text-blue-500 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(walletData?.publicAddress);
+                      toast.success("Copied topup account address");
+                    }}
+                  >
+                    {" "}
+                    {addressCrop(walletData?.publicAddress)}
+                  </span>
+                )}
+              </p>
+              <p className="text-end">
+                <span>Topup balance:</span>
+                {isWalletLoading || isWalletRefetching ? (
+                  <span className="text-blue-500"> Loading balance... </span>
+                ) : (
+                  <span> {walletData?.balance} Base ETH</span>
+                )}
+              </p>
+            </>
+          ) : null}
+          <div className="flex flex-col py-4">
+            <Select
+              animate={{
+                mount: { y: 0 },
+                unmount: { y: 25 },
+              }}
+              label="Network"
+              name="Network"
+              id="Network"
+              value={farcasterStates?.frameData?.selectedNetwork?.name}
+            >
+              {LENSPOST_721_ENALBED_CHAINS?.map((network) => (
+                <Option
+                  key={network?.id}
+                  onClick={() => {
+                    switchNetwork(network?.id);
+                    setFarcasterStates({
+                      ...farcasterStates,
+                      frameData: {
+                        ...farcasterStates.frameData,
+                        selectedNetwork: {
+                          id: network?.id,
+                          name: network?.name,
+                        },
+                        customCurrSymbol: "",
+                        customCurrAddress: "",
+                      },
+                    });
+                  }}
+                >
+                  {network?.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
           <div className="my-2">
             <div
               className={`${
@@ -1259,24 +1335,27 @@ const FarcasterNormalPost = () => {
                       unmount: { y: 25 },
                     }}
                     label="Currency"
-                    name="customCurrName"
-                    id="customCurrName"
-                    value={farcasterStates.frameData.customCurrName}
+                    name="customCurrSymbol"
+                    id="customCurrSymbol"
+                    value={farcasterStates?.frameData?.customCurrSymbol}
                   >
-                    {["DEGEN"].map((currency) => (
+                    {TOKEN_LIST[
+                      farcasterStates?.frameData?.selectedNetwork?.name
+                    ]?.map((currency) => (
                       <Option
-                        key={currency}
+                        key={currency?.id}
                         onClick={() => {
                           setFarcasterStates({
                             ...farcasterStates,
                             frameData: {
                               ...farcasterStates.frameData,
-                              customCurrName: currency,
+                              customCurrSymbol: currency?.symbol,
+                              customCurrAddress: currency?.address,
                             },
                           });
                         }}
                       >
-                        {currency.toUpperCase()}
+                        {currency?.symbol}
                       </Option>
                     ))}
                   </Select>
@@ -1311,6 +1390,17 @@ const FarcasterNormalPost = () => {
                 message={farcasterStates.frameData?.allowedMintsError}
               />
             )}
+
+            {farcasterStates.frameData?.isCustomCurrMint &&
+              farcasterStates.frameData?.allowedMints > walletData?.sponsored &&
+              chain?.id !== degenChain?.id && (
+                <Topup
+                  topUpAccount={walletData?.publicAddress}
+                  balance={walletData?.balance}
+                  refetch={refetchWallet}
+                  sponsored={walletData?.sponsored}
+                />
+              )}
           </div>
         </div>
         {/* End */}

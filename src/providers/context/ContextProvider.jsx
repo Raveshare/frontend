@@ -1,5 +1,6 @@
 import React, { createContext, useRef, useState } from "react";
 import posthog from "posthog-js";
+import { base } from "viem/chains";
 
 posthog.init("phc_CvXLACFkyLdhJjiGLxlix6ihbGjumRvGjUFSinPWJYD", {
   api_host: "https://eu.posthog.com",
@@ -377,7 +378,8 @@ const ContextProvider = ({ children }) => {
       isCustomCurrAmountError: false,
       customCurrAmountError: "",
 
-      customCurrName: "DEGEN",
+      customCurrSymbol: "",
+      customCurrAddress: "",
 
       fcSplitRevenueRecipients: [
         {
@@ -389,6 +391,11 @@ const ContextProvider = ({ children }) => {
       // split recipient error
       isFcSplitError: false,
       fcSplitErrorMsg: "",
+
+      selectedNetwork: {
+        id: "8453",
+        name: "Base",
+      },
     },
   });
 

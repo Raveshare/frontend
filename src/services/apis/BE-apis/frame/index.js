@@ -10,10 +10,8 @@ export const postFrame = async (params) => {
   return res.data;
 };
 
-export const getOrCreateWallet = async (address) => {
-  const res = await api.get(`${API}/mint`, {
-    address,
-  });
+export const getOrCreateWallet = async (chainId) => {
+  const res = await api.get(`${API}/mint?chainId=${chainId}`);
   return res.data;
 };
 
