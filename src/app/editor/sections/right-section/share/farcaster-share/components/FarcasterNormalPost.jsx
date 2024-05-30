@@ -850,16 +850,11 @@ const FarcasterNormalPost = () => {
   }, [isUploadSuccess]);
 
   useEffect(() => {
-    console.log(
-      "isWrite",
-      isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored
-    );
     if (
       isUploadSuccess &&
       !farcasterStates.frameData?.isCreatorSponsored &&
       !farcasterStates.frameData?.isCustomCurrMint
     ) {
-      console.log("Write contract");
       setIsPostingFrame(false);
       write?.();
     }
