@@ -393,8 +393,8 @@ const ContextProvider = ({ children }) => {
       fcSplitErrorMsg: "",
 
       selectedNetwork: {
-        id: "8453",
-        name: "Base",
+        id: "",
+        name: "",
       },
     },
   });

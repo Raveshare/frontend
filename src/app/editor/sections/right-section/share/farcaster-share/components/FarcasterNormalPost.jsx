@@ -835,7 +835,8 @@ const FarcasterNormalPost = () => {
         chainId: farcasterStates?.frameData?.selectedNetwork?.id,
         canvasId: contextCanvasIdRef.current,
         currency: farcasterStates?.frameData?.customCurrAddress,
-        pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
+        pricePerToken:
+          Number(farcasterStates?.frameData?.customCurrAmount) * 10 ** 18,
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
         recipients: sortRecipientsByAddress(
@@ -1309,58 +1310,62 @@ const FarcasterNormalPost = () => {
                 !farcasterStates.frameData?.isCustomCurrMint && "hidden"
               } `}
             >
-              <div className="flex flex-row justify-between">
-                <div className="flex flex-col py-4">
-                  <NumberInputBox
-                    min={"1"}
-                    step={"1"}
-                    label="Price"
-                    name="customCurrAmount"
-                    onChange={(e) => handleChange(e, "customCurrAmount")}
-                    onFocus={(e) => handleChange(e, "customCurrAmount")}
-                    value={farcasterStates?.frameData?.customCurrAmount}
-                  />
-                </div>
+              {farcasterStates?.frameData?.selectedNetwork?.name && (
+                <>
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-col py-4">
+                      <NumberInputBox
+                        min={"1"}
+                        step={"1"}
+                        label="Price"
+                        name="customCurrAmount"
+                        onChange={(e) => handleChange(e, "customCurrAmount")}
+                        onFocus={(e) => handleChange(e, "customCurrAmount")}
+                        value={farcasterStates?.frameData?.customCurrAmount}
+                      />
+                    </div>
 
-                <div className="flex flex-col py-4 mx-2">
-                  {/* <label htmlFor="price"></label> */}
-                  <Select
-                    animate={{
-                      mount: { y: 0 },
-                      unmount: { y: 25 },
-                    }}
-                    label="Currency"
-                    name="customCurrSymbol"
-                    id="customCurrSymbol"
-                    value={farcasterStates?.frameData?.customCurrSymbol}
-                  >
-                    {TOKEN_LIST[
-                      farcasterStates?.frameData?.selectedNetwork?.name
-                    ]?.map((currency) => (
-                      <Option
-                        key={currency?.id}
-                        onClick={() => {
-                          setFarcasterStates({
-                            ...farcasterStates,
-                            frameData: {
-                              ...farcasterStates.frameData,
-                              customCurrSymbol: currency?.symbol,
-                              customCurrAddress: currency?.address,
-                            },
-                          });
+                    <div className="flex flex-col py-4 mx-2">
+                      {/* <label htmlFor="price"></label> */}
+                      <Select
+                        animate={{
+                          mount: { y: 0 },
+                          unmount: { y: 25 },
                         }}
+                        label="Currency"
+                        name="customCurrSymbol"
+                        id="customCurrSymbol"
+                        value={farcasterStates?.frameData?.customCurrSymbol}
                       >
-                        {currency?.symbol}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
+                        {TOKEN_LIST[
+                          farcasterStates?.frameData?.selectedNetwork?.name
+                        ]?.map((currency) => (
+                          <Option
+                            key={currency?.id}
+                            onClick={() => {
+                              setFarcasterStates({
+                                ...farcasterStates,
+                                frameData: {
+                                  ...farcasterStates.frameData,
+                                  customCurrSymbol: currency?.symbol,
+                                  customCurrAddress: currency?.address,
+                                },
+                              });
+                            }}
+                          >
+                            {currency?.symbol}
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
 
-              {farcasterStates?.frameData?.isCustomCurrAmountError && (
-                <InputErrorMsg
-                  message={farcasterStates?.frameData.customCurrAmountError}
-                />
+                  {farcasterStates?.frameData?.isCustomCurrAmountError && (
+                    <InputErrorMsg
+                      message={farcasterStates?.frameData.customCurrAmountError}
+                    />
+                  )}
+                </>
               )}
             </div>
 
