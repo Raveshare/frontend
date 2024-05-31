@@ -918,6 +918,12 @@ const FarcasterNormalPost = () => {
     isUploadError,
   ]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      refetchWallet();
+    }, 1000);
+  }, [farcasterStates?.frameData?.selectedNetwork?.name]);
+
   console.log("Topup balance", walletData?.balance);
 
   return (
@@ -1264,7 +1270,10 @@ const FarcasterNormalPost = () => {
                 {isWalletLoading || isWalletRefetching ? (
                   <span className="text-blue-500"> Loading balance... </span>
                 ) : (
-                  <span> {walletData?.balance} Base ETH</span>
+                  <span>
+                    {" "}
+                    {walletData?.balance} {chain?.nativeCurrency?.symbol}{" "}
+                  </span>
                 )}
               </p>
             </>
