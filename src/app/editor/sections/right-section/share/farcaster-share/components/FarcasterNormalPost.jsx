@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import {
   ENVIRONMENT,
+  claimReward,
   shareOnSocials,
   uploadUserAssetToIPFS,
 } from "../../../../../../../services";
@@ -344,6 +345,9 @@ const FarcasterNormalPost = () => {
           setFarTxHash(res?.txHash);
           setIsShareSuccess(true);
 
+          claimReward({
+            taskId: 2,
+          });   
           // open the dialog
         } else if (res?.error || res?.reason === "REJECTED") {
           setIsError(true);

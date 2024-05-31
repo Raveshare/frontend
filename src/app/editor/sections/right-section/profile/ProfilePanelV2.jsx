@@ -18,6 +18,7 @@ import UserCardV2 from "./components/Cards/UserCardV2";
 import RewardV1 from "./components/Cards/RewardV1";
 import TaskCardV2 from "./components/Cards/TaskCardV2";
 
+
 const ProfilePanelV2 = () => {
   const { setMenu } = useContext(Context);
   const { username } = useUser();
@@ -43,7 +44,7 @@ const ProfilePanelV2 = () => {
     queryKey: ["getInviteCode"],
     queryFn: getInviteCode,
   });
-
+  const taskList = taskData?.message;
   const {
     data: pointHistoryData,
     isLoading: pointsHistoryIsLoading,
@@ -53,8 +54,6 @@ const ProfilePanelV2 = () => {
     queryKey: ["getPointsHistory"],
     queryFn: apiGetPointsHistory,
   });
-
-  console.log("pointHistoryData", pointHistoryData);
   return (
     <ProfilePanelHeaders
       panelHeader={`My Profile`}
@@ -100,14 +99,16 @@ const ProfilePanelV2 = () => {
                 {selectedTab === "pointsHistory" && (
                   <>
                     {pointHistoryData && pointHistoryData?.message?.length > 0
-                      ? pointHistoryData?.message?.slice(1).map((point, index) => (
-                          <RewardV1
-                            pointsId={index + 1}
-                            pointsReason={point.reason}
-                            pointsAmt={point.amount}
-                            pointsDate={point.createdAt}
-                          />
-                        ))
+                      ? pointHistoryData?.message
+                          ?.slice(1)
+                          .map((point, index) => (
+                            <RewardV1
+                              pointsId={index + 1}
+                              pointsReason={point.reason}
+                              pointsAmt={point.amount}
+                              pointsDate={point.createdAt}
+                            />
+                          ))
                       : null}
                   </>
                 )}

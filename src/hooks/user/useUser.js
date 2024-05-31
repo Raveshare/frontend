@@ -1,13 +1,13 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAppAuth, useLocalStorage } from "../app";
 import { getUserProfile } from "../../services/apis/BE-apis";
-import { getProfileImage } from "../../services";
+import { getFarcasterDetails, getProfileImage } from "../../services";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 const useUser = () => {
   const [profileImage, setProfileImage] = useState(null);
+  const [farcasterDetails, setFarcasterDetails] = useState({});
   const [userLevel, setUserLevel] = useState("Normie");
   const { userId } = useLocalStorage();
   const { address } = useAccount();
@@ -19,7 +19,8 @@ const useUser = () => {
     refetchOnMount: false,
   });
 
-  const res = async () => {
+
+  const fnGetPfp = async () => {
     const data = await getProfileImage(address);
     console.log(data);
     setProfileImage(data);
@@ -35,19 +36,26 @@ const useUser = () => {
       setUserLevel("Chad");
     }
   };
-  
-  useEffect(() => {
-    res();
-  }, [address]);
+
+  const fnGetFarcasterDetails = async () => {
+    const result = await getFarcasterDetails(address, `farcaster`);
+    setFarcasterDetails(result.Social[0]);
+
+    console.log("farcaster handle", result.Social[0]?.profileHandle);
+  };
 
   useEffect(() => {
     fnGetUserLevel();
+    fnGetPfp();
+    fnGetFarcasterDetails();
   }, [data]);
 
   return {
+    address,
     username: data?.message?.username,
     email: data?.message?.mail,
     lensHandle: data?.message?.lens_handle,
+    farcasterHandle: farcasterDetails?.profileHandle,
     points: data?.message?.points,
     profileImage: profileImage,
     error,
