@@ -13,6 +13,7 @@ import {
   errorMessage,
   addressCrop,
   saveToLocalStorage,
+  chainLogo,
 } from "../../../../../../../utils";
 import {
   useAppAuth,
@@ -25,10 +26,12 @@ import {
   ERROR,
   FRAME_URL,
   LOCAL_STORAGE,
+  TOKEN_LIST,
   URL_REGEX,
   degenChain,
 } from "../../../../../../../data";
 import {
+  Avatar,
   Button,
   Option,
   Select,
@@ -66,6 +69,7 @@ import BsPlus from "@meronex/icons/bs/BsPlus";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { useBalance } from "wagmi";
 import { base } from "viem/chains";
+import { LENSPOST_721_ENALBED_CHAINS } from "../../../../../../../data/constant/enabledChain";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -132,7 +136,7 @@ const FarcasterNormalPost = () => {
     isRefetching: isWalletRefetching,
   } = useQuery({
     queryKey: ["getOrCreateWallet"],
-    queryFn: () => getOrCreateWallet(),
+    queryFn: () => getOrCreateWallet(chain?.id),
     refetchOnWindowFocus: false,
   });
 
@@ -265,13 +269,13 @@ const FarcasterNormalPost = () => {
   };
 
   const checkCustomCurrAmt = () => {
-    if (farcasterStates?.frameData?.customCurrAmount <= 0.01) {
+    if (farcasterStates?.frameData?.customCurrAmount <= 0.0001) {
       setFarcasterStates((prevState) => ({
         ...prevState,
         frameData: {
           ...prevState.frameData,
           isCustomCurrAmountError: true,
-          customCurrAmountError: "Minimum price is 0.01",
+          customCurrAmountError: "Minimum price is 0.0001",
         },
       }));
       return false;
@@ -356,10 +360,10 @@ const FarcasterNormalPost = () => {
 
       // check if custom currency amount is a valid number
       if (name === "customCurrAmount") {
-        if (!value || value <= 0.01) {
+        if (!value || value <= 0.0001) {
           newState.frameData.isCustomCurrAmountError = true;
           newState.frameData.customCurrAmountError =
-            "Price should not be less than 0.01";
+            "Price should not be less than 0.0001";
         } else {
           newState.frameData.isCustomCurrAmountError = false;
           newState.frameData.customCurrAmountError = "";
@@ -405,9 +409,11 @@ const FarcasterNormalPost = () => {
     deployZoraContractMutation(deployArgs)
       .then((res) => {
         setRespContractAddress(res?.contract_address || res?.contract);
-
         setIsDeployingZoraContractSuccess(true);
         setIsDeployingZoraContract(false);
+        if (farcasterStates?.frameData?.isCustomCurrMint) {
+          setSlug(res?.slug);
+        }
       })
       .catch((err) => {
         setIsDeployingZoraContractError(true);
@@ -434,7 +440,7 @@ const FarcasterNormalPost = () => {
       redirectLink: farcasterStates.frameData?.externalLink,
       contractAddress: respContractAddress,
       chainId: farcasterStates?.frameData?.isCustomCurrMint
-        ? degenChain?.id
+        ? farcasterStates?.frameData?.selectedNetwork?.id
         : base?.id,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
     };
@@ -826,10 +832,11 @@ const FarcasterNormalPost = () => {
       // Deploy custom currency arguments
       const deployArgs = {
         contract_type: 721,
-        chainId: degenChain?.id,
+        chainId: farcasterStates?.frameData?.selectedNetwork?.id,
         canvasId: contextCanvasIdRef.current,
-        currency: DEGEN_CURRENCY_ADDRESS,
-        pricePerToken: Number(farcasterStates?.frameData?.customCurrAmount),
+        currency: farcasterStates?.frameData?.customCurrAddress,
+        pricePerToken:
+          Number(farcasterStates?.frameData?.customCurrAmount) * 10 ** 18,
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
         recipients: sortRecipientsByAddress(
@@ -839,13 +846,16 @@ const FarcasterNormalPost = () => {
           }))
         ),
       };
-
       deployZoraContractFn(deployArgs);
     }
   }, [isUploadSuccess]);
 
   useEffect(() => {
-    if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
+    if (
+      isUploadSuccess &&
+      !farcasterStates.frameData?.isCreatorSponsored &&
+      !farcasterStates.frameData?.isCustomCurrMint
+    ) {
       setIsPostingFrame(false);
       write?.();
     }
@@ -907,6 +917,12 @@ const FarcasterNormalPost = () => {
     isDeployingZoraContractError,
     isUploadError,
   ]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      refetchWallet();
+    }, 1000);
+  }, [farcasterStates?.frameData?.selectedNetwork?.name]);
 
   console.log("Topup balance", walletData?.balance);
 
@@ -1134,7 +1150,6 @@ const FarcasterNormalPost = () => {
             </div>
           </div>
         </div>
-
         <div className="mb-4">
           <div className="flex justify-between">
             <h2 className="text-lg mb-2"> External Link </h2>
@@ -1188,10 +1203,9 @@ const FarcasterNormalPost = () => {
             />
           )}
         </div>
-
         {/* Start  */}
         {/* Start Degen-L3 Mint */}
-        {/* <div className="mb-4">
+        <div className="mb-4">
           <div className="flex justify-between">
             <h2 className="text-lg mb-2"> Custom currency Mint </h2>
             <Switch
@@ -1203,6 +1217,7 @@ const FarcasterNormalPost = () => {
                     ...farcasterStates.frameData,
                     isCustomCurrMint:
                       !farcasterStates.frameData?.isCustomCurrMint,
+                    isCreatorSponsored: false,
                   },
                 })
               }
@@ -1225,77 +1240,141 @@ const FarcasterNormalPost = () => {
             {" "}
             Mint NFTs with custom currencies like $DEGEN{" "}
           </div>
-        </div> */}
-
+        </div>
         <div
           className={`${
             !farcasterStates.frameData?.isCustomCurrMint && "hidden"
           } mt-2`}
         >
+          {chain?.id === 8453 ? (
+            <>
+              <p className="text-end mt-4">
+                <span>Topup account:</span>
+                {isWalletLoading || isWalletRefetching ? (
+                  <span className="text-blue-500"> Loading address... </span>
+                ) : (
+                  <span
+                    className="text-blue-500 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(walletData?.publicAddress);
+                      toast.success("Copied topup account address");
+                    }}
+                  >
+                    {" "}
+                    {addressCrop(walletData?.publicAddress)}
+                  </span>
+                )}
+              </p>
+              <p className="text-end">
+                <span>Topup balance:</span>
+                {isWalletLoading || isWalletRefetching ? (
+                  <span className="text-blue-500"> Loading balance... </span>
+                ) : (
+                  <span>
+                    {" "}
+                    {walletData?.balance} {chain?.nativeCurrency?.symbol}{" "}
+                  </span>
+                )}
+              </p>
+            </>
+          ) : null}
+          <div className="flex flex-col py-4">
+            <Select
+              animate={{
+                mount: { y: 0 },
+                unmount: { y: 25 },
+              }}
+              label="Network"
+              name="Network"
+              id="Network"
+              value={farcasterStates?.frameData?.selectedNetwork?.name}
+            >
+              {LENSPOST_721_ENALBED_CHAINS?.map((network) => (
+                <Option
+                  key={network?.id}
+                  onClick={() => {
+                    switchNetwork(network?.id);
+                    setFarcasterStates({
+                      ...farcasterStates,
+                      frameData: {
+                        ...farcasterStates.frameData,
+                        selectedNetwork: {
+                          id: network?.id,
+                          name: network?.name,
+                        },
+                        customCurrSymbol: "",
+                        customCurrAddress: "",
+                      },
+                    });
+                  }}
+                >
+                  {network?.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
           <div className="my-2">
-            <p className="text-sm">
-              {" "}
-              {walletData?.sponsored > 0
-                ? `${
-                    walletData?.sponsored
-                  } mints are free. Topup with your custom currency if you want
-              to drop more than ${walletData?.sponsored} mints ${" "}`
-                : "You don't have any free mint. please Topup with your custom currency to mint"}{" "}
-            </p>
             <div
               className={`${
                 !farcasterStates.frameData?.isCustomCurrMint && "hidden"
               } `}
             >
-              <div className="flex flex-row justify-between">
-                <div className="flex flex-col py-4">
-                  <NumberInputBox
-                    min={"1"}
-                    step={"1"}
-                    label="Price"
-                    name="customCurrAmount"
-                    onChange={(e) => handleChange(e, "customCurrAmount")}
-                    onFocus={(e) => handleChange(e, "customCurrAmount")}
-                    value={farcasterStates?.frameData?.customCurrAmount}
-                  />
-                </div>
+              {farcasterStates?.frameData?.selectedNetwork?.name && (
+                <>
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-col py-4">
+                      <NumberInputBox
+                        min={"1"}
+                        step={"1"}
+                        label="Price"
+                        name="customCurrAmount"
+                        onChange={(e) => handleChange(e, "customCurrAmount")}
+                        onFocus={(e) => handleChange(e, "customCurrAmount")}
+                        value={farcasterStates?.frameData?.customCurrAmount}
+                      />
+                    </div>
 
-                <div className="flex flex-col py-4 mx-2">
-                  {/* <label htmlFor="price"></label> */}
-                  <Select
-                    animate={{
-                      mount: { y: 0 },
-                      unmount: { y: 25 },
-                    }}
-                    label="Currency"
-                    name="customCurrName"
-                    id="customCurrName"
-                    value={farcasterStates.frameData.customCurrName}
-                  >
-                    {["DEGEN"].map((currency) => (
-                      <Option
-                        key={currency}
-                        onClick={() => {
-                          setFarcasterStates({
-                            ...farcasterStates,
-                            frameData: {
-                              ...farcasterStates.frameData,
-                              customCurrName: currency,
-                            },
-                          });
+                    <div className="flex flex-col py-4 mx-2">
+                      {/* <label htmlFor="price"></label> */}
+                      <Select
+                        animate={{
+                          mount: { y: 0 },
+                          unmount: { y: 25 },
                         }}
+                        label="Currency"
+                        name="customCurrSymbol"
+                        id="customCurrSymbol"
+                        value={farcasterStates?.frameData?.customCurrSymbol}
                       >
-                        {currency.toUpperCase()}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </div>
+                        {TOKEN_LIST[
+                          farcasterStates?.frameData?.selectedNetwork?.name
+                        ]?.map((currency) => (
+                          <Option
+                            key={currency?.id}
+                            onClick={() => {
+                              setFarcasterStates({
+                                ...farcasterStates,
+                                frameData: {
+                                  ...farcasterStates.frameData,
+                                  customCurrSymbol: currency?.symbol,
+                                  customCurrAddress: currency?.address,
+                                },
+                              });
+                            }}
+                          >
+                            {currency?.symbol}
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
 
-              {farcasterStates?.frameData?.isCustomCurrAmountError && (
-                <InputErrorMsg
-                  message={farcasterStates?.frameData.customCurrAmountError}
-                />
+                  {farcasterStates?.frameData?.isCustomCurrAmountError && (
+                    <InputErrorMsg
+                      message={farcasterStates?.frameData.customCurrAmountError}
+                    />
+                  )}
+                </>
               )}
             </div>
 
@@ -1320,10 +1399,20 @@ const FarcasterNormalPost = () => {
                 message={farcasterStates.frameData?.allowedMintsError}
               />
             )}
+
+            {farcasterStates.frameData?.isCustomCurrMint &&
+              farcasterStates.frameData?.allowedMints > walletData?.sponsored &&
+              chain?.id !== degenChain?.id && (
+                <Topup
+                  topUpAccount={walletData?.publicAddress}
+                  balance={walletData?.balance}
+                  refetch={refetchWallet}
+                  sponsored={walletData?.sponsored}
+                />
+              )}
           </div>
         </div>
         {/* End */}
-
         <div
           className={`mb-4 ${
             !farcasterStates.frameData?.isCustomCurrMint && "hidden"
@@ -1438,125 +1527,86 @@ const FarcasterNormalPost = () => {
             </div>
           </div>
         </div>
-
         {/* End Degen-L3 Mint */}
-
-        {!farcasterStates.frameData?.isCustomCurrMint && (
-          <>
-            <div className="mb-4">
-              <div className="flex justify-between">
-                <h2 className="text-lg mb-2"> Sponsor Mints </h2>
-                <Switch
-                  checked={farcasterStates.frameData?.isCreatorSponsored}
-                  onChange={() =>
-                    setFarcasterStates({
-                      ...farcasterStates,
-                      frameData: {
-                        ...farcasterStates.frameData,
-                        isCreatorSponsored:
-                          !farcasterStates.frameData?.isCreatorSponsored,
-                      },
-                    })
-                  }
+        {/* {!farcasterStates.frameData?.isCustomCurrMint && ( */}
+        <>
+          <div className="mb-4">
+            <div className="flex justify-between">
+              <h2 className="text-lg mb-2"> Sponsor Mints </h2>
+              <Switch
+                checked={farcasterStates.frameData?.isCreatorSponsored}
+                onChange={() =>
+                  setFarcasterStates({
+                    ...farcasterStates,
+                    frameData: {
+                      ...farcasterStates.frameData,
+                      isCreatorSponsored:
+                        !farcasterStates.frameData?.isCreatorSponsored,
+                      isCustomCurrMint: false,
+                    },
+                  })
+                }
+                className={`${
+                  farcasterStates.frameData?.isCreatorSponsored
+                    ? "bg-[#e1f16b]"
+                    : "bg-gray-200"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
+              >
+                <span
                   className={`${
                     farcasterStates.frameData?.isCreatorSponsored
-                      ? "bg-[#e1f16b]"
-                      : "bg-gray-200"
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
-                >
-                  <span
-                    className={`${
-                      farcasterStates.frameData?.isCreatorSponsored
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />{" "}
-                </Switch>
-              </div>
-              <div className="w-4/5 opacity-75">
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />{" "}
+              </Switch>
+            </div>
+            <div className="w-4/5 opacity-75">
+              {" "}
+              Let your audience mint your frame for free.{" "}
+            </div>
+          </div>
+
+          <div
+            className={`${
+              !farcasterStates.frameData?.isCreatorSponsored && "hidden"
+            } mt-2`}
+          >
+            <div className="my-2">
+              <p className="text-sm">
                 {" "}
-                Let your audience mint your frame for free.{" "}
-              </div>
-            </div>
-
-            <div
-              className={`${
-                !farcasterStates.frameData?.isCreatorSponsored && "hidden"
-              } mt-2`}
-            >
-              <div className="my-2">
-                <p className="text-sm">
-                  {" "}
-                  {walletData?.sponsored > 0
-                    ? `${
-                        walletData?.sponsored
-                      } mints are free. Topup with Base ETH if you want
+                {walletData?.sponsored > 0
+                  ? `${
+                      walletData?.sponsored
+                    } mints are free. Topup with Base ETH if you want
               to drop more than ${walletData?.sponsored} mints ${" "}`
-                    : "You don't have any free mint. please Topup with Base ETH to mint"}{" "}
-                </p>
-                <p className="text-end mt-4">
-                  <span>Topup account:</span>
-                  {isWalletLoading || isWalletRefetching ? (
-                    <span className="text-blue-500"> Loading address... </span>
-                  ) : (
-                    <span
-                      className="text-blue-500 cursor-pointer"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          walletData?.publicAddress
-                        );
-                        toast.success("Copied topup account address");
-                      }}
-                    >
-                      {" "}
-                      {addressCrop(walletData?.publicAddress)}
-                    </span>
-                  )}
-                </p>
-                <p className="text-end">
-                  <span>Topup balance:</span>
-                  {isWalletLoading || isWalletRefetching ? (
-                    <span className="text-blue-500"> Loading balance... </span>
-                  ) : (
-                    <span> {walletData?.balance} Base ETH</span>
-                  )}
-                </p>
-                <div className="flex flex-col w-full py-2">
-                  <NumberInputBox
-                    min={1}
-                    step={1}
-                    label="Allowed Mints"
-                    name="allowedMints"
-                    onChange={(e) => handleChange(e, "allowedMints")}
-                    onFocus={(e) => handleChange(e, "allowedMints")}
-                    value={farcasterStates.frameData.allowedMints}
-                  />
-                </div>
-
-                {farcasterStates.frameData?.allowedMintsIsError && (
-                  <InputErrorMsg
-                    message={farcasterStates.frameData?.allowedMintsError}
-                  />
+                  : "You don't have any free mint. please Topup with Base ETH to mint"}{" "}
+              </p>
+              <p className="text-end mt-4">
+                <span>Topup account:</span>
+                {isWalletLoading || isWalletRefetching ? (
+                  <span className="text-blue-500"> Loading address... </span>
+                ) : (
+                  <span
+                    className="text-blue-500 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(walletData?.publicAddress);
+                      toast.success("Copied topup account address");
+                    }}
+                  >
+                    {" "}
+                    {addressCrop(walletData?.publicAddress)}
+                  </span>
                 )}
-
-                {farcasterStates.frameData?.isCreatorSponsored &&
-                  farcasterStates.frameData?.allowedMints >
-                    walletData?.sponsored && (
-                    <Topup
-                      topUpAccount={walletData?.publicAddress}
-                      balance={walletData?.balance}
-                      refetch={refetchWallet}
-                      sponsored={walletData?.sponsored}
-                    />
-                  )}
-              </div>
-            </div>
-
-            <div
-              className={`${
-                farcasterStates.frameData?.isCreatorSponsored && "hidden"
-              } mt-2`}
-            >
+              </p>
+              <p className="text-end">
+                <span>Topup balance:</span>
+                {isWalletLoading || isWalletRefetching ? (
+                  <span className="text-blue-500"> Loading balance... </span>
+                ) : (
+                  <span> {walletData?.balance} Base ETH</span>
+                )}
+              </p>
               <div className="flex flex-col w-full py-2">
                 <NumberInputBox
                   min={1}
@@ -1574,10 +1624,47 @@ const FarcasterNormalPost = () => {
                   message={farcasterStates.frameData?.allowedMintsError}
                 />
               )}
-            </div>
-          </>
-        )}
 
+              {farcasterStates.frameData?.isCreatorSponsored &&
+                farcasterStates.frameData?.allowedMints >
+                  walletData?.sponsored && (
+                  <Topup
+                    topUpAccount={walletData?.publicAddress}
+                    balance={walletData?.balance}
+                    refetch={refetchWallet}
+                    sponsored={walletData?.sponsored}
+                  />
+                )}
+            </div>
+          </div>
+
+          <div
+            className={`${
+              (farcasterStates.frameData?.isCreatorSponsored ||
+                farcasterStates?.frameData?.isCustomCurrMint) &&
+              "hidden"
+            } mt-2`}
+          >
+            <div className="flex flex-col w-full py-2">
+              <NumberInputBox
+                min={1}
+                step={1}
+                label="Allowed Mints"
+                name="allowedMints"
+                onChange={(e) => handleChange(e, "allowedMints")}
+                onFocus={(e) => handleChange(e, "allowedMints")}
+                value={farcasterStates.frameData.allowedMints}
+              />
+            </div>
+
+            {farcasterStates.frameData?.allowedMintsIsError && (
+              <InputErrorMsg
+                message={farcasterStates.frameData?.allowedMintsError}
+              />
+            )}
+          </div>
+        </>
+        {/* // )} */}
         {walletData?.balance > 0 && (
           <WithdrawFunds refetchWallet={refetchWallet} />
         )}

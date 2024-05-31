@@ -21,13 +21,7 @@ import { toast } from "react-toastify";
 import { ENVIRONMENT } from "../../../../../../../services";
 import { base } from "viem/chains";
 
-const Topup = ({
-  topUpAccount,
-  refetchWallet,
-  refetchCurrency,
-  balance,
-  sponsored,
-}) => {
+const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
   const { chain } = useNetwork();
@@ -52,8 +46,9 @@ const Topup = ({
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
-  const TxFeeForDeployment = chain?.id === base?.id ? 0.00009 : 0.00009;
-  const txFeeForMint = chain?.id === base?.id ? 0.00002 : 0.00002;
+  const selectedNetwork = farcasterStates?.frameData?.selectedNetwork;
+  const TxFeeForDeployment = 0.00009;
+  const txFeeForMint = 0.00002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
@@ -85,15 +80,6 @@ const Topup = ({
     hash: data?.hash,
   });
 
-  console.log({
-    config,
-    data,
-    error,
-    txData,
-    txError,
-    isTxSuccess,
-  });
-
   const handleChange = (e, key) => {
     const { name, value } = e.target;
 
@@ -123,7 +109,6 @@ const Topup = ({
 
       setTimeout(() => {
         refetchWallet();
-        refetchCurrency();
       }, 2000);
     }
   }, [isTxSuccess]);
@@ -160,13 +145,13 @@ const Topup = ({
     }
   }, [isError, isTxError]);
 
-  if (!farcasterStates.frameData.isCustomCurrMint && chain?.id !== 8453) {
+  if (farcasterStates.frameData.isCreatorSponsored && chain?.id !== base?.id) {
     return (
       <Card className="my-2">
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchNetwork && switchNetwork(8453)}
+            onClick={() => switchNetwork && switchNetwork(base?.id)}
           >
             <Typography variant="h6" color="blue-gray">
               Click here to switch to Base chain
@@ -177,16 +162,19 @@ const Topup = ({
     );
   }
 
-  if (farcasterStates.frameData.isCustomCurrMint && chain?.id !== 666666666) {
+  if (
+    farcasterStates.frameData.isCustomCurrMint &&
+    chain?.id !== selectedNetwork?.id
+  ) {
     return (
       <Card className="my-2">
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchNetwork && switchNetwork(666666666)}
+            onClick={() => switchNetwork && switchNetwork(selectedNetwork?.id)}
           >
             <Typography variant="h6" color="blue-gray">
-              Click here to switch to Degen chain
+              Click here to switch to {selectedNetwork?.name}
             </Typography>
           </ListItem>
         </List>
