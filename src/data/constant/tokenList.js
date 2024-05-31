@@ -17,14 +17,14 @@ export const TOKEN_LIST = {
       logoURI: "https://basescan.org/token/images/degentips_32.png",
     },
   ],
-  Degen: [
-    {
-      id: 666666666,
-      address: "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387",
-      symbol: "WDEGEN",
-      name: "Wrapped Degen",
-      decimals: 18,
-      logoURI: "https://basescan.org/token/images/degentips_32.png",
-    },
-  ],
+  //   Degen: [
+  //     {
+  //       id: 666666666,
+  //       address: "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387",
+  //       symbol: "WDEGEN",
+  //       name: "Wrapped Degen",
+  //       decimals: 18,
+  //       logoURI: "https://basescan.org/token/images/degentips_32.png",
+  //     },
+  //   ],
 };
