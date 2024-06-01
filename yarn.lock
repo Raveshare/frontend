@@ -4402,10 +4402,10 @@
     forge-std "https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80"
     solmate "6.1.0"
 
-"@zoralabs/zora-721-contracts@^1.14.1":
-  version "1.15.3"
-  resolved "https://registry.yarnpkg.com/@zoralabs/zora-721-contracts/-/zora-721-contracts-1.15.3.tgz#17c8696e7089384f9d94e399828a5c98208be648"
-  integrity sha512-VI3MLtneoL0jBtiGN8/efgm7VWfldMeoHHcTBDcoALQRy9xwLN3v6EV0bI6w5O1DFXUiiZorCHvMgkfSKIMoCQ==
+"@zoralabs/zora-721-contracts@^1.15.4":
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zora-721-contracts/-/zora-721-contracts-1.15.4.tgz#99ce5e9fdb4858b8cbe5e53d16bc1ca5fe41b980"
+  integrity sha512-kAwPDEAMFi4RHYm4IBOunXiSntrg03/z9OFcUvYl6/DHe8TaD8vlIVlQTKQClP/LAc9Dv3aR/v3ORVe8OGV7Ag==
   dependencies:
     "@dotenv/cli" "^2.2.2"
     "@zoralabs/protocol-rewards" "^1.0.2"
@@ -5586,6 +5586,11 @@ draggabilly@^3.0.0:
     get-size "^3.0.0"
     unidragger "^3.0.0"
 
+"ds-test@git+https://github.com/dapphub/ds-test.git#cd98eff28324bfac652e63a239a60632a761790b":
+  version "1.0.0"
+  uid cd98eff28324bfac652e63a239a60632a761790b
+  resolved "git+https://github.com/dapphub/ds-test.git#cd98eff28324bfac652e63a239a60632a761790b"
+
 "ds-test@https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b":
   version "1.0.0"
   resolved "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
@@ -6070,13 +6075,13 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
 
+"forge-std@git+https://github.com/foundry-rs/forge-std.git#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653":
+  version "1.1.1"
+  resolved "git+https://github.com/foundry-rs/forge-std.git#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653"
+
 "forge-std@https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80":
   version "1.6.0"
   resolved "https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80"
-
-"forge-std@https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653":
-  version "1.1.1"
-  resolved "https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653"
 
 form-data@^4.0.0:
   version "4.0.0"
@@ -9788,6 +9793,7 @@ wif@^4.0.0:
     bs58check "^3.0.1"
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+  name wrap-ansi-cjs
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
