@@ -1310,7 +1310,15 @@ const FarcasterNormalPost = () => {
                     });
                   }}
                 >
-                  {network?.name}
+                  <div className="flex items-center gap-1">
+                    <Avatar
+                      variant="circular"
+                      alt={network?.name}
+                      src={chainLogo(network?.id)}
+                      className="w-6 h-6"
+                    />
+                    <p>{network?.name}</p>
+                  </div>
                 </Option>
               ))}
             </Select>
@@ -1364,7 +1372,15 @@ const FarcasterNormalPost = () => {
                               });
                             }}
                           >
-                            {currency?.symbol}
+                            <div className="flex items-center gap-1">
+                              <Avatar
+                                variant="circular"
+                                alt={currency?.symbol}
+                                src={currency?.logoURI}
+                                className="w-6 h-6"
+                              />
+                              <p>{currency?.name}</p>
+                            </div>
                           </Option>
                         ))}
                       </Select>
@@ -1408,7 +1424,7 @@ const FarcasterNormalPost = () => {
                 <Topup
                   topUpAccount={walletData?.publicAddress}
                   balance={walletData?.balance}
-                  refetch={refetchWallet}
+                  refetchWallet={refetchWallet}
                   sponsored={walletData?.sponsored}
                 />
               )}
@@ -1633,7 +1649,7 @@ const FarcasterNormalPost = () => {
                   <Topup
                     topUpAccount={walletData?.publicAddress}
                     balance={walletData?.balance}
-                    refetch={refetchWallet}
+                    refetchWallet={refetchWallet}
                     sponsored={walletData?.sponsored}
                   />
                 )}
