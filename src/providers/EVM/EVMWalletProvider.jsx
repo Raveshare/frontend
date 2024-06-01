@@ -41,7 +41,7 @@ import { degenChain } from "../../data";
 const { chains, publicClient } = configureChains(
   ENVIRONMENT === "production"
     ? [base, mainnet, zora, optimism, arbitrum, polygon, degenChain]
-    : [base, degenChain, sepolia, baseSepolia, polygonMumbai],
+    : [base, degenChain, baseSepolia, sepolia, polygonMumbai],
   [alchemyProvider({ apiKey: ALCHEMY_API_KEY }), publicProvider()]
 );
 

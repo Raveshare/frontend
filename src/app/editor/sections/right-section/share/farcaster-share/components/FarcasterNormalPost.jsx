@@ -68,7 +68,7 @@ import TiDelete from "@meronex/icons/ti/TiDelete";
 import BsPlus from "@meronex/icons/bs/BsPlus";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { useBalance } from "wagmi";
-import { base } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 import { LENSPOST_721_ENALBED_CHAINS } from "../../../../../../../data/constant/enabledChain";
 
 const FarcasterNormalPost = () => {
@@ -189,7 +189,7 @@ const FarcasterNormalPost = () => {
     },
   });
 
-  const chainId = ENVIRONMENT === "production" ? 8453 : 999999999; // 999999999 - zora sepolia
+  const chainId = ENVIRONMENT === "production" ? base?.id : baseSepolia?.id;
   const isCreatorSponsored = farcasterStates?.frameData?.isCreatorSponsored;
   const LOA = walletData?.publicAddress ? walletData?.publicAddress : userLOA;
   const allowedMints = farcasterStates?.frameData?.allowedMints;
@@ -1678,16 +1678,16 @@ const FarcasterNormalPost = () => {
         ) : farcasterStates?.frameData?.isFrame &&
           !farcasterStates?.frameData?.isCustomCurrMint &&
           !farcasterStates?.frameData?.isCreatorSponsored &&
-          chain?.id != 8453 ? (
+          chain?.id != chainId ? (
           <div className="mx-2 outline-none">
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
               disabled={isLoadingSwitchNetwork}
-              onClick={() => switchNetwork && switchNetwork(8453)}
+              onClick={() => switchNetwork && switchNetwork(chainId)}
               color="red"
             >
               {isLoadingSwitchNetwork ? "Switching" : "Switch"} to
-              {chain?.id != 8453 ? " base" : "a suported"} Network{" "}
+              {chain?.id != chainId ? " base" : "a suported"} Network{" "}
               {isLoadingSwitchNetwork && <Spinner />}
             </Button>
           </div>
