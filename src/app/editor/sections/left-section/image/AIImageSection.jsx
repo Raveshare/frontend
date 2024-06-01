@@ -38,7 +38,13 @@ import animationData from "../../../../../assets/lottie/loaders/aiGeneration.jso
 import { useStore } from "../../../../../hooks/polotno";
 import { Context } from "../../../../../providers/context";
 import { Tab, Tabs, TabsHeader, TabsBody } from "@material-tailwind/react";
-import { getFalAiImage, getFalImgtoImg } from "../../../../../services";
+import {
+  claimReward,
+  getFalAiImage,
+  getFalImgtoImg,
+} from "../../../../../services";
+import useUser from "../../../../../hooks/user/useUser";
+import { toast } from "react-toastify";
 
 // Tab1 - Search Tab
 
@@ -60,6 +66,8 @@ const RANDOM_QUERIES3 = ["Mountains", "Hearts", "Robots", "NFTS", "Elon"];
 
 const CompSearch = () => {
   const store = useStore();
+  const { points } = useUser();
+
   // load data
   const [data, setData] = useState(null);
   const [stStatusCode, setStStatusCode] = useState(0);
@@ -73,6 +81,14 @@ const CompSearch = () => {
     if (!query) {
       return;
     }
+    if (!points) {
+      toast.error("Error Fetching $POSTER Points");
+      return;
+    }
+    if (points < 1) {
+      toast.error("Not enough $POSTER points");
+      return;
+    }
     async function load() {
       setIsLoading(true);
       setError(null);
@@ -84,6 +100,10 @@ const CompSearch = () => {
           setIsLoading(false);
           setStStatusCode(200);
           setData(response.data);
+
+          claimReward({
+            taskId: 5,
+          });
         } else if (data.status === 429) {
           setIsLoading(false);
           setStStatusCode(429);
@@ -169,7 +189,7 @@ const CompSearch = () => {
         </div>
       )}
       {query == "" ||
-        (!data &&  !isLoading &&(
+        (!data && !isLoading && (
           <div className="p-2 pt-4  text-center text-gray-500">
             Give a prompt and click Generate to get started
           </div>
@@ -248,7 +268,7 @@ const CompDesignify = () => {
 
 const CompInstructImage = () => {
   const { fastPreview } = useContext(Context);
-
+  const { points } = useUser();
   const [responseImage, setResponseImage] = useState(""); // For Newly generated Image Preview
   const [uploadedImg, setUploadedImg] = useState(); //For Uploaded Preview
   const [clicked, setClicked] = useState(false);
@@ -267,6 +287,15 @@ const CompInstructImage = () => {
   };
 
   const fnCallInstructImgAPI = async () => {
+    if (!points) {
+      toast.error("Error Fetching $POSTER Points ");
+      return;
+    }
+    if (points < 1) {
+      toast.error("Not enough $POSTER points");
+      return;
+    }
+
     setClicked(true);
     setResponseImage("");
 
@@ -310,6 +339,10 @@ const CompInstructImage = () => {
         //   setResponseImage("");
         //   setStDisplayMessage(response.data.error.type);
         // }
+
+        claimReward({
+          taskId: 5,
+        });
         setClicked(false);
       })
       .catch((err) => {

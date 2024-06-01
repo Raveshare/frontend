@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { LogoutBtn, ProfilePanelHeaders } from "./components";
-import { Tabs, Tab, TabsHeader } from "@material-tailwind/react";
+import { Tabs, Tab, TabsHeader, TabsBody } from "@material-tailwind/react";
 import { useQuery } from "@tanstack/react-query";
 import BsGift from "@meronex/icons/bs/BsGift";
 import MdcStarFourPointsOutline from "@meronex/icons/mdc/MdcStarFourPointsOutline";
 import { CardsHeading, LensCard, UserCard } from "./components/Cards";
 import { useUser } from "../../../../../hooks/user";
 import {
+  apiGetPointsHistory,
   getAllTasks,
   getInviteCode,
 } from "../../../../../services/apis/BE-apis";
@@ -20,7 +21,13 @@ import TaskCardV2 from "./components/Cards/TaskCardV2";
 const ProfilePanelV2 = () => {
   const { setMenu } = useContext(Context);
   const { username } = useUser();
-  const [tasksArr, setTasksArr] = useState([]);
+
+  const [selectedTab, setSelectedTab] = useState("tasks");
+
+  const tabsArr = [
+    { label: "Tasks", value: "tasks" },
+    { label: "Points history", value: "pointsHistory" },
+  ];
 
   const {
     data: taskData,
@@ -32,20 +39,20 @@ const ProfilePanelV2 = () => {
     queryFn: getAllTasks,
   });
 
-  const { data } = useQuery({
+  const { data: inviteCodesData } = useQuery({
     queryKey: ["getInviteCode"],
     queryFn: getInviteCode,
   });
-
   const taskList = taskData?.message;
-  const inviteCodeList = data?.message;
-
-  console.log(taskList);
-
-  useEffect(() => {
-    setTasksArr(taskList);
-  }, [taskList, data]);
-
+  const {
+    data: pointHistoryData,
+    isLoading: pointsHistoryIsLoading,
+    isError: pointsHistoryIsError,
+    error: pointsHistoryError,
+  } = useQuery({
+    queryKey: ["getPointsHistory"],
+    queryFn: apiGetPointsHistory,
+  });
   return (
     <ProfilePanelHeaders
       panelHeader={`My Profile`}
@@ -54,20 +61,58 @@ const ProfilePanelV2 = () => {
           <div className="flex flex-col align-middle justify-between">
             <UserCardV2 username={username} />
 
-            <div className="m-4 font-semibold ">TASKS</div>
-            {isLoading ? <LoadingAnimatedComponent /> : null}
-            {taskList && taskList.length > 0
-              ? taskList.map((task) => (
-                  <TaskCardV2
-                    taskId={task.id}
-                    taskAmount={task.amount}
-                    isReward={task.isReward}
-                    isCompleted={task.completed}
-                    taskName={task.name}
-                    taskDesc={task.description}
-                  />
-                ))
-              : null}
+            <Tabs value="tasks">
+              <div className="my-2">
+                <TabsHeader className="appFont">
+                  {tabsArr.map(({ label, value }) => (
+                    <Tab
+                      onClick={() => setSelectedTab(value)}
+                      key={value}
+                      value={value}
+                    >
+                      {label}
+                    </Tab>
+                  ))}
+                </TabsHeader>
+              </div>
+
+              <TabsBody>
+                {selectedTab === "tasks" && (
+                  <>
+                    {isLoading ? <LoadingAnimatedComponent /> : null}
+                    {taskData && taskData?.message?.length > 0
+                      ? taskData?.message?.map((task) => (
+                          <TaskCardV2
+                            taskId={task.id}
+                            taskAmount={task.amount}
+                            isReward={task.isReward}
+                            isCompleted={task.completed}
+                            taskName={task.name}
+                            taskDesc={task.description}
+                          />
+                        ))
+                      : null}
+                  </>
+                )}
+
+                {selectedTab === "pointsHistory" && (
+                  <>
+                    {pointHistoryData && pointHistoryData?.message?.length > 0
+                      ? pointHistoryData?.message
+                          ?.slice(1)
+                          .map((point, index) => (
+                            <RewardV1
+                              pointsId={index + 1}
+                              pointsReason={point.reason}
+                              pointsAmt={point.amount}
+                              pointsDate={point.createdAt}
+                            />
+                          ))
+                      : null}
+                  </>
+                )}
+              </TabsBody>
+            </Tabs>
           </div>
         </>
       }

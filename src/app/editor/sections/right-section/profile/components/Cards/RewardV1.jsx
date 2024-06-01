@@ -1,38 +1,27 @@
 import React from "react";
-import "../../styles/RewardsV1.css";
+import { utilXtimeAgo } from "../../../../../../../utils";
+import BsClockHistory from "@meronex/icons/bs/BsClockHistory";
+import BsCheck from "@meronex/icons/bs/BsCheck";
 
-const RewardV1 = () => {
+const RewardV1 = ({ pointsId, pointsReason, pointsAmt, pointsDate }) => {
   return (
-    <div class="card">
-      <div class="content">
-        <div class="back">
-          <div class="back-content">
-           
-            <strong>Hover Me</strong>
-          </div>
-        </div>
-        <div class="front">
-          <div class="img">
-            <div class="circle"></div>
-            <div class="circle" id="right"></div>
-            <div class="circle" id="bottom"></div>
+    <>
+      <div className="flex justify-between border-b-2 m-2 rounded-md">
+        <div className="flex flex-col gap-1">
+          <div className="flex ">
+            <BsCheck className="m-1 mt-1.5" />
+            {/* <div className="m-1">{pointsId}</div> */}
+            <div className="m-1">{pointsReason}</div>
           </div>
 
-          <div class="front-content">
-            <small class="badge">Pasta</small>
-            <div class="description">
-              <div class="title">
-                <p class="title">
-                  <strong>Spaguetti Bolognese</strong>
-                </p>
-               
-              </div>
-              <p class="card-footer">30 Mins &nbsp; | &nbsp; 1 Serving</p>
-            </div>
+          <div className="m-1 flex gap-1 align-middle opacity-50">
+            {" "}
+            <BsClockHistory className="m-0.5" /> {utilXtimeAgo(pointsDate)} ago
           </div>
         </div>
+        <div className="m-2 p-2 text-red-500">{pointsAmt}</div>
       </div>
-    </div>
+    </>
   );
 };
 

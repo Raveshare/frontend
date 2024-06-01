@@ -11,10 +11,18 @@ import { ChadDP, ChadBadge, ChadHex } from "../../assets/svgs/Chad";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 import { getInviteCode } from "../../../../../../../services/apis/BE-apis";
+import {
+  apiGenerateInviteCode,
+  getENSDomain,
+  getSocialDetails,
+} from "../../../../../../../services";
+import BsArrowRepeat from "@meronex/icons/bs/BsArrowRepeat";
+// import                 src/assets/logos/logoFarcaster.jpg
+import farcasterLogo from "../../../../../../../assets/logos/logoFarcaster.jpg";
 
 const UserCardV2 = ({ username }) => {
-  const { address } = useAccount();
-  const { points, profileImage, userLevel } = useUser();
+  const { points, profileImage, userLevel, address, farcasterHandle } =
+    useUser();
   const [inviteCodesArr, setInviteCodesArr] = useState([]);
 
   const { data, isLoading } = useQuery({
@@ -29,6 +37,20 @@ const UserCardV2 = ({ username }) => {
     toast.success(`${copyParam} copied`);
   };
 
+  const fnGenerateNewInviteCode = async () => {
+    const result = await apiGenerateInviteCode();
+    console.log("result", result);
+  };
+
+  const fnGetSocialDetails = async () => {
+    const result = await getSocialDetails(address, `farcaster`);
+    console.log("farcaster handle", result);
+  };
+
+  useEffect(() => {
+    fnGetSocialDetails();
+  }, []);
+
   useEffect(() => {
     setInviteCodesArr(inviteCodeList);
   }, [inviteCodeList, data]);
@@ -36,7 +58,7 @@ const UserCardV2 = ({ username }) => {
   return (
     <>
       <div className="shadow-md rounded-md">
-        <div className="flex justify-between m-2 mx-4">
+        <div className="flex justify-around m-2 mx-4">
           {/* <div className="flex flex-col gap-8 justify-normal align-baseline"> */}
           <div className="flex flex-col gap-8 justify-center align-middle items-center">
             <div className="inline-flex flex-col items-center justify-center relative">
@@ -68,6 +90,7 @@ const UserCardV2 = ({ username }) => {
               </div>
               <div className="relative w-[32px] h-[32px] mt-[-16px]">
                 <img
+                  className="scale-75"
                   src={
                     userLevel === "Pleb"
                       ? PlebBadge
@@ -78,9 +101,35 @@ const UserCardV2 = ({ username }) => {
                   alt=""
                 />
               </div>
+
+              {farcasterHandle && (
+                <>
+                  <div
+                    className="hover:opacity-80 cursor-pointer flex items-center gap-1 align-middle"
+                    onClick={() =>
+                      window.open(
+                        `https://warpcast.com/${
+                          farcasterHandle ? farcasterHandle : "poster"
+                        }`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    <img
+                      className="w-[16px] h-[16px] rounded-sm mt-2"
+                      src={farcasterLogo}
+                      alt="farcaster logo"
+                    />
+
+                    <div className="text-[#835ec9] mt-3">
+                      /{farcasterHandle ? farcasterHandle : "poster"}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="">
-              {(userLevel === "Normie" || userLevel === "Pleb") && (
+            {/* <div className="">
+            {(userLevel === "Normie" || userLevel === "Pleb") && (
                 <>
                   <div className="text-gray-600">
                     Get{" "}
@@ -97,8 +146,8 @@ const UserCardV2 = ({ username }) => {
                       : "Normie"}
                   </div>
 
+
                   <div className="flex gap-1 w-48 items-center">
-                    {/* Dynamic progress Bar based on the Points */}
                     <div
                       style={{
                         backgroundColor:
@@ -135,33 +184,51 @@ const UserCardV2 = ({ username }) => {
                   </div>
                 </>
               )}
-            </div>
+            </div> */}
           </div>
           <div className="flex flex-col mt-2">
-            <div className="">@{username ? username : "lenspostuser"}</div>
+            <div className="">@{username ? username : "posteruser"}</div>
             <div
               onClick={() => handleCopy(address)}
               className="flex align-middle mt-2 bg-blue-gray-50 p-1 pl-2 pr-2 rounded-md cursor-pointer w-fit"
             >
-              {address && addressCrop(address)}
+              {address ? addressCrop(address) : address}
               <BiCopy className="ml-1 mt-0.5 " />
             </div>
-            <div className="text-gray-600 mt-8">Points to Spend</div>
-            <div className="flex align-middle justify-between border border-gray-200 rounded-md w-26 mt-1">
-              <div className="m-1 text-lg mr-2 ml-2">{points}</div>
-              <div className="m-1">
+            {/* <div className="text-gray-600 mt-8">$POSTER</div> */}
+            <div className="flex align-middle justify-between border border-gray-200 rounded-md w-26 mt-4">
+              <div className="m-1 text-lg mr-2 ml-2">{points} </div>
+              <div className="m-1 flex items-center gap-2">
                 <img className="h-6" src={Coin} alt="Coin" />
+                <div className="">$POSTER</div>
               </div>
             </div>
 
             <div className="flex gap-2 mt-4 ">
               <div className=""> Invites : </div>
-              <div
-                className="flex items-center"
-                onClick={() => handleCopy(inviteCodesArr)}
-              >
-                <div className="cursor-pointer"> {inviteCodesArr} </div>
-                <BiCopy className="ml-1 cursor-pointer" size={12} />
+              <div className="flex items-center">
+                <div className="cursor-pointer">
+                  {" "}
+                  {inviteCodesArr?.length > 0 ? (
+                    <div
+                      className="flex align-middle "
+                      onClick={() => handleCopy(inviteCodesArr)}
+                    >
+                      <div className="">{inviteCodesArr[0]}</div>
+                      <BiCopy className="ml-1 cursor-pointer" size={12} />
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        onClick={fnGenerateNewInviteCode}
+                        className="flex items-center gap-2"
+                      >
+                        <div className="">Generate</div>
+                        <BsArrowRepeat size={16} />
+                      </div>
+                    </>
+                  )}{" "}
+                </div>
               </div>
             </div>
             <LogoutBtn />
