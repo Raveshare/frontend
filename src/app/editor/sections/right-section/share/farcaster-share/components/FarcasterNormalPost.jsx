@@ -441,7 +441,9 @@ const FarcasterNormalPost = () => {
       contractAddress: respContractAddress,
       chainId: farcasterStates?.frameData?.isCustomCurrMint
         ? farcasterStates?.frameData?.selectedNetwork?.id
-        : base?.id,
+        : farcasterStates?.frameData?.isCreatorSponsored
+        ? base?.id
+        : chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
     };
     postFrameData(params)
