@@ -10,7 +10,7 @@ export const TOKEN_LIST = {
     },
     {
       id: 8453,
-      address: "0xafb89a09d82fbde58f18ac6437b3fc81724e4df6",
+      address: "0xAfb89a09D82FBDE58f18Ac6437B3fC81724e4dF6",
       symbol: "DOG",
       name: "The Doge NFT",
       decimals: 18,
