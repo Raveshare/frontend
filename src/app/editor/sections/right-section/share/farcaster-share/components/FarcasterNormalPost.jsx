@@ -55,8 +55,7 @@ const FarcasterNormalPost = () => {
   const { chain } = useAccount();
   const { userLOA } = useLocalStorage();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
-  const { switchChain, isLoading: isLoadingSwitchNetwork } =
-    useSwitchChain();
+  const { switchChain, isLoading: isLoadingSwitchNetwork } = useSwitchChain();
 
   // farcaster states
   const [isShareLoading, setIsShareLoading] = useState(false);
@@ -931,7 +930,11 @@ const FarcasterNormalPost = () => {
             <Button
               className="w-full outline-none flex justify-center items-center gap-2"
               disabled={isLoadingSwitchNetwork}
-              onClick={() => switchChain(chainId)}
+              onClick={() =>
+                switchChain({
+                  chainId: chainId,
+                })
+              }
               color="red"
             >
               {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}

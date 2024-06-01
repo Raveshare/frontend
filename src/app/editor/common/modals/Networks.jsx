@@ -71,7 +71,10 @@ const Networks = ({ className, chains, isUnsupportedChain }) => {
               <List className="border rounded-lg my-2 p-0">
                 <ListItem
                   onClick={() => {
-                    network?.id !== chain?.id && switchChain(network?.id);
+                    network?.id !== chain?.id &&
+                      switchChain({
+                        chainId: network?.id,
+                      });
                   }}
                   className="p-2 hover:shadow-lg"
                 >

@@ -8,16 +8,14 @@ import {
   Spinner,
   Typography,
 } from "@material-tailwind/react";
-import { useFeeData, useAccount, useSwitchChain } from "wagmi";
+import { useEstimateFeesPerGas, useAccount, useSwitchChain } from "wagmi";
 import { base, baseSepolia } from "wagmi/chains";
-import {
-  useSendTransaction,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
-import { parseEther } from "viem";
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import { http, parseEther } from "viem";
 import { toast } from "react-toastify";
 import { ENVIRONMENT } from "../../../../../../../services";
+import { createConfig } from "wagmi";
+import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
 
 const network = ENVIRONMENT === "production" ? base : baseSepolia;
 
@@ -38,7 +36,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     isError: isFeeError,
     error: feeError,
     isLoading: isFeeLoading,
-  } = useFeeData({
+  } = useEstimateFeesPerGas({
     chainId: network?.id,
     formatUnits: "ether",
   });
@@ -58,16 +56,19 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
-  const { config } = useWriteContract({
-    to: topUpAccount, // users wallet
-    value: extraPayForMints
-      ? parseEther(extraPayForMints)
-      : parseEther(payForMints),
-    chainId: network?.id,
-  });
+  // const config = createConfig({
+  //   chains: [network],
+  //   transports: {
+  //     [network.id]: http(),
+  //   },
+  // });
 
-  const { data, isLoading, isSuccess, isError, error, sendTransaction } =
-    useSendTransaction(config);
+  config.transports = {
+    [network.id]: http(),
+  };
+
+  const { data, isPending, isSuccess, isError, error, sendTransaction } =
+    useSendTransaction({ config });
 
   const {
     data: txData,
@@ -122,19 +123,27 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   // get the error message
   useEffect(() => {
     if (isError) {
+      console.log(error);
       toast.error(error?.message.split("\n")[0]);
     } else if (isTxError) {
+      console.log(txError);
       toast.error(txError?.message.split("\n")[0]);
     }
   }, [isError, isTxError]);
 
   if (chain?.id !== network?.id) {
+    console.log("chain", chain.id);
+    console.log("network", network.id);
     return (
       <Card className="my-2">
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() => switchChain(network?.id)}
+            onClick={() =>
+              switchChain({
+                chainId: network?.id,
+              })
+            }
           >
             <Typography variant="h6" color="blue-gray">
               Please switch to {network?.name} network
@@ -190,10 +199,10 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
               </Typography>
 
               <div className="w-full flex justify-between items-center">
-                {isTxLoading || isLoading ? (
+                {isTxLoading || isPending ? (
                   <div className="flex justify-start gap-2">
                     <Typography variant="h6" color="blue-gray">
-                      {isLoading
+                      {isPending
                         ? "Confirm transaction"
                         : isTxLoading
                         ? "Confirming"
@@ -211,7 +220,14 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => sendTransaction?.()}
+                    onClick={() =>
+                      sendTransaction({
+                        to: topUpAccount,
+                        value: extraPayForMints
+                          ? parseEther(extraPayForMints)
+                          : parseEther(payForMints),
+                      })
+                    }
                     color="green"
                     size="sm"
                     className="flex justify-end"

@@ -18,28 +18,8 @@ import {
 } from "../../services"; 
 import { WagmiProvider, http  } from "wagmi";
 
-// const { chains, publicClient } = configureChains(
-//   ENVIRONMENT === "production"
-//     ? [polygon, mainnet, base, zora, optimism, arbitrum]
-//     : [polygonMumbai, baseSepolia],
-//   [alchemyProvider({ apiKey: ALCHEMY_API_KEY }), publicProvider()]
-// );
 
-// const connectors = connectorsForWallets([
-//   {
-//     groupName: "Recommended",
-//     wallets: [
-//       metaMaskWallet({ projectId: WALLETCONNECT_PROJECT_ID, chains }),
-//       phantomWallet({ chains }),
-//       rabbyWallet({ chains }),
-//       rainbowWallet({ projectId: WALLETCONNECT_PROJECT_ID, chains }),
-//       walletConnectWallet({ projectId: WALLETCONNECT_PROJECT_ID, chains }),
-//       coinbaseWallet({ chains }),
-//     ],
-//   },
-// ]);
-
-const config = getDefaultConfig({
+export const config = getDefaultConfig({
   appName: "Poster.fun",
   projectId: WALLETCONNECT_PROJECT_ID,
   chains:

@@ -25,6 +25,7 @@ import {
   useWriteContract,
   useSwitchChain,
   useWaitForTransactionReceipt,
+  useConfig,
 } from "wagmi";
 import { useAppAuth, useLocalStorage } from "../../../../../../../hooks/app";
 import {
@@ -66,7 +67,8 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { isAuthenticated } = useAppAuth();
   const { isFarcasterAuth, lensAuth, dispatcher } = useLocalStorage();
   const chainId = useChainId();
-  const { chains, chain } = useAccount();
+  const { chain } = useAccount();
+  const { chains } = useConfig();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
   const { openChainModal } = useChainModal();
   const [recipientsEns, setRecipientsEns] = useState([]);
@@ -197,7 +199,6 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
     const isUnsupportedChain = () => {
       if (
-        chain ||
         (isOpenAction && !networks?.includes(chain?.id)) ||
         chainId === chains[0]?.id
       ) {
@@ -717,7 +718,13 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     functionName: "createEditionWithReferral",
     args: handleMintSettings().args,
   });
-  const { write, data, error, isLoading, isError } = useContractWrite(config);
+  const {
+    writeContract,
+    data,
+    error,
+    isPending: isLoading,
+    isError,
+  } = useWriteContract();
   const {
     data: receipt,
     isLoading: isPending,
@@ -1685,7 +1692,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
           <Button
             className="w-full outline-none flex justify-center items-center gap-2"
             disabled={isLoadingSwitchNetwork}
-            onClick={() => switchChain(selectedChainId)}
+            onClick={() => switchChain({ chainId: selectedChainId })}
             color="red"
           >
             {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
