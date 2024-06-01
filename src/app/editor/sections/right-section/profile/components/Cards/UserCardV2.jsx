@@ -210,8 +210,8 @@ const UserCardV2 = ({ username }) => {
                 <div className="cursor-pointer">
                   {" "}
                   {inviteCodesArr?.length > 0 ? (
-                    <div onClick={() => handleCopy(inviteCodesArr)}>
-                      inviteCodesArr
+                    <div className="flex align-middle " onClick={() => handleCopy(inviteCodesArr)}>
+                      <div className="">{inviteCodesArr[0]}</div>
                       <BiCopy className="ml-1 cursor-pointer" size={12} />
                     </div>
                   ) : (
