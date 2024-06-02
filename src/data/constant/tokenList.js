@@ -20,7 +20,7 @@ export const TOKEN_LIST = {
   Degen: [
     {
       id: 666666666,
-      address: "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387",
+      address: "0xEb54dACB4C2ccb64F8074eceEa33b5eBb38E5387",
       symbol: "WDEGEN",
       name: "Wrapped Degen",
       decimals: 18,
