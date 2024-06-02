@@ -7,6 +7,7 @@ import OpMainnetLogo from "./logos/opMainnetLogo.webp";
 import EVMLogo from "./logos/evmLogo.png";
 
 const arbitrumLogo = "https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg";
+const degenLogo = "https://basescan.org/token/images/degentips_32.png";
 
 export {
   SolanaLogo,
@@ -17,4 +18,5 @@ export {
   BaseLogo,
   OpMainnetLogo,
   arbitrumLogo,
+  degenLogo,
 };

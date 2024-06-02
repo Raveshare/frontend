@@ -46,7 +46,7 @@ export const loadImageFile = (file, store) => {
         x: w - 100,
         y: h - 100,
         type: "image",
-        src: "/OGlogo.png",
+        src: "/watermark.png",
         selectable: false,
         alwaysOnTop: true,
         showInExport: true,

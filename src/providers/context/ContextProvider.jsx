@@ -368,10 +368,36 @@ const ContextProvider = ({ children }) => {
 			isExternalLink: false,
 			externalLink: '',
 
-			isExternalLinkError: false,
-			externalLinkError: '',
-		},
-	})
+      isExternalLinkError: false,
+      externalLinkError: "",
+
+      isCustomCurrMint: false,
+
+      customCurrAmount: 1,
+
+      isCustomCurrAmountError: false,
+      customCurrAmountError: "",
+
+      customCurrSymbol: "",
+      customCurrAddress: "",
+
+      fcSplitRevenueRecipients: [
+        {
+          address: "",
+          percentAllocation: null,
+        },
+      ],
+
+      // split recipient error
+      isFcSplitError: false,
+      fcSplitErrorMsg: "",
+
+      selectedNetwork: {
+        id: "",
+        name: "",
+      },
+    },
+  });
 
 	// for calendar
 	const [stFormattedDate, setStFormattedDate] = useState('')
