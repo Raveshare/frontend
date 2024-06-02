@@ -48,6 +48,8 @@ import {
 import WithdrawFunds from "./WithdrawFunds";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 import { zoraURLErc721 } from "../../zora-mint/utils";
+import { http } from "viem";
+import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -211,33 +213,23 @@ const FarcasterNormalPost = () => {
     });
   };
 
-  // create edition configs
-  const {
-    config,
-    error: prepareError,
-    isError: isPrepareError,
-  } = useWriteContract({
-    abi: zoraNftCreatorV1Config.abi,
-    address:
-      chain?.id == 8453
-        ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
-        : zoraNftCreatorV1Config.address[chainId],
-    functionName: "createEditionWithReferral",
-    args: argsArr,
-  });
+  config.transports = {
+    [chain?.id]: http(),
+  };
 
   const {
-    write,
+    writeContract,
     data,
     error: writeError,
-    isLoading,
+    isPending: isLoading,
     isError: isWriteError,
-  } = useContractWrite(config);
+  } = useWriteContract(config);
+
   const {
     data: receipt,
     isLoading: isPending,
     isSuccess,
-  } = useWaitForTransactionReceipt({ hash: data?.hash });
+  } = useWaitForTransactionReceipt({ hash: data });
 
   // deploy zora contract
   const deployZoraContractFn = async () => {
@@ -441,9 +433,17 @@ const FarcasterNormalPost = () => {
   useEffect(() => {
     if (isUploadSuccess && !farcasterStates.frameData?.isCreatorSponsored) {
       setIsPostingFrame(false);
-      write?.();
+      writeContract({
+        abi: zoraNftCreatorV1Config.abi,
+        address:
+          chain?.id == 8453
+            ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
+            : zoraNftCreatorV1Config.address[chainId],
+        functionName: "createEditionWithReferral",
+        args: argsArr,
+      });
     }
-  }, [isUploadSuccess, write]);
+  }, [isUploadSuccess]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -480,8 +480,8 @@ const FarcasterNormalPost = () => {
       toast.error(writeError?.message.split("\n")[0]);
     }
 
-    if (isPrepareError) {
-      console.log("prepare error", prepareError);
+    if (isWriteError) {
+      console.log("prepare error", writeError);
       // toast.error(prepareError.message);
     }
 
@@ -495,7 +495,6 @@ const FarcasterNormalPost = () => {
     setIsDeployingZoraContractError(false);
   }, [
     isWriteError,
-    isPrepareError,
     isError,
     isPostingFrameError,
     isDeployingZoraContractError,
@@ -514,7 +513,7 @@ const FarcasterNormalPost = () => {
           isPostingFrameError ||
           isDeployingZoraContractError ||
           isWriteError ||
-          (farcasterStates?.frameData?.isCreatorSponsored && prepareError) ||
+          (farcasterStates?.frameData?.isCreatorSponsored && writeError) ||
           isUploadError
         }
         isLoading={isLoading}

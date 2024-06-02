@@ -132,8 +132,6 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   }, [isError, isTxError]);
 
   if (chain?.id !== network?.id) {
-    console.log("chain", chain.id);
-    console.log("network", network.id);
     return (
       <Card className="my-2">
         <List>

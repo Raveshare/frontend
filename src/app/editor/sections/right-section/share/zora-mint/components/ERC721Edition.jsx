@@ -21,7 +21,6 @@ import { toast } from "react-toastify";
 import {
   useAccount,
   useChainId,
-  useContractWrite,
   useWriteContract,
   useSwitchChain,
   useWaitForTransactionReceipt,
@@ -61,6 +60,8 @@ import {
 } from "../../../../../../../services/apis/BE-apis";
 import { zoraURLErc721 } from "../utils/zoraURL";
 import { ZoraLogo } from "../../../../../../../assets";
+import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
+import { http } from "viem";
 
 const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { address } = useAccount();
@@ -704,32 +705,23 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     return { args: arr };
   };
 
-  // create edition configs
-  const {
-    config,
-    error: prepareError,
-    isError: isPrepareError,
-  } = useWriteContract({
-    abi: zoraNftCreatorV1Config.abi,
-    address:
-      chain?.id == 8453
-        ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
-        : zoraNftCreatorV1Config.address[chainId],
-    functionName: "createEditionWithReferral",
-    args: handleMintSettings().args,
-  });
+  config.transports = {
+    [chain?.id]: http(),
+  };
+
   const {
     writeContract,
     data,
-    error,
+    error: prepareError,
     isPending: isLoading,
-    isError,
-  } = useWriteContract();
+    isError: isPrepareError,
+  } = useWriteContract(config);
+
   const {
     data: receipt,
     isLoading: isPending,
     isSuccess,
-  } = useWaitForTransactionReceipt({ hash: data?.hash });
+  } = useWaitForTransactionReceipt({ hash: data });
 
   // mint on Zora
   const handleSubmit = () => {
@@ -917,10 +909,18 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     if (createSplitData?.splitAddress) {
       console.log("createSplitData", createSplitData);
       setTimeout(() => {
-        write?.();
+        writeContract({
+          abi: zoraNftCreatorV1Config.abi,
+          address:
+            chain?.id == 8453
+              ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
+              : zoraNftCreatorV1Config.address[chainId],
+          functionName: "createEditionWithReferral",
+          args: handleMintSettings().args,
+        });
       }, 1000);
     }
-  }, [isCreateSplitSuccess, write]);
+  }, [isCreateSplitSuccess]);
 
   // create open adition on LENS
   useEffect(() => {
@@ -936,6 +936,8 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // share on farcater
   useEffect(() => {
+    console.log("fc");
+    console.log(isFarcaster);
     if (isFarcaster && receipt?.logs[0]?.address) {
       const canvasParams = {
         zoraMintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
@@ -955,16 +957,16 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // error handling for mint
   useEffect(() => {
-    if (isError) {
-      console.log("mint error", error);
-      toast.error(error.message.split("\n")[0]);
+    if (isPrepareError) {
+      console.log("mint error", prepareError);
+      toast.error(prepareError.message.split("\n")[0]);
     }
 
     if (isPrepareError) {
       console.log("prepare error", prepareError);
       // toast.error(prepareError.message);
     }
-  }, [isError, isPrepareError]);
+  }, [prepareError, isPrepareError]);
 
   // error handling for create split
   useEffect(() => {
@@ -1004,7 +1006,9 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       <ZoraDialog
         title=" Zora ERC721 Edition"
         icon={ZoraLogo}
-        isError={isUploadError || isCreateSplitError || isError || isShareError}
+        isError={
+          isUploadError || isCreateSplitError || isPrepareError || isShareError
+        }
         isLoading={isLoading}
         isCreatingSplit={isCreateSplitLoading}
         isUploadingToIPFS={isUploading}
@@ -1705,7 +1709,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       ) : (
         <div className="mx-2">
           <Button
-            disabled={!write || networksDataSmartPosts()?.isUnsupportedChain}
+            disabled={isPending || networksDataSmartPosts()?.isUnsupportedChain}
             fullWidth
             // color="yellow"
             onClick={handleSubmit}
