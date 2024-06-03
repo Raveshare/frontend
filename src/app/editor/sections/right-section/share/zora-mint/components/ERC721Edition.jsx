@@ -190,19 +190,20 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   // networks data for samart posts
   const networksDataSmartPosts = () => {
     const networks = ENVIRONMENT === "production" ? [8453, 7777777] : [5]; // supported chains for Lens samart posts
+    const unsupportedChain = chains.slice(0, -3);
 
     // filter the chains for smart posts
     const filteredChains = isOpenAction
       ? chains.filter((chain) => {
           return networks?.includes(chain?.id);
         })
-      : chains.slice(0, -2);
+      : chains.slice(0, -3);
 
     const isUnsupportedChain = () => {
       if (
         chain?.unsupported ||
-        (isOpenAction && !networks?.includes(chain?.id))
-        // chainId === chains[0]?.id
+        (isOpenAction && !networks?.includes(chain?.id)) ||
+        chains.map((chain, index) => unsupportedChain.includes(chain))
       ) {
         return true;
       }

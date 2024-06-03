@@ -1,5 +1,15 @@
+import { ham } from "../network/ham";
+
 export const TOKEN_LIST = {
   Base: [
+    {
+      id: 8453,
+      address: "0x0000000000000000000000000000000000000000",
+      symbol: "ETH",
+      name: "Ether",
+      decimals: 18,
+      logoURI: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
+    },
     {
       id: 8453,
       address: "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
@@ -25,6 +35,16 @@ export const TOKEN_LIST = {
       name: "Wrapped Degen",
       decimals: 18,
       logoURI: "https://basescan.org/token/images/degentips_32.png",
+    },
+  ],
+  Ham: [
+    {
+      id: 5112,
+      address: "0x0000000000000000000000000000000000000000",
+      symbol: "ETH",
+      name: "Ether",
+      decimals: 18,
+      logoURI: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
     },
   ],
 };

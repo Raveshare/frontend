@@ -1,4 +1,6 @@
-export const degenChain = {
+import { defineChain } from "viem";
+
+export const degen = defineChain({
   id: 666666666,
   name: "Degen",
   nativeCurrency: {
@@ -21,4 +23,4 @@ export const degenChain = {
       apiUrl: "https://explorer.degen.tips/api/v2",
     },
   },
-};
+});
