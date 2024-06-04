@@ -28,7 +28,7 @@ import {
   LOCAL_STORAGE,
   TOKEN_LIST,
   URL_REGEX,
-  degenChain,
+  degen,
 } from "../../../../../../../data";
 import {
   Avatar,
@@ -136,21 +136,8 @@ const FarcasterNormalPost = () => {
     isRefetching: isWalletRefetching,
   } = useQuery({
     queryKey: ["getOrCreateWallet"],
-    queryFn: () => getOrCreateWallet(chain?.id),
+    queryFn: () => getOrCreateWallet(base?.id),
     refetchOnWindowFocus: false,
-  });
-
-  const {
-    data: currencyData,
-    isError: isCurrencyError,
-    isLoading: isCurrencyLoading,
-    error: currencyError,
-    isSuccess: isCurrencySuccess,
-    refetch: refetchCurrency,
-    isRefetching: isCurrencyRefetching,
-  } = useBalance({
-    address: "0x62b14E5D09BC0C340116B5BC87d787377C07A820",
-    chainId: degenChain?.id,
   });
 
   const { mutateAsync: deployZoraContractMutation } = useMutation({
@@ -601,8 +588,23 @@ const FarcasterNormalPost = () => {
       farcasterStates.frameData?.isCustomCurrMint &&
       !checkCustomCurrAmt()
     ) {
-      // toast.error("Please enter a valid price for the token");
       return;
+    }
+
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates.frameData?.isCustomCurrMint &&
+      !farcasterStates.frameData?.selectedNetwork?.id
+    ) {
+      return toast.error("Please select a network");
+    }
+
+    if (
+      farcasterStates.frameData?.isFrame &&
+      farcasterStates.frameData?.isCustomCurrMint &&
+      !farcasterStates.frameData?.customCurrSymbol
+    ) {
+      return toast.error("Please select a currency");
     }
 
     if (farcasterStates.frameData?.isFrame) {
@@ -1420,7 +1422,7 @@ const FarcasterNormalPost = () => {
 
             {farcasterStates.frameData?.isCustomCurrMint &&
               farcasterStates.frameData?.allowedMints > walletData?.sponsored &&
-              chain?.id !== degenChain?.id && (
+              chain?.id === base?.id && (
                 <Topup
                   topUpAccount={walletData?.publicAddress}
                   balance={walletData?.balance}

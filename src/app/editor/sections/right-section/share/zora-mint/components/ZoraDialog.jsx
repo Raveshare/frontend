@@ -159,7 +159,7 @@ const ZoraDialog = ({
                             rel="noreferrer"
                             className="text-blue-500"
                           >
-                            {isFrame ? "Frame" : "Post"}
+                            NFT
                           </a>
                           <BiCopy
                             onClick={() => {
@@ -190,7 +190,7 @@ const ZoraDialog = ({
                           rel="noreferrer"
                           className="text-blue-500"
                         >
-                          Post
+                          NFT
                         </a>
                         <BiCopy
                           onClick={() => {

@@ -48,8 +48,8 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const isTopup = farcasterStates.frameData?.isTopup;
   const selectedNetwork = farcasterStates?.frameData?.selectedNetwork;
   const isCustomCurrMint = farcasterStates?.frameData?.isCustomCurrMint;
-  const TxFeeForDeployment = 0.00009;
-  const txFeeForMint = isCustomCurrMint ? 0.000001 : 0.00002;
+  const TxFeeForDeployment = 0.0000009;
+  const txFeeForMint = isCustomCurrMint ? 0.0000001 : 0.0000002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
