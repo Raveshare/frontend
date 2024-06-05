@@ -3,10 +3,10 @@ import { utilXtimeAgo } from "../../../../../../../utils";
 import BsClockHistory from "@meronex/icons/bs/BsClockHistory";
 import BsCheck from "@meronex/icons/bs/BsCheck";
 
-const RewardV1 = ({ pointsId, pointsReason, pointsAmt, pointsDate }) => {
+const PointHistoryCard = ({ pointsId, pointsReason, pointsAmt, pointsDate }) => {
   return (
     <>
-      <div className="flex justify-between border-b-2 m-2 rounded-md">
+      <div className="flex justify-between border-b-2 m-2 rounded-sm">
         <div className="flex flex-col gap-1">
           <div className="flex ">
             <BsCheck className="m-1 mt-1.5" />
@@ -19,10 +19,10 @@ const RewardV1 = ({ pointsId, pointsReason, pointsAmt, pointsDate }) => {
             <BsClockHistory className="m-0.5" /> {utilXtimeAgo(pointsDate)} ago
           </div>
         </div>
-        <div className="m-2 p-2 text-red-500">{pointsAmt}</div>
+        <div className="m-2 p-2 text-xl text-red-500">{pointsAmt}</div>
       </div>
     </>
   );
 };
 
-export default RewardV1;
+export default PointHistoryCard;

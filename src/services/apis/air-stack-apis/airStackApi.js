@@ -181,6 +181,7 @@ const getProfileImageQuery = gql`
 `;
 
 export const getProfileImage = async (address) => {
+  
   const variables = {
     identities: address,
   };

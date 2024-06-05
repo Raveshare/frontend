@@ -4,13 +4,14 @@ import { getUserProfile } from "../../services/apis/BE-apis";
 import { getFarcasterDetails, getProfileImage } from "../../services";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
+import { consoleLogonlyDev, getFromLocalStorage } from "../../utils";
 
 const useUser = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [farcasterDetails, setFarcasterDetails] = useState({});
   const [userLevel, setUserLevel] = useState("Normie");
   const { userId } = useLocalStorage();
-  const { address } = useAccount();
+  const address = getFromLocalStorage("user.address");
   const { isAuthenticated } = useAppAuth();
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ["user", { userId }],
@@ -18,13 +19,6 @@ const useUser = () => {
     enabled: isAuthenticated ? true : false,
     refetchOnMount: false,
   });
-
-
-  const fnGetPfp = async () => {
-    const data = await getProfileImage(address);
-    console.log(data);
-    setProfileImage(data);
-  };
 
   const fnGetUserLevel = async () => {
     if (data?.message?.points < 500) {
@@ -38,17 +32,23 @@ const useUser = () => {
   };
 
   const fnGetFarcasterDetails = async () => {
+    if (!address) {
+      consoleLogonlyDev("Address not found");
+      return;
+    }
     const result = await getFarcasterDetails(address, `farcaster`);
     setFarcasterDetails(result.Social[0]);
-
-    console.log("farcaster handle", result.Social[0]?.profileHandle);
+    setProfileImage(result.Social[0]?.profileImage);
   };
 
   useEffect(() => {
     fnGetUserLevel();
-    fnGetPfp();
     fnGetFarcasterDetails();
-  }, [data]);
+  }, [data, address]);
+
+  useEffect(() => {
+    fnGetFarcasterDetails();
+  }, [address]);
 
   return {
     address,
