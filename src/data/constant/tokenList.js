@@ -26,6 +26,14 @@ export const TOKEN_LIST = {
       decimals: 18,
       logoURI: "https://basescan.org/token/images/dogetokenbase_32.png",
     },
+    {
+      id: 8453,
+      address: "0x5B5dee44552546ECEA05EDeA01DCD7Be7aa6144A",
+      symbol: "TN100x",
+      name: "The Next 100x Memecoin on Base",
+      decimals: 18,
+      logoURI: "https://icons.llamao.fi/icons/chains/rsz_base.jpg",
+    },
   ],
   Degen: [
     {
