@@ -161,139 +161,15 @@ export const StickerPanel = () => {
   });
 
   const tabArray = data?.data || [];
-  console.log("tabArray", tabArray?.[0]);
-
-  // Halloween use 'H' and not 'h' - BE Response
-  // const tabArray2 = [
-  //   {
-  //     name: "Base",
-  //     author: "base",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "Cybershakti",
-  //     author: "cybershakti",
-  //     campaign: "shakti",
-  //   },
-  //   {
-  //     name: "Gloom",
-  //     author: "$GLOOM",
-  //     campaign: "Gloom",
-  //   },
-  //   {
-  //     name: "Chicken",
-  //     author: "chicken",
-  //     campaign: "chicken",
-  //   },
-  //   {
-  //     name: "Otto",
-  //     author: "otto",
-  //     campaign: "otto",
-  //   },
-  //   {
-  //     name: "Monniverse",
-  //     author: "monniverse",
-  //     campaign: "monniverse",
-  //   },
-  //   {
-  //     name: "Enjoy",
-  //     author: "enjoy",
-  //     campaign: "enjoy",
-  //   },
-  //   {
-  //     name: "Frame",
-  //     author: "FRAME",
-  //     campaign: "$frame",
-  //   },
-  //   {
-  //     name: "Mfermojis",
-  //     author: "mfermojis",
-  //     campaign: "explore",
-  //   },
-  //   {
-  //     name: "Degen",
-  //     author: null,
-  //     campaign: "degen",
-  //   },
-  //   {
-  //     name: "Huddle",
-  //     author: "huddle",
-  //     campaign: "huddle",
-  //   },
-  //   {
-  //     name: "Wgmis",
-  //     author: "wgmis",
-  //     campaign: "wgmis",
-  //   },
-  //   {
-  //     name: "LOVE on LEVERAGE",
-  //     author: "UNLONELY",
-  //     campaign: "LOVE on LEVERAGE",
-  //   },
-  //   {
-  //     name: "Simp",
-  //     author: "$simp",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "Christmas",
-  //     author: null,
-  //     campaign: "christmas",
-  //   },
-  //   {
-  //     name: "Firefly",
-  //     author: "Firefly",
-  //     campaign: "firefly",
-  //   },
-  //   {
-  //     name: "Halloween",
-  //     author: null,
-  //     campaign: "halloween",
-  //   },
-  //   {
-  //     name: "Lensjump",
-  //     author: "lensjump",
-  //     campaign: "lensjump",
-  //   },
-  //   {
-  //     name: "Supducks",
-  //     author: "supducks",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "Lens",
-  //     author: "lens",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "Nouns",
-  //     author: "nouns",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "FLS",
-  //     author: "fls",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "Assorted",
-  //     author: "assorted",
-  //     campaign: null,
-  //   },
-  //   {
-  //     name: "Explore",
-  //     author: null,
-  //     campaign: "explore",
-  //   },
-  //   {
-  //     name: "Icons",
-  //     author: null,
-  //     campaign: null,
-  //   },
-  // ];
 
   const [currentTab, setCurrentTab] = useState(tabArray?.[0]);
   const store = useStore();
+
+  useEffect(() => {
+    if (data) {
+      setCurrentTab(tabArray?.[0]);
+    }
+  }, [data]);
 
   return (
     <>
@@ -331,17 +207,19 @@ export const StickerPanel = () => {
             {currentTab?.name === "Icons" ? (
               <CompIcons />
             ) : (
-              <TabsCustom
-                defaultQuery={firstLetterCapital(currentTab?.author)}
-                author={currentTab?.author}
-                campaignName={currentTab?.campaign}
-                getAssetsFn={
-                  currentTab?.author === "lensjump"
-                    ? getFeaturedAssets
-                    : getAssetByQuery
-                }
-                type="props"
-              />
+              currentTab && (
+                <TabsCustom
+                  defaultQuery={firstLetterCapital(currentTab?.author)}
+                  author={currentTab?.author}
+                  campaignName={currentTab?.campaign}
+                  getAssetsFn={
+                    currentTab?.author === "lensjump"
+                      ? getFeaturedAssets
+                      : getAssetByQuery
+                  }
+                  type="props"
+                />
+              )
             )}
           </div>
         </Tabs>
