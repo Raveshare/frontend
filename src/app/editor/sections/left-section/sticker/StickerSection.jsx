@@ -7,7 +7,11 @@ import { getKey } from "polotno/utils/validate-key";
 import styled from "polotno/utils/styled";
 import { useInfiniteAPI } from "polotno/utils/use-api";
 import { ImagesGrid } from "polotno/side-panel/images-grid";
-import { getAssetByQuery, getFeaturedAssets } from "../../../../../services";
+import {
+  getAssetByQuery,
+  getAuthors,
+  getFeaturedAssets,
+} from "../../../../../services";
 import {
   SearchComponent,
   StickerReacTour,
@@ -26,6 +30,8 @@ import {
   Tab,
   TabPanel,
 } from "@material-tailwind/react";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { useAppAuth } from "../../../../../hooks/app";
 
 const API = "https://api.polotno.dev/api";
 // const API = 'http://localhost:3001/api';
@@ -146,135 +152,147 @@ export const CompIcons = () => {
 };
 
 export const StickerPanel = () => {
+  const { isAuthenticated } = useAppAuth();
+
+  const { data } = useQuery({
+    key: ["assets-authors"],
+    queryFn: getAuthors,
+    enabled: isAuthenticated ? true : false,
+  });
+
+  const tabArray = data?.data || [];
+  console.log("tabArray", tabArray?.[0]);
+
   // Halloween use 'H' and not 'h' - BE Response
-  const tabArray = [
-    {
-      name: "Base",
-      author: "base",
-      campaign: null,
-    },
-    {
-      name: "Cybershakti",
-      author: "cybershakti",
-      campaign: "shakti",
-    },
-    {
-      name: "Gloom",
-      author: "$GLOOM",
-      campaign: "Gloom",
-    },
-    {
-      name: "Chicken",
-      author: "chicken",
-      campaign: "chicken",
-    },
-    {
-      name: "Otto",
-      author: "otto",
-      campaign: "otto",
-    },
-    {
-      name: "Monniverse",
-      author: "monniverse",
-      campaign: "monniverse",
-    },
-    {
-      name: "Enjoy",
-      author: "enjoy",
-      campaign: "enjoy",
-    },
-    {
-      name: "Frame",
-      author: "FRAME",
-      campaign: "$frame",
-    },
-    {
-      name: "Mfermojis",
-      author: "mfermojis",
-      campaign: "explore",
-    },
-    {
-      name: "Degen",
-      author: null,
-      campaign: "degen",
-    },
-    {
-      name: "Huddle",
-      author: "huddle",
-      campaign: "huddle",
-    },
-    {
-      name: "Wgmis",
-      author: "wgmis",
-      campaign: "wgmis",
-    },
-    {
-      name: "LOVE on LEVERAGE",
-      author: "UNLONELY",
-      campaign: "LOVE on LEVERAGE",
-    },
-    {
-      name: "Simp",
-      author: "$simp",
-      campaign: null,
-    },
-    {
-      name: "Christmas",
-      author: null,
-      campaign: "christmas",
-    },
-    {
-      name: "Firefly",
-      author: "Firefly",
-      campaign: "firefly",
-    },
-    {
-      name: "Halloween",
-      author: null,
-      campaign: "halloween",
-    },
-    {
-      name: "Lensjump",
-      author: "lensjump",
-      campaign: "lensjump",
-    },
-    {
-      name: "Supducks",
-      author: "supducks",
-      campaign: null,
-    },
-    {
-      name: "Lens",
-      author: "lens",
-      campaign: null,
-    },
-    {
-      name: "Nouns",
-      author: "nouns",
-      campaign: null,
-    },
-    {
-      name: "FLS",
-      author: "fls",
-      campaign: null,
-    },
-    {
-      name: "Assorted",
-      author: "assorted",
-      campaign: null,
-    },
-    {
-      name: "Explore",
-      author: null,
-      campaign: "explore",
-    },
-    {
-      name: "Icons",
-      author: null,
-      campaign: null,
-    },
-  ];
-  const [currentTab, setCurrentTab] = useState(tabArray[0]);
+  // const tabArray2 = [
+  //   {
+  //     name: "Base",
+  //     author: "base",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "Cybershakti",
+  //     author: "cybershakti",
+  //     campaign: "shakti",
+  //   },
+  //   {
+  //     name: "Gloom",
+  //     author: "$GLOOM",
+  //     campaign: "Gloom",
+  //   },
+  //   {
+  //     name: "Chicken",
+  //     author: "chicken",
+  //     campaign: "chicken",
+  //   },
+  //   {
+  //     name: "Otto",
+  //     author: "otto",
+  //     campaign: "otto",
+  //   },
+  //   {
+  //     name: "Monniverse",
+  //     author: "monniverse",
+  //     campaign: "monniverse",
+  //   },
+  //   {
+  //     name: "Enjoy",
+  //     author: "enjoy",
+  //     campaign: "enjoy",
+  //   },
+  //   {
+  //     name: "Frame",
+  //     author: "FRAME",
+  //     campaign: "$frame",
+  //   },
+  //   {
+  //     name: "Mfermojis",
+  //     author: "mfermojis",
+  //     campaign: "explore",
+  //   },
+  //   {
+  //     name: "Degen",
+  //     author: null,
+  //     campaign: "degen",
+  //   },
+  //   {
+  //     name: "Huddle",
+  //     author: "huddle",
+  //     campaign: "huddle",
+  //   },
+  //   {
+  //     name: "Wgmis",
+  //     author: "wgmis",
+  //     campaign: "wgmis",
+  //   },
+  //   {
+  //     name: "LOVE on LEVERAGE",
+  //     author: "UNLONELY",
+  //     campaign: "LOVE on LEVERAGE",
+  //   },
+  //   {
+  //     name: "Simp",
+  //     author: "$simp",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "Christmas",
+  //     author: null,
+  //     campaign: "christmas",
+  //   },
+  //   {
+  //     name: "Firefly",
+  //     author: "Firefly",
+  //     campaign: "firefly",
+  //   },
+  //   {
+  //     name: "Halloween",
+  //     author: null,
+  //     campaign: "halloween",
+  //   },
+  //   {
+  //     name: "Lensjump",
+  //     author: "lensjump",
+  //     campaign: "lensjump",
+  //   },
+  //   {
+  //     name: "Supducks",
+  //     author: "supducks",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "Lens",
+  //     author: "lens",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "Nouns",
+  //     author: "nouns",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "FLS",
+  //     author: "fls",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "Assorted",
+  //     author: "assorted",
+  //     campaign: null,
+  //   },
+  //   {
+  //     name: "Explore",
+  //     author: null,
+  //     campaign: "explore",
+  //   },
+  //   {
+  //     name: "Icons",
+  //     author: null,
+  //     campaign: null,
+  //   },
+  // ];
+
+  const [currentTab, setCurrentTab] = useState(tabArray?.[0]);
   const store = useStore();
 
   return (
@@ -282,20 +300,26 @@ export const StickerPanel = () => {
       <div className="flex flex-col h-full">
         {/* New Material Tailwind Buttons / Tabs : */}
         {/* Reference Link: https://www.material-tailwind.com/docs/react/tabs */}
-        <Tabs id="custom-animation" value={currentTab?.name}>
+        <Tabs
+          id="custom-animation"
+          value={firstLetterCapital(currentTab?.author)}
+        >
           <TabsWithArrows
             tabsHeaders={
               <>
                 <TabsHeader className="overflow-x-auto">
-                  {tabArray.map((tab, index) => (
+                  {tabArray?.map((tab, index) => (
                     <Tab
                       key={index}
-                      value={tab?.name}
+                      value={firstLetterCapital(tab?.author)}
                       onClick={() => {
                         setCurrentTab(tab);
                       }}
                     >
-                      <div className="appFont"> {tab?.name} </div>
+                      <div className="appFont">
+                        {" "}
+                        {firstLetterCapital(tab?.author)}{" "}
+                      </div>
                     </Tab>
                   ))}
                 </TabsHeader>
@@ -308,7 +332,7 @@ export const StickerPanel = () => {
               <CompIcons />
             ) : (
               <TabsCustom
-                defaultQuery={currentTab?.name}
+                defaultQuery={firstLetterCapital(currentTab?.author)}
                 author={currentTab?.author}
                 campaignName={currentTab?.campaign}
                 getAssetsFn={

@@ -476,6 +476,12 @@ export const getFeaturedAssets = async (type, page) => {
   };
 };
 
+// get all authors
+export const getAuthors = async () => {
+  const result = await api.get(`${API}/asset/all-authors`);
+  return result?.data;
+};
+
 // asset apis end
 
 // Remove Background API
