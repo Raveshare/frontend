@@ -47,17 +47,25 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
   const selectedNetwork = farcasterStates?.frameData?.selectedNetwork;
+  const isCustomCurrMint = farcasterStates?.frameData?.isCustomCurrMint;
   const TxFeeForDeployment = 0.00009;
-  const txFeeForMint = 0.00002;
+  const txFeeForMint = isCustomCurrMint ? 0.00001 : 0.00002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
 
-  const payForMints = Number(
+  const payForMintsForCustomCurr = Number(TxFeeForDeployment)
+    .toFixed(18)
+    .toString();
+  const payForMintsForSponsored = Number(
     txFeeForMint * numberOfExtraMints + TxFeeForDeployment
   )
     .toFixed(18)
     .toString();
+
+  const payForMints = isCustomCurrMint
+    ? payForMintsForCustomCurr
+    : payForMintsForSponsored;
 
   const { config, error: prapareError } = usePrepareSendTransaction({
     to: topUpAccount, // users wallet

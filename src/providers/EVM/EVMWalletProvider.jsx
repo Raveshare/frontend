@@ -36,12 +36,12 @@ import {
   WALLETCONNECT_PROJECT_ID,
 } from "../../services";
 import { publicActions } from "viem";
-import { degenChain } from "../../data";
+import { degen, ham } from "../../data";
 
 const { chains, publicClient } = configureChains(
   ENVIRONMENT === "production"
-    ? [base, mainnet, zora, optimism, arbitrum, polygon, degenChain]
-    : [base, degenChain, baseSepolia, sepolia, polygonMumbai],
+    ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham]
+    : [base, baseSepolia, sepolia, polygonMumbai, degen, ham],
   [alchemyProvider({ apiKey: ALCHEMY_API_KEY }), publicProvider()]
 );
 
