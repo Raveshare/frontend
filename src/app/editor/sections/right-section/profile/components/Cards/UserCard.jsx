@@ -35,9 +35,9 @@ const UserCard = ({ username }) => {
 
   const inviteCodeList = data?.message;
 
-  const handleCopy = (copyParam) => {
+  const handleCopy = (scope, copyParam) => {
     navigator.clipboard.writeText(copyParam);
-    toast.success(`${copyParam} copied`);
+    toast.success(`${scope} copied`);
   };
 
   const fnGenerateNewInviteCode = async () => {
@@ -194,7 +194,7 @@ const UserCard = ({ username }) => {
           <div className="flex flex-col mt-2">
             <div className="">@{username ? username : "posteruser"}</div>
             <div
-              onClick={() => handleCopy(address)}
+              onClick={() => handleCopy(`Address`, address)}
               className="flex align-middle mt-2 bg-blue-gray-50 p-1 pl-2 pr-2 rounded-md cursor-pointer w-fit"
             >
               {address && addressCrop(address)}
@@ -217,7 +217,7 @@ const UserCard = ({ username }) => {
                   {inviteCodesArr?.length > 0 ? (
                     <div
                       className="flex align-middle "
-                      onClick={() => handleCopy(inviteCodesArr)}
+                      onClick={() => handleCopy(`Invite Code`, inviteCodesArr)}
                     >
                       <div className="">{inviteCodesArr[0]}</div>
                       <BiCopy className="ml-1 mt-1 cursor-pointer" size={12} />

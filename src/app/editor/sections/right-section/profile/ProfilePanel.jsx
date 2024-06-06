@@ -165,7 +165,7 @@ const ProfilePanel = () => {
                   <>
                     {pointHistoryData && pointHistoryData?.message?.length > 0
                       ? pointHistoryData?.message
-                          ?.slice(1)
+                          ?.slice(1).reverse()
                           .map((point, index) => (
                             <PointHistoryCard
                               pointsId={index + 1}
