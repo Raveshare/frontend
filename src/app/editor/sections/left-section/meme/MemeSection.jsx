@@ -74,7 +74,7 @@ export const MemePanel = () => {
             <SearchComponent
               query={query}
               setQuery={setQuery}
-              placeholder="Search icons"
+              placeholder="Search memes"
               funtion={() => mutateAsync(query)}
             />
           </div>

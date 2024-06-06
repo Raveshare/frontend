@@ -5,9 +5,12 @@ import {
   Card,
   List,
   ListItem,
+  Option,
+  Select,
   Spinner,
   Typography,
 } from "@material-tailwind/react";
+
 import { useEstimateFeesPerGas, useAccount, useSwitchChain } from "wagmi";
 import { base, baseSepolia } from "wagmi/chains";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
@@ -16,10 +19,16 @@ import { toast } from "react-toastify";
 import { ENVIRONMENT } from "../../../../../../../services";
 import { createConfig } from "wagmi";
 import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
+import { useFeeData, useNetwork, useSwitchNetwork } from "wagmi";
+import {
+  useSendTransaction,
+  usePrepareSendTransaction,
+  useWaitForTransaction,
+} from "wagmi";
+import { base } from "viem/chains";
 
-const network = ENVIRONMENT === "production" ? base : baseSepolia;
 
-const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
+const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
   const { chain } = useAccount();
@@ -44,13 +53,18 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
+  const selectedNetwork = farcasterStates?.frameData?.selectedNetwork;
+  const isCustomCurrMint = farcasterStates?.frameData?.isCustomCurrMint;
   const TxFeeForDeployment = 0.00009;
-  const txFeeForMint = 0.00002;
+  const txFeeForMint = isCustomCurrMint ? 0.00001 : 0.00002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
 
-  const payForMints = Number(
+  const payForMintsForCustomCurr = Number(TxFeeForDeployment)
+    .toFixed(18)
+    .toString();
+  const payForMintsForSponsored = Number(
     txFeeForMint * numberOfExtraMints + TxFeeForDeployment
   )
     .toFixed(18)
@@ -66,6 +80,17 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
   config.transports = {
     [network.id]: http(),
   };
+  const payForMints = isCustomCurrMint
+    ? payForMintsForCustomCurr
+    : payForMintsForSponsored;
+
+  const { config, error: prapareError } = usePrepareSendTransaction({
+    to: topUpAccount, // users wallet
+    value: extraPayForMints
+      ? parseEther(extraPayForMints)
+      : parseEther(payForMints),
+    chainId: chain?.id,
+  });
 
   const { data, isPending, isSuccess, isError, error, sendTransaction } =
     useSendTransaction({ config });
@@ -80,6 +105,22 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     hash: data?.hash,
   });
 
+  const handleChange = (e, key) => {
+    const { name, value } = e.target;
+
+    setFarcasterStates((prevState) => {
+      // Create a new state based on the previous state
+      const newState = {
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          [key]: value,
+        },
+      };
+      return newState;
+    });
+  };
+
   // change the frameData isTopup to true if transaction is success
   useEffect(() => {
     if (isTxSuccess) {
@@ -92,7 +133,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
       });
 
       setTimeout(() => {
-        refetch();
+        refetchWallet();
       }, 2000);
     }
   }, [isTxSuccess]);
@@ -131,7 +172,27 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     }
   }, [isError, isTxError]);
 
-  if (chain?.id !== network?.id) {
+  if (farcasterStates.frameData.isCreatorSponsored && chain?.id !== base?.id) {
+    return (
+      <Card className="my-2">
+        <List>
+          <ListItem
+            className="flex justify-between items-center gap-2"
+            onClick={() => switchNetwork && switchNetwork(base?.id)}
+          >
+            <Typography variant="h6" color="blue-gray">
+              Click here to switch to Base chain
+            </Typography>
+          </ListItem>
+        </List>
+      </Card>
+    );
+  }
+
+  if (
+    farcasterStates.frameData.isCustomCurrMint &&
+    chain?.id !== selectedNetwork?.id
+  ) {
     return (
       <Card className="my-2">
         <List>
@@ -144,7 +205,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
             }
           >
             <Typography variant="h6" color="blue-gray">
-              Please switch to {network?.name} network
+              Click here to switch to {selectedNetwork?.name}
             </Typography>
           </ListItem>
         </List>
@@ -191,9 +252,45 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
               <Typography variant="h6" color="red">
                 Insufficient balance please topup
               </Typography>
+
+              {/* <div className="flex">
+                <div className="flex flex-col py-2 mx-2">
+                  <Select
+                    animate={{
+                      mount: { y: 0 },
+                      unmount: { y: 25 },
+                    }}
+                    label="Custom Currency"
+                    name="Custom Currency"
+                    id="idCustomCurrency"
+                    value={farcasterStates?.frameData?.customCurrName}
+                    onChange={(e) => handleChange(e, "customCurrName")}
+                  >
+                    {["DEGEN"].map((currency) => (
+                      <Option
+                        key={currency}
+                        onClick={() => {
+                          setFarcasterStates({
+                            ...farcasterStates,
+                            frameData: {
+                              ...farcasterStates.frameData,
+                              customCurrName: currency,
+                            },
+                          });
+                        }}
+                      >
+                        {currency.toUpperCase()}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </div> */}
+
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}
-                {network?.name} {network?.nativeCurrency?.symbol}
+                <>
+                  {chain?.name} {chain?.nativeCurrency?.symbol}
+                </>
               </Typography>
 
               <div className="w-full flex justify-between items-center">

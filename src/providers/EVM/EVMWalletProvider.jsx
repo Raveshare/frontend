@@ -17,7 +17,15 @@ import {
   WALLETCONNECT_PROJECT_ID,
 } from "../../services"; 
 import { WagmiProvider, http  } from "wagmi";
+import { publicActions } from "viem";
+import { degen, ham } from "../../data";
 
+const { chains, publicClient } = configureChains(
+  ENVIRONMENT === "production"
+    ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham]
+    : [base, baseSepolia, sepolia, polygonMumbai, degen, ham],
+  [alchemyProvider({ apiKey: ALCHEMY_API_KEY }), publicProvider()]
+);
 
 export const config = getDefaultConfig({
   appName: "Poster.fun",

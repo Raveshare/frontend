@@ -4,6 +4,8 @@ import {
   ZoraLogo,
   OpMainnetLogo,
   arbitrumLogo,
+  degenLogo,
+  HamLogo,
 } from "../assets";
 
 const chainLogos = {
@@ -15,6 +17,8 @@ const chainLogos = {
   7777777: ZoraLogo, // Zora
   10: OpMainnetLogo, // Optimism
   42161: arbitrumLogo, // Arbitrum
+  666666666: degenLogo, // Degen
+  5112: HamLogo,
 };
 
 export const chainLogo = (chainId) => {

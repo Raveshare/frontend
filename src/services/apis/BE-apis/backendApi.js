@@ -476,6 +476,12 @@ export const getFeaturedAssets = async (type, page) => {
   };
 };
 
+// get all authors
+export const getAuthors = async () => {
+  const result = await api.get(`${API}/asset/all-authors`);
+  return result?.data;
+};
+
 // asset apis end
 
 // Remove Background API
@@ -603,6 +609,15 @@ export const updateUserProfile = async (data) => {
 
 export const claimReward = async (data) => {
   const result = await api.post(`${API}/user/loyalty/claim-reward`, data);
+
+  return {
+    data: result?.data,
+  };
+};
+
+// Generate Invite code
+export const apiGenerateInviteCode = async () => {
+  const result = await api.post(`${API}/user/loyalty/generate-code`);
 
   return {
     data: result?.data,

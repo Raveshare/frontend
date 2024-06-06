@@ -311,11 +311,7 @@ const LenspostTemplates = () => {
             hasSeeMore
             seeMoreFn={() => store.openSidePanel("Elements")}
           />
-          <CustomHorizontalScroller
-            type="props"
-            author="cybershakti"
-            campaign="shakti"
-          />
+          <CustomHorizontalScroller type="props" author="ham" campaign={null} />
 
           <div className="ml-2 mt-4 mb-1 "> Lenspost Templates </div>
 

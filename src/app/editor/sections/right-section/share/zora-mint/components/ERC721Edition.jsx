@@ -31,6 +31,7 @@ import {
   APP_ETH_ADDRESS,
   ERROR,
   LOCAL_STORAGE,
+  MINT_URL,
 } from "../../../../../../../data";
 import {
   ENVIRONMENT,
@@ -40,6 +41,7 @@ import {
 } from "../../../../../../../services";
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
 import {
+  chainLogo,
   errorMessage,
   getFromLocalStorage,
   saveToLocalStorage,
@@ -83,6 +85,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // farcaster data states
   const [farTxHash, setFarTxHash] = useState("");
+  const [slug, setSlug] = useState("");
 
   const {
     createSplit,
@@ -190,18 +193,20 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   // networks data for samart posts
   const networksDataSmartPosts = () => {
     const networks = ENVIRONMENT === "production" ? [8453, 7777777] : [5]; // supported chains for Lens samart posts
+    const unsupportedChain = chains.slice(0, -3);
 
     // filter the chains for smart posts
     const filteredChains = isOpenAction
       ? chains.filter((chain) => {
           return networks?.includes(chain?.id);
         })
-      : chains.slice(1);
+      : chains.slice(0, -3);
 
     const isUnsupportedChain = () => {
       if (
-        (isOpenAction && !networks?.includes(chain?.id)) ||
-        chainId === chains[0]?.id
+        chain?.unsupported ||
+        (isOpenAction && !networks?.includes(chain?.id))
+        // chains.map((chain, index) => unsupportedChain.includes(chain))
       ) {
         return true;
       }
@@ -848,7 +853,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const storeZoraLink = () => {
     let paramsData = {
       canvasId: contextCanvasIdRef.current,
-      mintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
+      mintLink: receipt?.logs[0]?.address,
       chain: chain?.name,
       contractType: 721,
       chainId: chain?.id,
@@ -858,9 +863,11 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     storeZoraLinkMutation(paramsData)
       .then((res) => {
         console.log("StoreZoraLink", res?.slug);
+        setSlug(res?.slug);
       })
       .catch((error) => {
         console.log("StoreZoraLinkErr", errorMessage(error));
+        setIsShareLoading(false);
       });
   };
 
@@ -936,21 +943,22 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // share on farcater
   useEffect(() => {
-    console.log("fc");
-    console.log(isFarcaster);
-    if (isFarcaster && receipt?.logs[0]?.address) {
+    if (isFarcaster && slug) {
       const canvasParams = {
-        zoraMintLink: zoraURLErc721(receipt?.logs[0]?.address, chain?.id),
+        zoraMintLink: MINT_URL + "/mint/" + slug,
         channelId: farcasterStates.channel?.id || "",
       };
 
       handleShare(canvasParams, "farcaster");
     }
-  }, [isSuccess]);
+  }, [slug]);
 
   // store the zora link in DB
   useEffect(() => {
     if (isSuccess && receipt?.logs[0]?.address) {
+      if (isFarcaster) {
+        setIsShareLoading(true);
+      }
       storeZoraLink();
     }
   }, [isSuccess]);
@@ -1004,11 +1012,9 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   return (
     <>
       <ZoraDialog
-        title=" Zora ERC721 Edition"
-        icon={ZoraLogo}
-        isError={
-          isUploadError || isCreateSplitError || isPrepareError || isShareError
-        }
+        title="ERC721 Edition"
+        icon={chainLogo(selectedChainId)}
+        isError={isUploadError || isCreateSplitError || isError || isShareError}
         isLoading={isLoading}
         isCreatingSplit={isCreateSplitLoading}
         isUploadingToIPFS={isUploading}
@@ -1020,6 +1026,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
         data={receipt}
         farTxHash={farTxHash}
         isSuccess={isSuccess}
+        slug={slug}
       />
       {/* Switch Number 1 Start */}
       <div className="mb-4 m-4">

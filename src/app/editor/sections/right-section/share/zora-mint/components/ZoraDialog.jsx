@@ -15,7 +15,7 @@ import { useAccount } from "wagmi";
 import BiCopy from "@meronex/icons/bi/BiCopy";
 import { toast } from "react-toastify";
 import { zoraURLErc721 } from "../utils";
-import { FRAME_URL } from "../../../../../../../data";
+import { FRAME_URL, MINT_URL } from "../../../../../../../data";
 
 const ZoraDialog = ({
   title,
@@ -36,6 +36,7 @@ const ZoraDialog = ({
   frameId,
   isStoringFrameData,
   isDeployingZoraContract,
+  slug,
 }) => {
   const [open, setOpen] = useState(false);
   const { resetState } = useReset();
@@ -149,34 +150,60 @@ const ZoraDialog = ({
                           )}
                         </span>
                       )}
+                      {slug && (
+                        <span className="flex gap-1 items-center">
+                          Mint your
+                          <a
+                            href={MINT_URL + "/mint/" + slug}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-500"
+                          >
+                            NFT
+                          </a>
+                          <BiCopy
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                MINT_URL + "/mint/" + slug
+                              );
+                              setIsCopy({
+                                id: 3,
+                              });
+                            }}
+                            className="cursor-pointer"
+                          />
+                          {isCopy?.id === 3 && (
+                            <span className="text-green-500">Copied</span>
+                          )}
+                        </span>
+                      )}
                     </>
                   )
                 : isSuccess && (
                     <>
                       Transaction is successful. <br />
                       <span className="text-md flex items-center gap-1">
-                        Check your edition on{" "}
+                        Mint your{" "}
                         <a
-                          href={zoraURLErc721(
-                            data?.logs[0]?.address,
-                            chain?.id
-                          )}
+                          href={MINT_URL + "/mint/" + slug}
                           target="_blank"
                           rel="noreferrer"
                           className="text-blue-500"
                         >
-                          Zora
+                          NFT
                         </a>
                         <BiCopy
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              zoraURLErc721(data?.logs[0]?.address, chain?.id)
+                              MINT_URL + "/mint/" + slug
                             );
-                            setIsCopy(true);
+                            setIsCopy({
+                              id: 4,
+                            });
                           }}
                           className="cursor-pointer"
                         />
-                        {isCopy && (
+                        {isCopy?.id === 4 && (
                           <span className="text-green-500">Copied</span>
                         )}
                       </span>

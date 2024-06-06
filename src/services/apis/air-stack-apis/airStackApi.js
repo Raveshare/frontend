@@ -165,7 +165,7 @@ const getProfileImageQuery = gql`
   query MyQuery($identities: Identity!) {
     Socials(
       input: {
-        filter: { dappName: { _eq: lens }, identity: { _eq: $identities } }
+        filter: { dappName: { _eq: farcaster }, identity: { _eq: $identities } }
         blockchain: ethereum
       }
     ) {
@@ -181,6 +181,7 @@ const getProfileImageQuery = gql`
 `;
 
 export const getProfileImage = async (address) => {
+  
   const variables = {
     identities: address,
   };
@@ -202,6 +203,60 @@ export const getProfileImage = async (address) => {
 
     if (profileImage) {
       return profileImage;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getFarcasterDetailsQuery = gql`
+  query MyQuery($identities: Identity!) {
+    Socials(
+      input: {
+        blockchain: ethereum
+        filter: { dappName: { _eq: farcaster }, identity: { _eq: $identities } }
+      }
+    ) {
+      Social {
+        profileName
+        profileMetadata
+        profileImage
+        profileHandle
+        profileDisplayName
+        profileBio
+        connectedAddresses {
+          address
+        }
+        profileUrl
+        twitterUserName
+      }
+    }
+  }
+`;
+
+export const getFarcasterDetails = async (address) => {
+  const variables = {
+    identities: address,
+  };
+
+  try {
+    const result = await request(
+      AIRSTACK_API,
+      getFarcasterDetailsQuery,
+      variables,
+      {
+        headers: {
+          "x-api-key": AIRSTACK_API_KEY,
+        },
+      }
+    );
+
+    console.log("farcaster airstack res", result);
+
+    const profileDetails = result?.Socials;
+
+    if (profileDetails) {
+      return profileDetails;
     }
   } catch (error) {
     console.log(error);
