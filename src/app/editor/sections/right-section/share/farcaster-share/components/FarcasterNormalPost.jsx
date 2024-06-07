@@ -56,7 +56,6 @@ import { InputBox, InputErrorMsg, NumberInputBox } from "../../../../../common";
 import Topup from "./Topup";
 import {
   useAccount,
-  useContractWrite,
   useWriteContract,
   useSwitchChain,
   useWaitForTransactionReceipt,
@@ -72,7 +71,6 @@ import { XCircleIcon } from "@heroicons/react/24/outline";
 import { useBalance } from "wagmi";
 import { base, baseSepolia } from "viem/chains";
 import { LENSPOST_721_ENALBED_CHAINS } from "../../../../../../../data/constant/enabledChain";
-
 
 const FarcasterNormalPost = () => {
   const { resetState } = useReset();
@@ -489,7 +487,7 @@ const FarcasterNormalPost = () => {
           // Claim the task for the user
           claimReward({
             taskId: 2,
-          });   
+          });
 
           // open the dialog
         } else if (res?.error || res?.reason === "REJECTED") {
@@ -1301,7 +1299,7 @@ const FarcasterNormalPost = () => {
                 <Option
                   key={network?.id}
                   onClick={() => {
-                    switchNetwork(network?.id);
+                    switchChain({ chainId: network?.id });
                     setFarcasterStates({
                       ...farcasterStates,
                       frameData: {

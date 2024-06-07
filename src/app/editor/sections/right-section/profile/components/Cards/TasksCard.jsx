@@ -18,8 +18,8 @@ const TasksCard = ({
   isCompleted,
   modalName,
 }) => {
-
-  const { setOpenedProfileModal, openedModalName, setOpenedModalName } = useContext(Context);
+  const { setOpenedProfileModal, openedModalName, setOpenedModalName } =
+    useContext(Context);
 
   const handleClick = () => {
     if (!isCompleted) {
@@ -31,7 +31,7 @@ const TasksCard = ({
     <>
       <div
         onClick={() => handleClick()}
-        className={`flex flex-col bg-[#F7F7F7] m-4 mt-2 rounded-md  ${
+        className={`flex flex-col bg-[#F7F7F7] m-4 mt-2 rounded-md   ${
           isCompleted ? "" : "hover:bg-[#f3f2f2] cursor-pointer"
         }`}
       >
