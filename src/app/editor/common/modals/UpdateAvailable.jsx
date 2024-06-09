@@ -35,7 +35,7 @@ const UpdateAvailable = () => {
       >
         <DialogHeader className="gap-2 border-b border-gray-300">
           <img
-            src="/OGlogo.png"
+            src="/logo_square_630x630.png"
             alt="brave logo"
             className="h-10 w-10 rounded-lg"
           />

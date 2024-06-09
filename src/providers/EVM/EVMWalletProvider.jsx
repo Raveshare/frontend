@@ -36,8 +36,8 @@ export const config = createConfig({
   projectId: WALLETCONNECT_PROJECT_ID,
   chains:
     ENVIRONMENT === "production"
-      ? [polygon, mainnet, base, zora, optimism, arbitrum]
-      : [polygonMumbai, baseSepolia],
+      ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham]
+      : [base, baseSepolia, polygonMumbai, degen, ham],
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),
@@ -47,6 +47,8 @@ export const config = createConfig({
     [polygonMumbai.id]: http(),
     [baseSepolia.id]: http(),
     [arbitrum.id]: http(),
+    [degen.id]: http(),
+    [ham.id]: http(),
   },
 });
 

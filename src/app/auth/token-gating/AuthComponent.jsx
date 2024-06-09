@@ -156,7 +156,12 @@ const AuthComponent = () => {
             <div className="flex flex-col justify-center text-center flex-wrap m-4 rounded-md">
               <div className="m-2 text-lg">
                 {" "}
-                <img className="h-16 mb-8" src="/logo.png" alt="" />{" "}
+                <img
+                  className="h-16 mb-8"
+                  src="/logo.png"
+                  alt="logo"
+                  loading="lazy"
+                />{" "}
               </div>
               {/* if wallet is disconnected */}
               {!isConnected && !solanaConnected && (

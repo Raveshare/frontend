@@ -8,18 +8,15 @@ import {
   Spinner,
   Typography,
 } from "@material-tailwind/react";
+
 import { useEstimateFeesPerGas, useAccount, useSwitchChain } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { http, parseEther } from "viem";
 import { toast } from "react-toastify";
-import { ENVIRONMENT } from "../../../../../../../services";
-import { createConfig } from "wagmi";
 import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
 
-const network = ENVIRONMENT === "production" ? base : baseSepolia;
-
-const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
+const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
   const { chain } = useAccount();
@@ -37,35 +34,36 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     error: feeError,
     isLoading: isFeeLoading,
   } = useEstimateFeesPerGas({
-    chainId: network?.id,
+    chainId: chain?.id,
     formatUnits: "ether",
   });
 
   const allowedMints = Number(farcasterStates.frameData?.allowedMints);
   const isSufficientBalance = farcasterStates.frameData?.isSufficientBalance;
   const isTopup = farcasterStates.frameData?.isTopup;
+  const selectedNetwork = farcasterStates?.frameData?.selectedNetwork;
+  const isCustomCurrMint = farcasterStates?.frameData?.isCustomCurrMint;
   const TxFeeForDeployment = 0.00009;
-  const txFeeForMint = 0.00002;
+  const txFeeForMint = isCustomCurrMint ? 0.00001 : 0.00002;
 
   //   bcoz first 10 is free so we are subtracting 10 from total mints
   const numberOfExtraMints = allowedMints - sponsored;
 
-  const payForMints = Number(
+  const payForMintsForCustomCurr = Number(TxFeeForDeployment)
+    .toFixed(18)
+    .toString();
+  const payForMintsForSponsored = Number(
     txFeeForMint * numberOfExtraMints + TxFeeForDeployment
   )
     .toFixed(18)
     .toString();
 
-  // const config = createConfig({
-  //   chains: [network],
-  //   transports: {
-  //     [network.id]: http(),
-  //   },
-  // });
-
   config.transports = {
-    [network.id]: http(),
+    [chain.id]: http(),
   };
+  const payForMints = isCustomCurrMint
+    ? payForMintsForCustomCurr
+    : payForMintsForSponsored;
 
   const { data, isPending, isSuccess, isError, error, sendTransaction } =
     useSendTransaction({ config });
@@ -77,8 +75,24 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     isLoading: isTxLoading,
     isSuccess: isTxSuccess,
   } = useWaitForTransactionReceipt({
-    hash: data?.hash,
+    hash: data,
   });
+
+  const handleChange = (e, key) => {
+    const { name, value } = e.target;
+
+    setFarcasterStates((prevState) => {
+      // Create a new state based on the previous state
+      const newState = {
+        ...prevState,
+        frameData: {
+          ...prevState.frameData,
+          [key]: value,
+        },
+      };
+      return newState;
+    });
+  };
 
   // change the frameData isTopup to true if transaction is success
   useEffect(() => {
@@ -92,7 +106,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
       });
 
       setTimeout(() => {
-        refetch();
+        refetchWallet();
       }, 2000);
     }
   }, [isTxSuccess]);
@@ -131,7 +145,27 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
     }
   }, [isError, isTxError]);
 
-  if (chain?.id !== network?.id) {
+  if (farcasterStates.frameData.isCreatorSponsored && chain?.id !== base?.id) {
+    return (
+      <Card className="my-2">
+        <List>
+          <ListItem
+            className="flex justify-between items-center gap-2"
+            onClick={() => switchNetwork && switchNetwork(base?.id)}
+          >
+            <Typography variant="h6" color="blue-gray">
+              Click here to switch to Base chain
+            </Typography>
+          </ListItem>
+        </List>
+      </Card>
+    );
+  }
+
+  if (
+    farcasterStates.frameData.isCustomCurrMint &&
+    chain?.id !== selectedNetwork?.id
+  ) {
     return (
       <Card className="my-2">
         <List>
@@ -144,7 +178,7 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
             }
           >
             <Typography variant="h6" color="blue-gray">
-              Please switch to {network?.name} network
+              Click here to switch to {selectedNetwork?.name}
             </Typography>
           </ListItem>
         </List>
@@ -191,9 +225,12 @@ const Topup = ({ topUpAccount, refetch, balance, sponsored }) => {
               <Typography variant="h6" color="red">
                 Insufficient balance please topup
               </Typography>
+
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}
-                {network?.name} {network?.nativeCurrency?.symbol}
+                <>
+                  {chain?.name} {chain?.nativeCurrency?.symbol}
+                </>
               </Typography>
 
               <div className="w-full flex justify-between items-center">
