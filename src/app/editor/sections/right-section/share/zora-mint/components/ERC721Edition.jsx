@@ -21,11 +21,10 @@ import { toast } from "react-toastify";
 import {
   useAccount,
   useChainId,
-  useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
-  useSwitchNetwork,
-  useWaitForTransaction,
+  useWriteContract,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
+  useConfig,
 } from "wagmi";
 import { useAppAuth, useLocalStorage } from "../../../../../../../hooks/app";
 import {
@@ -62,13 +61,17 @@ import {
   mintToXchain,
 } from "../../../../../../../services/apis/BE-apis";
 import { zoraURLErc721 } from "../utils/zoraURL";
+import { ZoraLogo } from "../../../../../../../assets";
+import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
+import { http } from "viem";
 
 const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { address } = useAccount();
   const { isAuthenticated } = useAppAuth();
   const { isFarcasterAuth, lensAuth, dispatcher } = useLocalStorage();
   const chainId = useChainId();
-  const { chains, chain } = useNetwork();
+  const { chain } = useAccount();
+  const { chains } = useConfig();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
   const { openChainModal } = useChainModal();
   const [recipientsEns, setRecipientsEns] = useState([]);
@@ -98,8 +101,8 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     isError: isErrorSwitchNetwork,
     isLoading: isLoadingSwitchNetwork,
     isSuccess: isSuccessSwitchNetwork,
-    switchNetwork,
-  } = useSwitchNetwork();
+    switchChain,
+  } = useSwitchChain();
 
   const {
     zoraErc721Enabled,
@@ -707,26 +710,23 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     return { args: arr };
   };
 
-  // create edition configs
+  config.transports = {
+    [chain?.id]: http(),
+  };
+
   const {
-    config,
+    writeContract,
+    data,
     error: prepareError,
+    isPending: isLoading,
     isError: isPrepareError,
-  } = usePrepareContractWrite({
-    abi: zoraNftCreatorV1Config.abi,
-    address:
-      chain?.id == 8453
-        ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
-        : zoraNftCreatorV1Config.address[chainId],
-    functionName: "createEditionWithReferral",
-    args: handleMintSettings().args,
-  });
-  const { write, data, error, isLoading, isError } = useContractWrite(config);
+  } = useWriteContract(config);
+
   const {
     data: receipt,
     isLoading: isPending,
     isSuccess,
-  } = useWaitForTransaction({ hash: data?.hash });
+  } = useWaitForTransactionReceipt({ hash: data });
 
   // mint on Zora
   const handleSubmit = () => {
@@ -916,10 +916,18 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     if (createSplitData?.splitAddress) {
       console.log("createSplitData", createSplitData);
       setTimeout(() => {
-        write?.();
+        writeContract({
+          abi: zoraNftCreatorV1Config.abi,
+          address:
+            chain?.id == 8453
+              ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
+              : zoraNftCreatorV1Config.address[chainId],
+          functionName: "createEditionWithReferral",
+          args: handleMintSettings().args,
+        });
       }, 1000);
     }
-  }, [isCreateSplitSuccess, write]);
+  }, [isCreateSplitSuccess]);
 
   // create open adition on LENS
   useEffect(() => {
@@ -957,16 +965,16 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // error handling for mint
   useEffect(() => {
-    if (isError) {
-      console.log("mint error", error);
-      toast.error(error.message.split("\n")[0]);
+    if (isPrepareError) {
+      console.log("mint error", prepareError);
+      toast.error(prepareError.message.split("\n")[0]);
     }
 
     if (isPrepareError) {
       console.log("prepare error", prepareError);
       // toast.error(prepareError.message);
     }
-  }, [isError, isPrepareError]);
+  }, [prepareError, isPrepareError]);
 
   // error handling for create split
   useEffect(() => {
@@ -1695,7 +1703,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
           <Button
             className="w-full outline-none flex justify-center items-center gap-2"
             disabled={isLoadingSwitchNetwork}
-            onClick={() => switchNetwork(selectedChainId)}
+            onClick={() => switchChain({ chainId: selectedChainId })}
             color="red"
           >
             {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
@@ -1708,7 +1716,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       ) : (
         <div className="mx-2">
           <Button
-            disabled={!write || networksDataSmartPosts()?.isUnsupportedChain}
+            disabled={isPending || networksDataSmartPosts()?.isUnsupportedChain}
             fullWidth
             // color="yellow"
             onClick={handleSubmit}

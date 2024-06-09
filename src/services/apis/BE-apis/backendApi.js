@@ -615,6 +615,15 @@ export const claimReward = async (data) => {
   };
 };
 
+// Generate Invite code
+export const apiGenerateInviteCode = async () => {
+  const result = await api.post(`${API}/user/loyalty/generate-code`);
+
+  return {
+    data: result?.data,
+  };
+};
+
 export const apiGenerateShareSlug = async (data) => {
   const result = await api.post(
     `${API}/user/canvas/generate-share-slug?canvasId=${data}`

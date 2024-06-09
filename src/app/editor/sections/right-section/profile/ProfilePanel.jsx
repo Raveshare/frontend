@@ -1,38 +1,36 @@
 import React, { useContext, useEffect, useState } from "react";
-import { LogoutBtn, ProfilePanelHeaders } from "./components";
-import iconTrending from "./assets/svgs/iconTrending.svg";
-import {
-  Tabs,
-  Tab,
-  TabsHeader,
-  Select,
-  Option,
-} from "@material-tailwind/react";
+import { ProfilePanelHeaders } from "./components";
+import { Tabs, Tab, TabsHeader, TabsBody } from "@material-tailwind/react";
 import { useQuery } from "@tanstack/react-query";
-import BsGift from "@meronex/icons/bs/BsGift";
-import MdcStarFourPointsOutline from "@meronex/icons/mdc/MdcStarFourPointsOutline";
-import {
-  CardsHeading,
-  LensCard,
-  TasksCard,
-  UserCard,
-} from "./components/Cards";
+import { TaskCardV2 } from "./components/Cards";
 import { useUser } from "../../../../../hooks/user";
 import {
+  apiGetPointsHistory,
   getAllTasks,
   getInviteCode,
 } from "../../../../../services/apis/BE-apis";
-import { ErrorComponent } from "../../../common";
+import {
+  CustomAccordion,
+  ErrorComponent,
+  LoadingAnimatedComponent,
+} from "../../../common";
 import { Context } from "../../../../../providers/context";
-import HiOutlineArrowNarrowRight from "@meronex/icons/hi/HiOutlineArrowNarrowRight";
+import UserCard from "./components/Cards/UserCard";
+
+import farcasterLogo from "../../../../../assets/logos/logoFarcaster.jpg";
+import PointHistoryCard from "./components/Cards/PointHistoryCard";
 
 const ProfilePanel = () => {
   const { setMenu } = useContext(Context);
   const { username } = useUser();
-  const [tasksArr, setTasksArr] = useState([]);
-  const [inviteCodesArr, setInviteCodesArr] = useState([]);
+
   const [selectedTab, setSelectedTab] = useState("tasks");
-  const [openedModal, setOpenedModal] = useState("");
+  const [groupedTasks, setGroupedTasks] = useState({});
+
+  const tabsArr = [
+    { label: "Tasks", value: "tasks" },
+    { label: "Points history", value: "pointsHistory" },
+  ];
 
   const {
     data: taskData,
@@ -44,127 +42,143 @@ const ProfilePanel = () => {
     queryFn: getAllTasks,
   });
 
-  const { data } = useQuery({
+  const { data: inviteCodesData } = useQuery({
     queryKey: ["getInviteCode"],
     queryFn: getInviteCode,
   });
-
   const taskList = taskData?.message;
-  const inviteCodeList = data?.message;
+  const {
+    data: pointHistoryData,
+    isLoading: pointsHistoryIsLoading,
+    isError: pointsHistoryIsError,
+    error: pointsHistoryError,
+  } = useQuery({
+    queryKey: ["getPointsHistory"],
+    queryFn: apiGetPointsHistory,
+  });
+
+  // Group the tasks by campaign :
+  const fnGroupTaskByCampaign = async () => {
+    setGroupedTasks(
+      await taskData?.message?.reduce((acc, task) => {
+        const campaignKey = task.campaign || "Poster";
+        if (!acc[campaignKey]) {
+          acc[campaignKey] = [];
+        }
+        acc[campaignKey].push(task);
+        return acc;
+      }, {})
+    );
+  };
+
+  useEffect(() => {
+    fnGroupTaskByCampaign();
+  }, [taskData]);
 
   return (
     <ProfilePanelHeaders
-      // panelHeader={`Hi @${username || "username"}`}
       panelHeader={`My Profile`}
       panelContent={
         <>
           <div className="flex flex-col align-middle justify-between">
             <UserCard username={username} />
 
-            <div className="flex m-2">
-              <div className="ml-2 text-base font-semibold"> Invite Codes </div>
-              {/* <div className="ml-4 mt-0.5">{inviteCodeList}</div> */}
+            <Tabs value="tasks">
+              <div className="my-1">
+                <TabsHeader className="appFont">
+                  {tabsArr.map(({ label, value }) => (
+                    <Tab
+                      onClick={() => setSelectedTab(value)}
+                      key={value}
+                      value={value}
+                    >
+                      {label}
+                    </Tab>
+                  ))}
+                </TabsHeader>
+              </div>
 
-              {inviteCodeList && (
-                <Select className="" label={"Choose an Invite code"}>
-                  {inviteCodeList.map((val) => {
-                    return <Option>{val}</Option>;
-                  })}
-                </Select>
-              )}
-            </div>
+              <TabsBody>
+                {selectedTab === "tasks" && (
+                  <>
+                    {isLoading ? <LoadingAnimatedComponent /> : null}
+                    {!isLoading && (
+                      <div>
+                        {/* Mapping the grouped tasks and then internal mapping the tasks */}
+                        {groupedTasks &&
+                          Object.entries(groupedTasks).map(
+                            ([campaign, tasks], index) => (
+                              <div key={campaign} className="mx-2">
+                                {/* Accordion for each campaign / group */}
+                                <CustomAccordion
+                                  // customOpen - index of the `groupedTasks` that is to be open by default
+                                  // customOpen={campaign === "farcaster" ? 1 : 0}   // can also be opened by campaign name
+                                  customOpen={index === 0 ? 1 : 0}
+                                  customHeader={
+                                    <>
+                                      <div className="flex items-center gap-2">
+                                        <div className="">
+                                          {campaign === "farcaster" && (
+                                            <img
+                                              src={farcasterLogo} // Assuming this is the same for all tasks
+                                              alt={`${campaign} Tasks`}
+                                              className="w-6 h-6 rounded-xl"
+                                            />
+                                          )}
+                                        </div>
+                                        <div>{`${campaign
+                                          .slice(0, 1)
+                                          .toUpperCase()}${campaign.slice(
+                                          1
+                                        )} Tasks`}</div>
+                                      </div>
+                                    </>
+                                  }
+                                  customBody={
+                                    <>
+                                      {tasks.length > 0
+                                        ? tasks.map((task, index) => (
+                                            <TaskCardV2
+                                              key={index}
+                                              // taskId={task.id}
+                                              taskId={index + 1} // Just to display the task number on FE, internally we use `task.id` Itself
+                                              taskAmount={task.amount}
+                                              isReward={task.isReward}
+                                              isCompleted={task.completed}
+                                              taskName={task.name}
+                                              taskDesc={task.description}
+                                            />
+                                          ))
+                                        : null}
+                                    </>
+                                  }
+                                />
+                              </div>
+                            )
+                          )}
+                      </div>
+                    )}
+                  </>
+                )}
 
-            <hr className="mb-2" />
-
-            {/* <CardsHeading
-              name="Trending"
-              iconImg={iconTrending && iconTrending}
-            /> */}
-            <LensCard />
-
-            <Tabs className="overflow-scroll my-2" value={selectedTab}>
-              <TabsHeader className="relative top-0 mx-2 mb-4">
-                <Tab
-                  value="tasks"
-                  className="appFont"
-                  onClick={() => setSelectedTab("tasks")}
-                >
-                  <CardsHeading
-                    name="Tasks"
-                    icon={<MdcStarFourPointsOutline />}
-                  />
-                </Tab>
-
-                <Tab
-                  value="rewards"
-                  className="appFont"
-                  onClick={() => setSelectedTab("rewards")}
-                >
-                  <CardsHeading name="Rewards" icon={<BsGift />} />
-                </Tab>
-              </TabsHeader>
-
-              {isLoading && (
-                <div className="flex justify-center m-8"> Loading... </div>
-              )}
-              {selectedTab === "tasks" && (
-                <>
-                  {isError && <ErrorComponent error={error} />}
-                  {taskList &&
-                    taskList?.map(
-                      (task) =>
-                        // display only the tasks that are not completed
-                        !task?.completed && (
-                          <div
-                            onClick={() => {
-                              setOpenedModal(task?.tag);
-                            }}
-                          >
-                            <TasksCard
-                              modalName={task?.tag}
-                              isCompleted={task?.completed}
-                              // CardHead={task?.description.split(/\\n/)[0]}
-                              // CardSubHead={task?.description.split(/\\n/)[1]}
-                              CardHead={task?.name}
-                              CardSubHead={task?.description}
-                              NoOfPoints={task?.amount}
+                {selectedTab === "pointsHistory" && (
+                  <>
+                    {pointHistoryData && pointHistoryData?.message?.length > 0
+                      ? pointHistoryData?.message
+                          ?.slice(1)
+                          .map((point, index) => (
+                            <PointHistoryCard
+                              pointsId={index + 1}
+                              pointsReason={point.reason}
+                              pointsAmt={point.amount}
+                              pointsDate={point.createdAt}
                             />
-                          </div>
-                        )
-                    )}
-                </>
-              )}
-
-              {selectedTab === "rewards" && (
-                <>
-                  {isError && <ErrorComponent error={error} />}
-                  {taskList &&
-                    taskList?.map(
-                      (task) =>
-                        // display only the tasks that are completed
-                        task?.completed && (
-                          <TasksCard
-                            modalName={task?.tag}
-                            isCompleted={task?.completed}
-                            // onClickFn={}
-                            // CardHead={task?.description.split(/\\n/)[0]}
-                            // CardSubHead={task?.description.split(/\\n/)[1]}
-                            CardHead={task?.name}
-                            CardSubHead={task?.description}
-                            NoOfPoints={task?.amount}
-                          />
-                        )
-                    )}
-                </>
-              )}
+                          ))
+                      : null}
+                  </>
+                )}
+              </TabsBody>
             </Tabs>
-          </div>
-          <div
-            className="flex flex-row align-middle justify-center cursor-pointer hover:opacity-0.5"
-            onClick={() => setMenu("allTasksnRewards")}
-          >
-            <div className="mr-0.5">View all</div>
-            <HiOutlineArrowNarrowRight className="m-1" />
           </div>
         </>
       }
