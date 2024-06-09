@@ -11,7 +11,7 @@ import {
   Checkbox,
 } from "@material-tailwind/react";
 import { useReset } from "../../../../../../../hooks/app";
-import { useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 import BiCopy from "@meronex/icons/bi/BiCopy";
 import { toast } from "react-toastify";
 import { zoraURLErc721 } from "../utils";
@@ -40,7 +40,7 @@ const ZoraDialog = ({
 }) => {
   const [open, setOpen] = useState(false);
   const { resetState } = useReset();
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   const [isCopy, setIsCopy] = useState({
     id: null,
   });

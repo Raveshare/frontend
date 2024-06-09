@@ -37,7 +37,8 @@ const UserCard = ({ username }) => {
 
   const handleCopy = (scope, copyParam) => {
     navigator.clipboard.writeText(copyParam);
-    toast.success(`${scope} copied`);
+
+    toast.success(`Address copied`);
   };
 
   const fnGenerateNewInviteCode = async () => {
