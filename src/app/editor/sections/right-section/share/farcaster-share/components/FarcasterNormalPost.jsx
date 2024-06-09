@@ -486,7 +486,7 @@ const FarcasterNormalPost = () => {
 
           // Claim the task for the user
           claimReward({
-            taskId: 2,
+            taskId: 3,
           });
 
           // open the dialog
