@@ -35,6 +35,8 @@ export const config = getDefaultConfig({
     [polygonMumbai.id]: http(),
     [baseSepolia.id]: http(),
     [arbitrum.id]: http(),
+    [degen.id]: http(),
+    [ham.id]: http(),
   },
 });
 

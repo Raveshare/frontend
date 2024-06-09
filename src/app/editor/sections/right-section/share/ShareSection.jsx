@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import {useAccount } from "wagmi";
+import { useAccount, useChainId, useChains } from "wagmi";
 // import { Dialog } from "@headlessui/react";
 import EmojiPicker, { EmojiStyle, Emoji } from "emoji-picker-react";
 import { DateTimePicker } from "@atlaskit/datetime-picker";
@@ -14,7 +14,7 @@ import { InputBox } from "../../../common";
 
 const ShareSection = () => {
   const { address, isConnected } = useAccount();
-  const { chains, chain } = useAccount();
+  const chains = useChains();
   const {
     setMenu,
     postName,
