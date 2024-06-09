@@ -1,23 +1,20 @@
-import { useAccount, useSwitchChain } from "wagmi";
+import { useAccount } from "wagmi";
 import ShareButton from "./share/ShareButton";
 import DownloadBtn from "./download/DownloadBtn";
 import { ENVIRONMENT } from "../../../../services";
-import ProfileMenu from "./user/ProfileMenu";
-import LoginBtn from "./auth/LoginBtn";
 import { useAppAuth } from "../../../../hooks/app";
 import { Typography } from "@material-tailwind/react";
 import { EVMWallets, SolanaWallets } from "./auth/wallets";
 import Logo from "./logo/Logo";
 import PointsBtn from "./PointsBtn/PointsBtn";
 import MobileLoginBtn from "./auth/MobileLoginBtn";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import LoginModal from "./auth/LoginModal";
 import { Context } from "../../../../providers/context";
 const TopbarSection = () => {
   const { openedLoginModal } = useContext(Context);
   const { isAuthenticated } = useAppAuth();
   const { chain } = useAccount();
-  const { switchChain } = useSwitchChain();
 
   const isSupportedChain = () => {
     if (ENVIRONMENT === "production") {

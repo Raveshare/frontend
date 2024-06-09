@@ -5,14 +5,12 @@ import {
   Card,
   List,
   ListItem,
-  Option,
-  Select,
   Spinner,
   Typography,
 } from "@material-tailwind/react";
 
 import { useEstimateFeesPerGas, useAccount, useSwitchChain } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { http, parseEther } from "viem";
 import { toast } from "react-toastify";
