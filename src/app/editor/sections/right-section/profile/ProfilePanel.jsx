@@ -137,18 +137,20 @@ const ProfilePanel = () => {
                                   customBody={
                                     <>
                                       {tasks.length > 0
-                                        ? tasks.map((task, index) => (
-                                            <TaskCardV2
-                                              key={index}
-                                              // taskId={task.id}
-                                              taskId={index + 1} // Just to display the task number on FE, internally we use `task.id` Itself
-                                              taskAmount={task.amount}
-                                              isReward={task.isReward}
-                                              isCompleted={task.completed}
-                                              taskName={task.name}
-                                              taskDesc={task.description}
-                                            />
-                                          ))
+                                        ? tasks.map((task, index) =>
+                                            !task.isRecurring ? (
+                                              <TaskCardV2
+                                                key={index}
+                                                // taskId={task.id}
+                                                taskId={index + 1} // Just to display the task number on FE, internally we use `task.id` Itself
+                                                taskAmount={task.amount}
+                                                isReward={task.isReward}
+                                                isCompleted={task.completed}
+                                                taskName={task.name}
+                                                taskDesc={task.description}
+                                              />
+                                            ) : null
+                                          )
                                         : null}
                                     </>
                                   }
@@ -165,7 +167,8 @@ const ProfilePanel = () => {
                   <>
                     {pointHistoryData && pointHistoryData?.message?.length > 0
                       ? pointHistoryData?.message
-                          ?.slice(1).reverse()
+                          ?.slice(1)
+                          .reverse()
                           .map((point, index) => (
                             <PointHistoryCard
                               pointsId={index + 1}
