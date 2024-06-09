@@ -21,10 +21,11 @@ import { toast } from "react-toastify";
 import {
   useAccount,
   useChainId,
-  useWriteContract,
-  useSwitchChain,
-  useWaitForTransactionReceipt,
-  useConfig,
+  useContractWrite,
+  useNetwork,
+  usePrepareContractWrite,
+  useSwitchNetwork,
+  useWaitForTransaction,
 } from "wagmi";
 import { useAppAuth, useLocalStorage } from "../../../../../../../hooks/app";
 import {
@@ -32,7 +33,6 @@ import {
   ERROR,
   LOCAL_STORAGE,
   MINT_URL,
-  ham,
 } from "../../../../../../../data";
 import {
   ENVIRONMENT,
@@ -62,18 +62,13 @@ import {
   mintToXchain,
 } from "../../../../../../../services/apis/BE-apis";
 import { zoraURLErc721 } from "../utils/zoraURL";
-import { ZoraLogo } from "../../../../../../../assets";
-import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
-import { http } from "viem";
-import { degen, polygon } from "viem/chains";
 
 const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { address } = useAccount();
   const { isAuthenticated } = useAppAuth();
   const { isFarcasterAuth, lensAuth, dispatcher } = useLocalStorage();
   const chainId = useChainId();
-  const { chain } = useAccount();
-  const { chains } = useConfig();
+  const { chains, chain } = useNetwork();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
   const { openChainModal } = useChainModal();
   const [recipientsEns, setRecipientsEns] = useState([]);
@@ -103,8 +98,8 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     isError: isErrorSwitchNetwork,
     isLoading: isLoadingSwitchNetwork,
     isSuccess: isSuccessSwitchNetwork,
-    switchChain,
-  } = useSwitchChain();
+    switchNetwork,
+  } = useSwitchNetwork();
 
   const {
     zoraErc721Enabled,
@@ -128,7 +123,6 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     error: uploadError,
     isSuccess: isUploadSuccess,
     isLoading: isUploading,
-    isPending: isUploadPending,
   } = useMutation({
     mutationKey: "uploadToIPFS",
     mutationFn: uploadUserAssetToIPFS,
@@ -186,9 +180,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const isUnsupportedChain = () => {
     // chains[0] is the polygon network
     if (
-      chainId === degen?.id ||
-      chainId === polygon?.id ||
-      chainId === ham?.id ||
+      chainId === chains[0]?.id ||
       chain?.unsupported ||
       chain?.id != selectedChainId
     )
@@ -715,23 +707,26 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     return { args: arr };
   };
 
-  config.transports = {
-    [chain?.id]: http(),
-  };
-
+  // create edition configs
   const {
-    writeContract,
-    data,
+    config,
     error: prepareError,
-    isPending: isLoading,
     isError: isPrepareError,
-  } = useWriteContract(config);
-
+  } = usePrepareContractWrite({
+    abi: zoraNftCreatorV1Config.abi,
+    address:
+      chain?.id == 8453
+        ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
+        : zoraNftCreatorV1Config.address[chainId],
+    functionName: "createEditionWithReferral",
+    args: handleMintSettings().args,
+  });
+  const { write, data, error, isLoading, isError } = useContractWrite(config);
   const {
     data: receipt,
     isLoading: isPending,
     isSuccess,
-  } = useWaitForTransactionReceipt({ hash: data });
+  } = useWaitForTransaction({ hash: data?.hash });
 
   // mint on Zora
   const handleSubmit = () => {
@@ -921,18 +916,10 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     if (createSplitData?.splitAddress) {
       console.log("createSplitData", createSplitData);
       setTimeout(() => {
-        writeContract({
-          abi: zoraNftCreatorV1Config.abi,
-          address:
-            chain?.id == 8453
-              ? "0x58C3ccB2dcb9384E5AB9111CD1a5DEA916B0f33c"
-              : zoraNftCreatorV1Config.address[chainId],
-          functionName: "createEditionWithReferral",
-          args: handleMintSettings().args,
-        });
+        write?.();
       }, 1000);
     }
-  }, [isCreateSplitSuccess]);
+  }, [isCreateSplitSuccess, write]);
 
   // create open adition on LENS
   useEffect(() => {
@@ -970,16 +957,16 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // error handling for mint
   useEffect(() => {
-    if (isPrepareError) {
-      console.log("mint error", prepareError);
-      toast.error(prepareError.message.split("\n")[0]);
+    if (isError) {
+      console.log("mint error", error);
+      toast.error(error.message.split("\n")[0]);
     }
 
     if (isPrepareError) {
       console.log("prepare error", prepareError);
       // toast.error(prepareError.message);
     }
-  }, [prepareError, isPrepareError]);
+  }, [isError, isPrepareError]);
 
   // error handling for create split
   useEffect(() => {
@@ -1019,10 +1006,10 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       <ZoraDialog
         title="ERC721 Edition"
         icon={chainLogo(selectedChainId)}
-        isError={isUploadError || isCreateSplitError || isShareError}
+        isError={isUploadError || isCreateSplitError || isError || isShareError}
         isLoading={isLoading}
         isCreatingSplit={isCreateSplitLoading}
-        isUploadingToIPFS={isUploadPending}
+        isUploadingToIPFS={isUploading}
         isPending={isPending}
         isShareLoading={isShareLoading}
         isShareSuccess={isShareSuccess}
@@ -1708,7 +1695,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
           <Button
             className="w-full outline-none flex justify-center items-center gap-2"
             disabled={isLoadingSwitchNetwork}
-            onClick={() => switchChain({ chainId: selectedChainId })}
+            onClick={() => switchNetwork(selectedChainId)}
             color="red"
           >
             {isLoadingSwitchNetwork ? "Switching" : "Switch"} to{" "}
@@ -1721,7 +1708,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       ) : (
         <div className="mx-2">
           <Button
-            disabled={isPending || networksDataSmartPosts()?.isUnsupportedChain}
+            disabled={!write || networksDataSmartPosts()?.isUnsupportedChain}
             fullWidth
             // color="yellow"
             onClick={handleSubmit}

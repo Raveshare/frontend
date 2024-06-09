@@ -165,7 +165,7 @@ const getProfileImageQuery = gql`
   query MyQuery($identities: Identity!) {
     Socials(
       input: {
-        filter: { dappName: { _eq: farcaster }, identity: { _eq: $identities } }
+        filter: { dappName: { _eq: lens }, identity: { _eq: $identities } }
         blockchain: ethereum
       }
     ) {

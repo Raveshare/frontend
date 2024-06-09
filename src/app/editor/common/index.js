@@ -31,7 +31,6 @@ import Networks from "./modals/Networks";
 
 import ShareWithTagsModal from "../sections/left-section/design/components/modals/ShareWithTagsModal";
 import UpdateAvailable from "./modals/UpdateAvailable";
-import CustomAccordion  from "./elements/CustomAccordion";
 
 export {
   CustomImageComponent,
@@ -61,5 +60,4 @@ export {
   ShareWithTagsModal,
   Networks,
   UpdateAvailable,
-  CustomAccordion,
 };

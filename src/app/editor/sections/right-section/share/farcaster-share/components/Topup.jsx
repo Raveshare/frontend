@@ -10,32 +10,35 @@ import {
   Spinner,
   Typography,
 } from "@material-tailwind/react";
-
-import { useEstimateFeesPerGas, useAccount, useSwitchChain } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
-import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
-import { http, parseEther } from "viem";
+import { useFeeData, useNetwork, useSwitchNetwork } from "wagmi";
+import {
+  useSendTransaction,
+  usePrepareSendTransaction,
+  useWaitForTransaction,
+} from "wagmi";
+import { parseEther } from "viem";
 import { toast } from "react-toastify";
-import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
+import { ENVIRONMENT } from "../../../../../../../services";
+import { base } from "viem/chains";
 
 const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
-  const { chain } = useAccount();
+  const { chain } = useNetwork();
   const {
     data: switchData,
     isLoading: switchLoading,
     isError: switchError,
     error: switchErrorData,
-    switchChain,
-  } = useSwitchChain();
+    switchNetwork,
+  } = useSwitchNetwork();
 
   const {
     data: feeData,
     isError: isFeeError,
     error: feeError,
     isLoading: isFeeLoading,
-  } = useEstimateFeesPerGas({
+  } = useFeeData({
     chainId: chain?.id,
     formatUnits: "ether",
   });
@@ -60,15 +63,20 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
-  config.transports = {
-    [chain.id]: http(),
-  };
   const payForMints = isCustomCurrMint
     ? payForMintsForCustomCurr
     : payForMintsForSponsored;
 
-  const { data, isPending, isSuccess, isError, error, sendTransaction } =
-    useSendTransaction({ config });
+  const { config, error: prapareError } = usePrepareSendTransaction({
+    to: topUpAccount, // users wallet
+    value: extraPayForMints
+      ? parseEther(extraPayForMints)
+      : parseEther(payForMints),
+    chainId: chain?.id,
+  });
+
+  const { data, isLoading, isSuccess, isError, error, sendTransaction } =
+    useSendTransaction(config);
 
   const {
     data: txData,
@@ -76,8 +84,8 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     error: txError,
     isLoading: isTxLoading,
     isSuccess: isTxSuccess,
-  } = useWaitForTransactionReceipt({
-    hash: data,
+  } = useWaitForTransaction({
+    hash: data?.hash,
   });
 
   const handleChange = (e, key) => {
@@ -139,10 +147,8 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   // get the error message
   useEffect(() => {
     if (isError) {
-      console.log(error);
       toast.error(error?.message.split("\n")[0]);
     } else if (isTxError) {
-      console.log(txError);
       toast.error(txError?.message.split("\n")[0]);
     }
   }, [isError, isTxError]);
@@ -173,11 +179,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() =>
-              switchChain({
-                chainId: network?.id,
-              })
-            }
+            onClick={() => switchNetwork && switchNetwork(selectedNetwork?.id)}
           >
             <Typography variant="h6" color="blue-gray">
               Click here to switch to {selectedNetwork?.name}
@@ -228,6 +230,39 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
                 Insufficient balance please topup
               </Typography>
 
+              {/* <div className="flex">
+                <div className="flex flex-col py-2 mx-2">
+                  <Select
+                    animate={{
+                      mount: { y: 0 },
+                      unmount: { y: 25 },
+                    }}
+                    label="Custom Currency"
+                    name="Custom Currency"
+                    id="idCustomCurrency"
+                    value={farcasterStates?.frameData?.customCurrName}
+                    onChange={(e) => handleChange(e, "customCurrName")}
+                  >
+                    {["DEGEN"].map((currency) => (
+                      <Option
+                        key={currency}
+                        onClick={() => {
+                          setFarcasterStates({
+                            ...farcasterStates,
+                            frameData: {
+                              ...farcasterStates.frameData,
+                              customCurrName: currency,
+                            },
+                          });
+                        }}
+                      >
+                        {currency.toUpperCase()}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </div> */}
+
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}
                 <>
@@ -236,10 +271,10 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
               </Typography>
 
               <div className="w-full flex justify-between items-center">
-                {isTxLoading || isPending ? (
+                {isTxLoading || isLoading ? (
                   <div className="flex justify-start gap-2">
                     <Typography variant="h6" color="blue-gray">
-                      {isPending
+                      {isLoading
                         ? "Confirm transaction"
                         : isTxLoading
                         ? "Confirming"
@@ -257,14 +292,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() =>
-                      sendTransaction({
-                        to: topUpAccount,
-                        value: extraPayForMints
-                          ? parseEther(extraPayForMints)
-                          : parseEther(payForMints),
-                      })
-                    }
+                    onClick={() => sendTransaction?.()}
                     color="green"
                     size="sm"
                     className="flex justify-end"
