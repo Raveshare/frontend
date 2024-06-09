@@ -48,7 +48,6 @@ const UserCard = ({ username }) => {
   const fnGetSocialDetails = async () => {
     if (!address) return;
     const result = await getSocialDetails(address, `farcaster`);
-    console.log("farcaster handle", result);
   };
 
   useEffect(() => {
