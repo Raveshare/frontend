@@ -181,7 +181,6 @@ const getProfileImageQuery = gql`
 `;
 
 export const getProfileImage = async (address) => {
-  
   const variables = {
     identities: address,
   };
@@ -250,8 +249,6 @@ export const getFarcasterDetails = async (address) => {
         },
       }
     );
-
-    console.log("farcaster airstack res", result);
 
     const profileDetails = result?.Socials;
 

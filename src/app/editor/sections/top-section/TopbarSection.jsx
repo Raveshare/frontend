@@ -1,4 +1,4 @@
-import {  useAccount, useSwitchChain } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import ShareButton from "./share/ShareButton";
 import DownloadBtn from "./download/DownloadBtn";
 import { ENVIRONMENT } from "../../../../services";
