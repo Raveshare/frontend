@@ -32,6 +32,7 @@ import {
   ERROR,
   LOCAL_STORAGE,
   MINT_URL,
+  ham,
 } from "../../../../../../../data";
 import {
   ENVIRONMENT,
@@ -64,6 +65,7 @@ import { zoraURLErc721 } from "../utils/zoraURL";
 import { ZoraLogo } from "../../../../../../../assets";
 import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
 import { http } from "viem";
+import { degen, polygon } from "viem/chains";
 
 const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { address } = useAccount();
@@ -126,6 +128,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     error: uploadError,
     isSuccess: isUploadSuccess,
     isLoading: isUploading,
+    isPending: isUploadPending,
   } = useMutation({
     mutationKey: "uploadToIPFS",
     mutationFn: uploadUserAssetToIPFS,
@@ -183,7 +186,9 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const isUnsupportedChain = () => {
     // chains[0] is the polygon network
     if (
-      chainId === chains[0]?.id ||
+      chainId === degen?.id ||
+      chainId === polygon?.id ||
+      chainId === ham?.id ||
       chain?.unsupported ||
       chain?.id != selectedChainId
     )
@@ -1014,10 +1019,10 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
       <ZoraDialog
         title="ERC721 Edition"
         icon={chainLogo(selectedChainId)}
-        isError={isUploadError || isCreateSplitError || isError || isShareError}
+        isError={isUploadError || isCreateSplitError || isShareError}
         isLoading={isLoading}
         isCreatingSplit={isCreateSplitLoading}
-        isUploadingToIPFS={isUploading}
+        isUploadingToIPFS={isUploadPending}
         isPending={isPending}
         isShareLoading={isShareLoading}
         isShareSuccess={isShareSuccess}

@@ -16,17 +16,7 @@ import { base, baseSepolia } from "wagmi/chains";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { http, parseEther } from "viem";
 import { toast } from "react-toastify";
-import { ENVIRONMENT } from "../../../../../../../services";
-import { createConfig } from "wagmi";
 import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
-import { useFeeData, useNetwork, useSwitchNetwork } from "wagmi";
-import {
-  useSendTransaction,
-  usePrepareSendTransaction,
-  useWaitForTransaction,
-} from "wagmi";
-import { base } from "viem/chains";
-
 
 const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
@@ -46,7 +36,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     error: feeError,
     isLoading: isFeeLoading,
   } = useEstimateFeesPerGas({
-    chainId: network?.id,
+    chainId: chain?.id,
     formatUnits: "ether",
   });
 
@@ -70,27 +60,12 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
-  // const config = createConfig({
-  //   chains: [network],
-  //   transports: {
-  //     [network.id]: http(),
-  //   },
-  // });
-
   config.transports = {
-    [network.id]: http(),
+    [chain.id]: http(),
   };
   const payForMints = isCustomCurrMint
     ? payForMintsForCustomCurr
     : payForMintsForSponsored;
-
-  const { config, error: prapareError } = usePrepareSendTransaction({
-    to: topUpAccount, // users wallet
-    value: extraPayForMints
-      ? parseEther(extraPayForMints)
-      : parseEther(payForMints),
-    chainId: chain?.id,
-  });
 
   const { data, isPending, isSuccess, isError, error, sendTransaction } =
     useSendTransaction({ config });
@@ -102,7 +77,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     isLoading: isTxLoading,
     isSuccess: isTxSuccess,
   } = useWaitForTransactionReceipt({
-    hash: data?.hash,
+    hash: data,
   });
 
   const handleChange = (e, key) => {
@@ -252,39 +227,6 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
               <Typography variant="h6" color="red">
                 Insufficient balance please topup
               </Typography>
-
-              {/* <div className="flex">
-                <div className="flex flex-col py-2 mx-2">
-                  <Select
-                    animate={{
-                      mount: { y: 0 },
-                      unmount: { y: 25 },
-                    }}
-                    label="Custom Currency"
-                    name="Custom Currency"
-                    id="idCustomCurrency"
-                    value={farcasterStates?.frameData?.customCurrName}
-                    onChange={(e) => handleChange(e, "customCurrName")}
-                  >
-                    {["DEGEN"].map((currency) => (
-                      <Option
-                        key={currency}
-                        onClick={() => {
-                          setFarcasterStates({
-                            ...farcasterStates,
-                            frameData: {
-                              ...farcasterStates.frameData,
-                              customCurrName: currency,
-                            },
-                          });
-                        }}
-                      >
-                        {currency.toUpperCase()}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </div> */}
 
               <Typography variant="h6" color="blue-gray">
                 {extraPayForMints ? extraPayForMints : payForMints}{" "}
