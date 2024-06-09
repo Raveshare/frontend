@@ -22,4 +22,3 @@ export * from "./stringify";
 export * from "./chainLogo";
 export * from "./eventTracks";
 export * from "./consoleLogonlyDev";
-export * from "./utilXtimeAgo";

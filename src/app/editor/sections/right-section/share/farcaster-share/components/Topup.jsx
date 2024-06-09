@@ -10,43 +10,36 @@ import {
   Spinner,
   Typography,
 } from "@material-tailwind/react";
-
-import { useEstimateFeesPerGas, useAccount, useSwitchChain } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
-import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
-import { http, parseEther } from "viem";
-import { toast } from "react-toastify";
-import { ENVIRONMENT } from "../../../../../../../services";
-import { createConfig } from "wagmi";
-import { config } from "../../../../../../../providers/EVM/EVMWalletProvider";
 import { useFeeData, useNetwork, useSwitchNetwork } from "wagmi";
 import {
   useSendTransaction,
   usePrepareSendTransaction,
   useWaitForTransaction,
 } from "wagmi";
+import { parseEther } from "viem";
+import { toast } from "react-toastify";
+import { ENVIRONMENT } from "../../../../../../../services";
 import { base } from "viem/chains";
-
 
 const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [extraPayForMints, setExtraPayForMints] = useState(null);
-  const { chain } = useAccount();
+  const { chain } = useNetwork();
   const {
     data: switchData,
     isLoading: switchLoading,
     isError: switchError,
     error: switchErrorData,
-    switchChain,
-  } = useSwitchChain();
+    switchNetwork,
+  } = useSwitchNetwork();
 
   const {
     data: feeData,
     isError: isFeeError,
     error: feeError,
     isLoading: isFeeLoading,
-  } = useEstimateFeesPerGas({
-    chainId: network?.id,
+  } = useFeeData({
+    chainId: chain?.id,
     formatUnits: "ether",
   });
 
@@ -70,16 +63,6 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     .toFixed(18)
     .toString();
 
-  // const config = createConfig({
-  //   chains: [network],
-  //   transports: {
-  //     [network.id]: http(),
-  //   },
-  // });
-
-  config.transports = {
-    [network.id]: http(),
-  };
   const payForMints = isCustomCurrMint
     ? payForMintsForCustomCurr
     : payForMintsForSponsored;
@@ -92,8 +75,8 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     chainId: chain?.id,
   });
 
-  const { data, isPending, isSuccess, isError, error, sendTransaction } =
-    useSendTransaction({ config });
+  const { data, isLoading, isSuccess, isError, error, sendTransaction } =
+    useSendTransaction(config);
 
   const {
     data: txData,
@@ -101,7 +84,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     error: txError,
     isLoading: isTxLoading,
     isSuccess: isTxSuccess,
-  } = useWaitForTransactionReceipt({
+  } = useWaitForTransaction({
     hash: data?.hash,
   });
 
@@ -164,10 +147,8 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
   // get the error message
   useEffect(() => {
     if (isError) {
-      console.log(error);
       toast.error(error?.message.split("\n")[0]);
     } else if (isTxError) {
-      console.log(txError);
       toast.error(txError?.message.split("\n")[0]);
     }
   }, [isError, isTxError]);
@@ -198,11 +179,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
         <List>
           <ListItem
             className="flex justify-between items-center gap-2"
-            onClick={() =>
-              switchChain({
-                chainId: network?.id,
-              })
-            }
+            onClick={() => switchNetwork && switchNetwork(selectedNetwork?.id)}
           >
             <Typography variant="h6" color="blue-gray">
               Click here to switch to {selectedNetwork?.name}
@@ -294,10 +271,10 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
               </Typography>
 
               <div className="w-full flex justify-between items-center">
-                {isTxLoading || isPending ? (
+                {isTxLoading || isLoading ? (
                   <div className="flex justify-start gap-2">
                     <Typography variant="h6" color="blue-gray">
-                      {isPending
+                      {isLoading
                         ? "Confirm transaction"
                         : isTxLoading
                         ? "Confirming"
@@ -315,14 +292,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() =>
-                      sendTransaction({
-                        to: topUpAccount,
-                        value: extraPayForMints
-                          ? parseEther(extraPayForMints)
-                          : parseEther(payForMints),
-                      })
-                    }
+                    onClick={() => sendTransaction?.()}
                     color="green"
                     size="sm"
                     className="flex justify-end"
