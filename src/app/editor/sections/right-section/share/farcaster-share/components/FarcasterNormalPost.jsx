@@ -930,7 +930,7 @@ const FarcasterNormalPost = () => {
     }, 1000);
   }, [farcasterStates?.frameData?.selectedNetwork?.name]);
 
-  console.log("Topup balance", walletData?.balance);
+  console.log({ topUp_balance: walletData?.balance });
 
   return (
     <>
