@@ -15,17 +15,25 @@ import {
   ALCHEMY_API_KEY,
   ENVIRONMENT,
   WALLETCONNECT_PROJECT_ID,
-} from "../../services";
-import { WagmiProvider, http } from "wagmi";
+} from "../../services"; 
+import { WagmiProvider, http  } from "wagmi";
+import { publicActions } from "viem";
 import { degen, ham } from "../../data";
+
+const { chains, publicClient } = configureChains(
+  ENVIRONMENT === "production"
+    ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham]
+    : [base, baseSepolia, sepolia, polygonMumbai, degen, ham],
+  [alchemyProvider({ apiKey: ALCHEMY_API_KEY }), publicProvider()]
+);
 
 export const config = getDefaultConfig({
   appName: "Poster.fun",
   projectId: WALLETCONNECT_PROJECT_ID,
   chains:
     ENVIRONMENT === "production"
-      ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham]
-      : [base, baseSepolia, polygonMumbai, degen, ham],
+      ? [polygon, mainnet, base, zora, optimism, arbitrum]
+      : [polygonMumbai, baseSepolia],
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),
@@ -35,8 +43,6 @@ export const config = getDefaultConfig({
     [polygonMumbai.id]: http(),
     [baseSepolia.id]: http(),
     [arbitrum.id]: http(),
-    [degen.id]: http(),
-    [ham.id]: http(),
   },
 });
 
