@@ -35,6 +35,8 @@ import { SolanaWalletErrorContext } from "../providers/solana/SolanaWalletProvid
 import { useLogout } from "../hooks/app";
 import { useStore } from "../hooks/polotno";
 import * as Sentry from "@sentry/react";
+import { usePrivy } from "@privy-io/react-auth";
+import { useLogin } from "@privy-io/react-auth";
 
 const App = () => {
   const { setSteps, setIsOpen, setCurrentStep } = useTour();
@@ -52,6 +54,8 @@ const App = () => {
   const [sign, setSign] = useState("");
   const { address, isConnected, isDisconnected } = useAccount();
   const { disconnect } = useDisconnect();
+  // const { login } = usePrivy();
+
   const {
     data: evmSignature,
     isError,
@@ -84,6 +88,54 @@ const App = () => {
   );
   const { logout } = useLogout();
 
+  // set login with hooks for privy
+  const { login } = useLogin({
+    onComplete: (
+      user,
+      isNewUser,
+      wasAlreadyAuthenticated,
+      loginMethod,
+      linkedAccount
+    ) => {
+      console.log(
+        user,
+        isNewUser,
+        wasAlreadyAuthenticated,
+        loginMethod,
+        linkedAccount
+      );
+      // Any logic you'd like to execute if the user is/becomes authenticated while this
+      // component is mounteds
+      setIsLoading(false);
+      setText("");
+      toast.success("Login successful");
+      saveToLocalStorage(LOCAL_STORAGE.evmAuth, true);
+      saveToLocalStorage(LOCAL_STORAGE.userAuthTime, new Date().getTime());
+      saveToLocalStorage(LOCAL_STORAGE.userAddress, user.wallet.address);
+      // TODO : save the user data in local storage
+      // saveToLocalStorage(LOCAL_STORAGE.lensAuth, {
+      //   profileId: res?.profileId,
+      //   profileHandle: res?.profileHandle,
+      // });
+      // saveToLocalStorage(LOCAL_STORAGE.userId, res?.userId);
+      // Sentry.setUser({
+      //   id: res?.userId,
+      // });
+      // setSession(res.jwt);
+      // posthog.identify(res?.userId, {
+      //   evm_address: address,
+      // });
+    },
+    onError: (error) => {
+      console.log(error);
+      // Any logic you'd like to execute after a user exits the login flow or there is an error
+      toast.error(error);
+      disconnect();
+      setIsLoading(false);
+      setText("");
+    },
+  });
+
   // clear the session if it is expired (24hrs)
   useEffect(() => {
     const clearLocalStorage = () => {
@@ -110,23 +162,6 @@ const App = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // generate signature for EVM
-  const generateSignature = () => {
-    saveToLocalStorage(LOCAL_STORAGE.hasUserSeenTheApp, true);
-    if (isDisconnected) return;
-
-    if (getEvmAuth) {
-      return setSession(getUserAuthToken);
-    } else if (isConnected) {
-      clearAllLocalStorageData();
-      setIsLoading(true);
-      signMessage({
-        message: EVM_MESSAGE,
-      });
-      setText("Sign the message to login");
-    }
-  };
-
   // generate signature for solana
   const generateSignatureSolana = async () => {
     saveToLocalStorage(LOCAL_STORAGE.hasUserSeenTheApp, true);
@@ -148,63 +183,17 @@ const App = () => {
   };
 
   // EVM login
-  const { mutateAsync: evmAuthAsync } = useMutation({
-    mutationKey: "evmAuth",
-    mutationFn: evmAuth,
-  });
+  // handled by privy
+  // const { mutateAsync: evmAuthAsync } = useMutation({
+  //   mutationKey: "evmAuth",
+  //   mutationFn: evmAuth,
+  // });
 
   // Solana login
   const { mutateAsync: solanaAuthAsync } = useMutation({
     mutationKey: "solanaAuth",
     mutationFn: solanaAuth,
   });
-
-  // EVM auth handler
-  const evmAuthHandler = async () => {
-    setIsLoading(true);
-    setText("Logging in...");
-    await evmAuthAsync({
-      walletAddress: address,
-      signature: evmSignature,
-      message: EVM_MESSAGE,
-    })
-      .then((res) => {
-        if (res?.status === "success") {
-          setIsLoading(false);
-          setText("");
-          toast.success("Login successful");
-          saveToLocalStorage(LOCAL_STORAGE.evmAuth, true);
-          saveToLocalStorage(LOCAL_STORAGE.userAuthToken, res.jwt);
-          saveToLocalStorage(LOCAL_STORAGE.userAuthTime, new Date().getTime());
-          saveToLocalStorage(LOCAL_STORAGE.userAddress, address);
-          saveToLocalStorage(LOCAL_STORAGE.lensAuth, {
-            profileId: res?.profileId,
-            profileHandle: res?.profileHandle,
-          });
-          saveToLocalStorage(LOCAL_STORAGE.userId, res?.userId);
-          Sentry.setUser({
-            id: res?.userId,
-          });
-          setSession(res.jwt);
-          posthog.identify(res?.userId, {
-            evm_address: address,
-          });
-        } else {
-          toast.error(ERROR.SOMETHING_WENT_WRONG);
-          disconnect();
-          setIsLoading(false);
-          setText("");
-          toast.error(res);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.error(errorMessage(err));
-        disconnect();
-        setIsLoading(false);
-        setText("");
-      });
-  };
 
   // Solana auth handler
   const solanaAuthHandler = async () => {
@@ -332,12 +321,12 @@ const App = () => {
     }
   }, [solanaSignature]);
 
-  useEffect(() => {
-    // Run the effect when isConnected and address change
-    if (isConnected && address) {
-      generateSignature();
-    }
-  }, [isConnected, address, initialRender]);
+  // useEffect(() => {
+  // // Run the effect when isConnected and address change
+  //   if (isConnected && address) {
+  //     generateSignature();
+  //   }
+  // }, [isConnected, address, initialRender]);
 
   useEffect(() => {
     // Run the effect when solanaConnected and solanaAddress change

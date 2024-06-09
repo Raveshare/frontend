@@ -48,7 +48,6 @@ import ZoraDialog from "./ZoraDialog";
 import { useCreateSplit } from "../../../../../../../hooks/0xsplit";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { EVMWallets } from "../../../../top-section/auth/wallets";
-import { useChainModal } from "@rainbow-me/rainbowkit";
 import {
   FarcasterAuth,
   FarcasterChannel,
@@ -71,7 +70,6 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { chain } = useAccount();
   const { chains } = useConfig();
   const getEVMAuth = getFromLocalStorage(LOCAL_STORAGE.evmAuth);
-  const { openChainModal } = useChainModal();
   const [recipientsEns, setRecipientsEns] = useState([]);
   const [totalPercent, setTotalPercent] = useState(0);
 

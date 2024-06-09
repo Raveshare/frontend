@@ -14,4 +14,5 @@ export const LOCAL_STORAGE = {
   userId: "user.id",
   isWatermark: "watermark",
   userLOA: "user.LOA",
+  privy : "privy:token",
 };

@@ -1,6 +1,4 @@
-import "@rainbow-me/rainbowkit/styles.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
   polygon,
   mainnet,
@@ -11,15 +9,29 @@ import {
   baseSepolia,
   arbitrum,
 } from "wagmi/chains";
-import {
-  ALCHEMY_API_KEY,
-  ENVIRONMENT,
-  WALLETCONNECT_PROJECT_ID,
-} from "../../services"; 
-import { WagmiProvider, http  } from "wagmi";
+import { ENVIRONMENT, WALLETCONNECT_PROJECT_ID } from "../../services";
+import { http } from "wagmi";
 
+import { PrivyProvider } from "@privy-io/react-auth";
+import { WagmiProvider, createConfig } from "@privy-io/wagmi";
 
-export const config = getDefaultConfig({
+// Replace this with your Privy config
+export const privyConfig = {
+  embeddedWallets: {
+    createOnLogin: "users-without-wallets",
+    requireUserPasswordOnCreate: true,
+    noPromptOnSignature: false,
+  },
+  appearance: {
+    loginMessage: "Login to Poster.fun",
+  },
+  loginMethods: ["wallet", "email", "sms", "farcaster"],
+  appearance: {
+    showWalletLoginFirst: true,
+  },
+};
+
+export const config = createConfig({
   appName: "Poster.fun",
   projectId: WALLETCONNECT_PROJECT_ID,
   chains:
@@ -42,11 +54,11 @@ const queryClient = new QueryClient();
 
 const EVMWalletProvider = ({ children }) => {
   return (
-    <WagmiProvider config={config}>
+    <PrivyProvider appId="clvysua9y0a63qk92kex0ulud" config={privyConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider coolMode={true}>{children}</RainbowKitProvider>
+        <WagmiProvider config={config}>{children}</WagmiProvider>
       </QueryClientProvider>
-    </WagmiProvider>
+    </PrivyProvider>
   );
 };
 

@@ -21,7 +21,6 @@ import {
 import { ClipboardIcon, PowerIcon } from "@heroicons/react/24/outline";
 import { useSolanaWallet } from "../../../../../hooks/solana";
 import { useLogout } from "../../../../../hooks/app";
-import { useAccountModal } from "@rainbow-me/rainbowkit";
 
 const ProfileMenu = () => {
   const { solanaAddress } = useSolanaWallet();

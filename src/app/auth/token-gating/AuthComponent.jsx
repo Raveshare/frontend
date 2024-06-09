@@ -1,4 +1,3 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAccount, useDisconnect } from "wagmi";
 import { useContext, useEffect, useRef, useState } from "react";

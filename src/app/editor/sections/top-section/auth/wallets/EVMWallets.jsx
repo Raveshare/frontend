@@ -1,17 +1,17 @@
 import { Button } from "@material-tailwind/react";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import React from "react";
 import { EVMLogo } from "../../../../../../assets";
 
-const EVMWallets = ({title, className}) => {
-  const { openConnectModal } = useConnectModal();
+const EVMWallets = ({ title, className }) => {
+  const { login } = usePrivy();
 
   return (
     <Button
       size="lg"
       color="black"
       className={`flex items-center justify-center gap-3 outline-none my-2 ${className}`}
-      onClick={openConnectModal}
+      onClick={login}
     >
       <img
         src={EVMLogo}
