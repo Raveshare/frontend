@@ -8,12 +8,11 @@ import { Context } from "../../../../../providers/context/ContextProvider";
 import BsX from "@meronex/icons/bs/BsX";
 import { Textarea, Typography } from "@material-tailwind/react";
 import logoSolana from "../../../../../assets/logos/logoSolana.png";
-import logoZora from "../../../../../assets/logos/logoZora.png";
 import logoFarcaster from "../../../../../assets/logos/logoFarcaster.jpg";
 import { InputBox } from "../../../common";
 
 const ShareSection = () => {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const chains = useChains();
   const {
     setMenu,
