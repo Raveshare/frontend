@@ -300,8 +300,8 @@ const LenspostTemplates = () => {
           />
           <CompCarousel
             type="background"
-            author="monniverse"
-            campaign="monniverse"
+            author="kitty"
+            campaign="kitty"
           />
 
           {/*  Featured Panels : Stickers */}
