@@ -169,7 +169,7 @@ export const StickerPanel = () => {
     }
   });
   
-  console.log("tabArray", tabArray);
+  // console.log("tabArray", tabArray);
 
   const [currentTab, setCurrentTab] = useState(tabArray?.[0]);
   const store = useStore();

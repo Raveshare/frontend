@@ -37,7 +37,7 @@ export const BannerPanel = () => {
     }
   });
 
-  console.log("tabArray", tabArray);
+  // console.log("tabArray", tabArray);
   const [currentTab, setCurrentTab] = useState(tabArray?.[0]);
 
   useEffect(() => {
