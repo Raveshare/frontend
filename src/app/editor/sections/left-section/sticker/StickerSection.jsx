@@ -162,7 +162,14 @@ export const StickerPanel = () => {
 
   // const tabArray = data?.data || [];
   // Just to ignore First Tab showing no results
-  const tabArray = data?.data.slice(1) || [];
+  const tabArray = [];
+  data?.data.map((tab) => {
+    if (tab?.hasStickers) {
+      tabArray.push(tab);
+    }
+  });
+  
+  console.log("tabArray", tabArray);
 
   const [currentTab, setCurrentTab] = useState(tabArray?.[0]);
   const store = useStore();
