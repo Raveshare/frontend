@@ -59,7 +59,7 @@ const Topup = ({ topUpAccount, refetchWallet, balance, sponsored }) => {
     .toString();
 
   config.transports = {
-    [chain.id]: http(),
+    [chain?.id]: http(),
   };
   const payForMints = isCustomCurrMint
     ? payForMintsForCustomCurr
