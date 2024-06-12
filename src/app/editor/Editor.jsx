@@ -510,6 +510,28 @@ const Editor = () => {
 	//     isWatermark.current = false;
 	//   }
 	// }, [isPageActive.current]);
+	
+	useEffect(() => {addGlobalFont({
+		fontFamily: 'Britney Onchain',
+		styles: [
+		  {
+			src: 'url(/fonts/BritneyOnchain/BritneyOnchainVF.ttf)',
+			fontStyle: 'normal',
+			fontWeight: 'normal',
+		  },
+		  {
+			src: 'url(/fonts/BritneyOnchain/BritneyOnchain-Style01.otf)',
+			fontStyle: 'normal',
+			fontWeight: 'bold',
+		  },
+		  {
+			src: 'url(/fonts/BritneyOnchain/BritneyOnchain-Style02.otf)',
+			fontStyle: 'normal',
+			fontWeight: 'bold',
+		  },
+		],
+	  });
+	}, [])
 
 	return (
 		<>
