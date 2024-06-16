@@ -55,4 +55,14 @@ export const TOKEN_LIST = {
       logoURI: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
     },
   ],
+  Og: [
+    {
+      id: 16600,
+      address: "0x0000000000000000000000000000000000000000",
+      symbol: "ETH",
+      name: "Ether",
+      decimals: 18,
+      logoURI: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
+    },
+  ],
 };

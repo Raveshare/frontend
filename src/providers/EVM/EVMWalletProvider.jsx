@@ -17,15 +17,15 @@ import {
   WALLETCONNECT_PROJECT_ID,
 } from "../../services";
 import { WagmiProvider, http } from "wagmi";
-import { degen, ham } from "../../data";
+import { degen, ham, og } from "../../data";
 
 export const config = getDefaultConfig({
   appName: "Poster.fun",
   projectId: WALLETCONNECT_PROJECT_ID,
   chains:
     ENVIRONMENT === "production"
-      ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham]
-      : [base, baseSepolia, polygonMumbai, degen, ham],
+      ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham, og]
+      : [base, baseSepolia, polygonMumbai, degen, ham, og],
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),

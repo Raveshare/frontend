@@ -59,7 +59,7 @@ const ShareSection = () => {
 
   const filterChains = () => {
     if (chains?.length > 0) {
-      return chains?.slice(0, -3);
+      return chains?.slice(0, -4);
     } else {
       return chainsArray;
     }
