@@ -644,6 +644,29 @@
   dependencies:
     tslib "~2.5.0"
 
+"@blueprintjs/colors@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/colors/-/colors-5.1.1.tgz#b227d1ce8b95d9266d976441f34cd71d436735db"
+  integrity sha512-Mni/GgCYLaMf5U5zsCN42skOG49w3U0QmUFuJgFZ/1pv+3cHF/9xR4L4dXcj5DtgJoHkmUbK36PR5mdFB65WEA==
+  dependencies:
+    tslib "~2.6.2"
+
+"@blueprintjs/core@5", "@blueprintjs/core@5.10.3", "@blueprintjs/core@^5.10.3":
+  version "5.10.3"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-5.10.3.tgz#92daf209ceb1b4bc33c3fb8c53287e63430bf0b9"
+  integrity sha512-QlfvAkZOimeyJKs9+EKd52nYfHd1yltSJQLAmv0+0wF/5m+eQ5jeWjF8Mr/vwq2EqiC3pS2+i3mivORvxXTgDg==
+  dependencies:
+    "@blueprintjs/colors" "^5.1.1"
+    "@blueprintjs/icons" "^5.9.0"
+    "@popperjs/core" "^2.11.8"
+    classnames "^2.3.1"
+    normalize.css "^8.0.1"
+    react-popper "^2.3.0"
+    react-transition-group "^4.4.5"
+    react-uid "^2.3.3"
+    tslib "~2.6.2"
+    use-sync-external-store "^1.2.0"
+
 "@blueprintjs/core@^4.20.2":
   version "4.20.2"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-4.20.2.tgz#ae1bbaf13bd1bf887b506760c478cc940f6d6e20"
@@ -683,6 +706,15 @@
     classnames "^2.3.1"
     tslib "~2.5.0"
 
+"@blueprintjs/icons@^5.9.0":
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-5.9.0.tgz#f1d6ebffa3033bbdd8ea05dbfa6fb8e5e88cf119"
+  integrity sha512-9W9DYFqSORBr1QPSEwpbjnftbU+hfWB/gFtpa4LdzR7VhtQaCdcrinyXFmNUFacQ9czYrmr72bP567Rv6pRUDg==
+  dependencies:
+    change-case "^4.1.2"
+    classnames "^2.3.1"
+    tslib "~2.6.2"
+
 "@blueprintjs/popover2@^1.14.11":
   version "1.14.11"
   resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-1.14.11.tgz#0698fdeaf6710460cef0b71bed592ca37f40d1f9"
@@ -695,6 +727,16 @@
     dom4 "^2.1.5"
     react-popper "^2.3.0"
     tslib "~2.5.0"
+
+"@blueprintjs/select@5.1.5":
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/select/-/select-5.1.5.tgz#bcf17932d2da38dc91175d5240e5b0babf8012c7"
+  integrity sha512-7oSO6fmZ9lZpzPpAuxoIzgczTWvyNmUOxDUAzO5LltcKL5jNg9V8L/wADNvRTrr9MAw8IbVwEw5fPDeZ8iP3Vg==
+  dependencies:
+    "@blueprintjs/core" "^5.10.3"
+    "@blueprintjs/icons" "^5.9.0"
+    classnames "^2.3.1"
+    tslib "~2.6.2"
 
 "@blueprintjs/select@^4.9.24":
   version "4.9.24"
@@ -2361,7 +2403,7 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@popperjs/core@^2.11.7", "@popperjs/core@^2.9.1":
+"@popperjs/core@^2.11.7", "@popperjs/core@^2.11.8", "@popperjs/core@^2.9.1":
   version "2.11.8"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
@@ -5866,6 +5908,11 @@ dom4@^2.1.5:
   resolved "https://registry.yarnpkg.com/dom4/-/dom4-2.1.6.tgz#c90df07134aa0dbd81ed4d6ba1237b36fc164770"
   integrity sha512-JkCVGnN4ofKGbjf5Uvc8mmxaATIErKQKSgACdBXpsQ3fY6DlIpAyWfiBSrGkttATssbDCp3psiAKWXk5gmjycA==
 
+dompurify@^3.0.5:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.1.5.tgz#2c6a113fc728682a0f55684b1388c58ddb79dc38"
+  integrity sha512-lwG+n5h8QNpxtyrJW/gJWckL+1/DQiYMX8f7t8Z2AZTPw1esVrqjI63i7Zc2Gz0aKzLVMYC1V1PL/ky+aY/NgA==
+
 dot-case@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/dot-case/-/dot-case-3.0.4.tgz#9b2b670d00a431667a8a75ba29cd1b98809ce751"
@@ -6314,6 +6361,11 @@ fast-glob@^3.2.9, fast-glob@^3.3.0:
     glob-parent "^5.1.2"
     merge2 "^1.3.0"
     micromatch "^4.0.4"
+
+fast-json-patch@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/fast-json-patch/-/fast-json-patch-3.1.1.tgz#85064ea1b1ebf97a3f7ad01e23f9337e72c66947"
+  integrity sha512-vf6IHUX2SBcA+5/+4883dsIjpBTqmfBjmYiWK1savxQmFk4JfBMLa7ynTYOs1Rolp/T1betJxHiGD3g1Mn8lUQ==
 
 fast-json-stable-stringify@^2.0.0:
   version "2.1.0"
@@ -7386,10 +7438,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-konva@^9.2.1:
-  version "9.3.6"
-  resolved "https://registry.yarnpkg.com/konva/-/konva-9.3.6.tgz#62b36292dbe06c56eb161d5ead221c2b5c5a8926"
-  integrity sha512-dqR8EbcM0hjuilZCBP6xauQ5V3kH3m9kBcsDkqPypQuRgsXbcXUrxqYxhNbdvKZpYNW8Amq94jAD/C0NY3qfBQ==
+konva@^9.3.11:
+  version "9.3.11"
+  resolved "https://registry.yarnpkg.com/konva/-/konva-9.3.11.tgz#742263389b4ad16fc2c202f1d6317ae85b837f04"
+  integrity sha512-ZkFF4CXKZCDd2+6sBPA0y3hQ+X4uTqIS6JxTl3BEOFJzKr1tId+rxxJgtsk1FQIH3auuvnMj/rkbatUcf9C2Wg==
 
 lilconfig@^2.1.0:
   version "2.1.0"
@@ -7761,22 +7813,22 @@ mlly@^1.2.0, mlly@^1.6.1:
     pkg-types "^1.0.3"
     ufo "^1.3.2"
 
-mobx-react-lite@^4.0.4:
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-4.0.6.tgz#a7f128914e3d67dac80819068b749ffdd4a18705"
-  integrity sha512-0rOE0KDMwV9CzsstYC86ZxxrUpKLGBN0/T3WpKZibLnJcukdb9HVL8VKHoDxaBPbInLZ5azPKUod4mXTsi+u+A==
+mobx-react-lite@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-4.0.7.tgz#f4e21e18d05c811010dcb1d3007e797924c4d90b"
+  integrity sha512-RjwdseshK9Mg8On5tyJZHtGD+J78ZnCnRaxeQDSiciKVQDUbfZcXhmld0VMxAwvcTnPEHZySGGewm467Fcpreg==
   dependencies:
     use-sync-external-store "^1.2.0"
 
-mobx-state-tree@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/mobx-state-tree/-/mobx-state-tree-5.2.0.tgz#784fb22b7d2b1598c6b4fb8987d68d86eaf66d8b"
-  integrity sha512-TAKfMHEF9F59iAcLbD1Y9D8Kand4NoYM1h8Yv3Ol5la9X0I7T4Y/mhVN/oK/bi3g0v7dYy9wsoni2T66zCohGQ==
+mobx-state-tree@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/mobx-state-tree/-/mobx-state-tree-6.0.0.tgz#c2a48246761b189c1789989b73d0017e9f05da44"
+  integrity sha512-Aky3I5SMM1gKvI780TyxqSf+VDRpu03QONxqGerXG7DOemK3z1Ka2KfbPuiXm/znawsYDwqeZgmz0rjbCLSD8g==
 
-mobx@6.10.2:
-  version "6.10.2"
-  resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.10.2.tgz#96e123deef140750360ca9a5b02a8b91fbffd4d9"
-  integrity sha512-B1UGC3ieK3boCjnMEcZSwxqRDMdzX65H/8zOHbuTY8ZhvrIjTUoLRR2TP2bPqIgYRfb3+dUigu8yMZufNjn0LQ==
+mobx@6.12.3:
+  version "6.12.3"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.12.3.tgz#b6a0fde4268116be602d50bffb32f1b90a8fb077"
+  integrity sha512-c8NKkO4R2lShkSXZ2Ongj1ycjugjzFFo/UswHBnS62y07DMcTc9Rvo03/3nRyszIvwPNljlkd4S828zIBv/piw==
 
 modern-ahocorasick@^1.0.0:
   version "1.0.1"
@@ -8335,32 +8387,33 @@ pngjs@^5.0.0:
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-5.0.0.tgz#e79dd2b215767fd9c04561c01236df960bce7fbb"
   integrity sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==
 
-polotno@1.14.6:
-  version "1.14.6"
-  resolved "https://registry.yarnpkg.com/polotno/-/polotno-1.14.6.tgz#475d2f3b153bf0c6a456ac95c355ef4d4a4f4db2"
-  integrity sha512-XXTwu4jyKNdDDs0LOPx4QlmejjmeHrDtEju0R1O4jMDx6FLkYyBYj93LIwaZJ/kqtEGBQwUrlhETwMHg0KBGug==
+polotno@^2.9.2:
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/polotno/-/polotno-2.9.2.tgz#70ac622b85e81edde5cd8d08d249e6004fd90e48"
+  integrity sha512-jb9UKtJ0LCClptSenq8AV+u/ep3EuZrw0CUbw+i2w4O/9Z+mCpYGF8r5CZCldIc0EvabgiQLoLFLjDrdRWajOA==
   dependencies:
-    "@blueprintjs/core" "^4.20.2"
-    "@blueprintjs/popover2" "^1.14.11"
-    "@blueprintjs/select" "^4.9.24"
+    "@blueprintjs/core" "5.10.3"
+    "@blueprintjs/select" "5.1.5"
     "@meronex/icons" "^4.0.0"
+    fast-json-patch "^3.1.1"
     functions-have-names "^1.2.3"
     gradient-parser "^1.0.2"
-    konva "^9.2.1"
-    mobx "6.10.2"
-    mobx-react-lite "^4.0.4"
-    mobx-state-tree "5.2.0"
+    konva "^9.3.11"
+    mobx "6.12.3"
+    mobx-react-lite "^4.0.7"
+    mobx-state-tree "6.0.0"
     nanoid "3.3.4"
     quill "^1.3.7"
+    quill-paste-smart "^1.4.12"
     rasterizehtml "^1.3.1"
     react-color "^2.19.3"
     react-konva "18.2.10"
-    react-konva-utils "^1.0.5"
+    react-konva-utils "^1.0.6"
     react-sortablejs "6.1.4"
-    react-window "^1.8.9"
-    sortablejs "^1.15.0"
-    svg-round-corners "^0.4.1"
-    swr "^2.2.2"
+    react-window "^1.8.10"
+    sortablejs "^1.15.2"
+    svg-round-corners "^0.4.3"
+    swr "^2.2.5"
     use-image "^1.1.1"
 
 pony-cause@^2.1.10:
@@ -8656,6 +8709,13 @@ quill-delta@^3.6.2:
     extend "^3.0.2"
     fast-diff "1.1.2"
 
+quill-paste-smart@^1.4.12:
+  version "1.4.12"
+  resolved "https://registry.yarnpkg.com/quill-paste-smart/-/quill-paste-smart-1.4.12.tgz#3e3c1fbe83692142bfd44a284383b5970cf3f98f"
+  integrity sha512-knKATPGbtVD2k5HUcRmUbSe5iHJG+d+C6sZojYE9oal4QqaB+as6H3cCKyLrZ1hEal48Mm9rQg+FYjQt0KBDsQ==
+  dependencies:
+    dompurify "^3.0.5"
+
 quill@^1.3.7:
   version "1.3.7"
   resolved "https://registry.yarnpkg.com/quill/-/quill-1.3.7.tgz#da5b2f3a2c470e932340cdbf3668c9f21f9286e8"
@@ -8772,7 +8832,7 @@ react-is@^16.13.1, react-is@^16.7.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-react-konva-utils@^1.0.5:
+react-konva-utils@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/react-konva-utils/-/react-konva-utils-1.0.6.tgz#7cda4a9ea94665f6b30813a4c1eaf600b89b4c84"
   integrity sha512-011+jyXwadFDkbIUdlTarKwbqME0ljX1vPeW5oyLQx4rtHdcsDr43tdOdSsMT3XpZyl8clgM9I/eK0lBuBuFHg==
@@ -8959,14 +9019,14 @@ react-transition-group@^4.3.0, react-transition-group@^4.4.5:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react-uid@^2.2.0:
+react-uid@^2.2.0, react-uid@^2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/react-uid/-/react-uid-2.3.3.tgz#6a485ccc868555997f3506c6db97a3e735d97adf"
   integrity sha512-iNpDovcb9qBpBTo8iUgqRSQOS8GV3bWoNaTaUptHkXtAooXSo0OWe7vN6TqqB8x3x0bNBbQx96kkmSltQ5h9kQ==
   dependencies:
     tslib "^2.0.0"
 
-react-window@^1.8.9:
+react-window@^1.8.10:
   version "1.8.10"
   resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.10.tgz#9e6b08548316814b443f7002b1cf8fd3a1bdde03"
   integrity sha512-Y0Cx+dnU6NLa5/EvoHukUD0BklJ8qITCtVEPY1C/nL8wwoZ0b5aEw8Ff1dOVHw7fCzMt55XfJDd8S8W8LCaUCg==
@@ -9585,7 +9645,7 @@ sonic-boom@^2.2.1:
   dependencies:
     atomic-sleep "^1.0.0"
 
-sortablejs@^1.15.0:
+sortablejs@^1.15.2:
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.15.2.tgz#4e9f7bda4718bd1838add9f1866ec77169149809"
   integrity sha512-FJF5jgdfvoKn1MAKSdGs33bIqLi3LmsgVTliuX6iITj834F+JRQZN90Z93yql8h0K2t0RwDPBmxwlbZfDcxNZA==
@@ -9820,12 +9880,12 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-svg-round-corners@^0.4.1:
+svg-round-corners@^0.4.3:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/svg-round-corners/-/svg-round-corners-0.4.3.tgz#5a783dd81cc499b950425bfaa6334f9157276da9"
   integrity sha512-9zxcdLa9Bh2Bddxa760wSzspWLJ1nTRMKIsVH6MjNm8QssbZGbmY0pOnjwrp/cST+mfod2l3lpbuKFe+c3wHjw==
 
-swr@^2.2.2:
+swr@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/swr/-/swr-2.2.5.tgz#063eea0e9939f947227d5ca760cc53696f46446b"
   integrity sha512-QtxqyclFeAsxEUeZIYmsaQ0UjimSq1RZ9Un7I68/0ClKK/U3LoyQunwkQfJZr2fc22DfIXLNDc2wFyTEikCUpg==
@@ -10017,6 +10077,11 @@ tslib@~2.5.0:
   version "2.5.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.5.3.tgz#24944ba2d990940e6e982c4bea147aba80209913"
   integrity sha512-mSxlJJwl3BMEQCUNnxXBU9jP4JBktcEGhURcPR6VQVlnP0FdDEsIaz0C35dXNGLyRfrATNofF0F5p2KPxQgB+w==
+
+tslib@~2.6.2:
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.3.tgz#0438f810ad7a9edcde7a241c3d80db693c8cbfe0"
+  integrity sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==
 
 typed-styles@^0.0.7:
   version "0.0.7"
