@@ -58,9 +58,9 @@ export const TOKEN_LIST = {
   Og: [
     {
       id: 16600,
-      address: "0x0000000000000000000000000000000000000000",
-      symbol: "ETH",
-      name: "Ether",
+      address: "0xeE597D163C3Fef7B594cC11746BC4099F4323Fd3",
+      symbol: "AOGI",
+      name: "AOGI",
       decimals: 18,
       logoURI: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
     },
