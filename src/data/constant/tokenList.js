@@ -65,4 +65,22 @@ export const TOKEN_LIST = {
       logoURI: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
     },
   ],
+  "Arbitrum One": [
+    {
+      id: 42161,
+      address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      symbol: "USDT",
+      name: "Tether USD",
+      decimals: 18,
+      logoURI: "https://arbiscan.io/token/images/tether_32.png",
+    },
+    {
+      id: 42161,
+      address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      symbol: "USDC",
+      name: "USD Coin",
+      decimals: 18,
+      logoURI: "https://arbiscan.io/token/images/centre-usdc_28.png",
+    },
+  ],
 };

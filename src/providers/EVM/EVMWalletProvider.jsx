@@ -25,7 +25,7 @@ export const config = getDefaultConfig({
   chains:
     ENVIRONMENT === "production"
       ? [base, mainnet, zora, optimism, arbitrum, polygon, degen, ham, og]
-      : [base, baseSepolia, polygonMumbai, degen, ham, og],
+      : [base, baseSepolia, arbitrum, polygonMumbai, degen, ham, og],
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),
