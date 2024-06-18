@@ -30,6 +30,7 @@ import {
   TOKEN_LIST,
   URL_REGEX,
   degen,
+  isSponsoredChain,
 } from "../../../../../../../data";
 import {
   Avatar,
@@ -136,7 +137,7 @@ const FarcasterNormalPost = () => {
     isRefetching: isWalletRefetching,
   } = useQuery({
     queryKey: ["getOrCreateWallet"],
-    queryFn: () => getOrCreateWallet(base?.id),
+    queryFn: () => getOrCreateWallet(chain?.id),
     refetchOnWindowFocus: false,
   });
 
@@ -778,6 +779,10 @@ const FarcasterNormalPost = () => {
     });
   };
 
+  const isSponsoredChainFn = () => {
+    return isSponsoredChain?.includes(chain?.id);
+  };
+
   // add recipient to the split list
   useEffect(() => {
     if (isAuthenticated) {
@@ -1252,7 +1257,7 @@ const FarcasterNormalPost = () => {
             !farcasterStates.frameData?.isCustomCurrMint && "hidden"
           } mt-2`}
         >
-          {chain?.id === 8453 ? (
+          {isSponsoredChainFn() ? (
             <>
               <p className="text-end mt-4">
                 <span>Topup account:</span>
@@ -1424,7 +1429,7 @@ const FarcasterNormalPost = () => {
 
             {farcasterStates.frameData?.isCustomCurrMint &&
               farcasterStates.frameData?.allowedMints > walletData?.sponsored &&
-              chain?.id === base?.id && (
+              isSponsoredChainFn() && (
                 <Topup
                   topUpAccount={walletData?.publicAddress}
                   balance={walletData?.balance}
