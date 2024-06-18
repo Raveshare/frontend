@@ -42,9 +42,9 @@ const DownloadBtn = () => {
   return (
     <Popover2
       content={
-        <Menu>
+        <Menu className="p-4 border border-gray-300 shadow-2xl">
           <li class="bp4-menu-header">
-            <h6 class="bp4-heading">File type</h6>
+            <h6 class="bp4-heading mb-2">File type</h6>
           </li>
           <HTMLSelect
             fill
@@ -61,7 +61,7 @@ const DownloadBtn = () => {
           </HTMLSelect>
 
           <>
-            <li class="bp4-menu-header">
+            <li class="bp4-menu-header mt-4">
               <h6 class="bp4-heading">Size</h6>
             </li>
             <div style={{ padding: "10px" }}>
