@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@0xsplits/splits-sdk": "^3.0.8",
@@ -63,6 +64,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^3.1.0",
     "autoprefixer": "^10.4.14",
+    "husky": "^8.0.0",
     "postcss": "^8.4.23",
     "tailwindcss": "^3.3.1",
     "vite": "^4.2.0"
