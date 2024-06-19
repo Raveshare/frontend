@@ -6924,6 +6924,11 @@ humanize-ms@^1.2.1:
   dependencies:
     ms "^2.0.0"
 
+husky@^8.0.0:
+  version "8.0.3"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-8.0.3.tgz#4936d7212e46d1dea28fef29bb3a108872cd9184"
+  integrity sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==
+
 i18next-browser-languagedetector@7.1.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/i18next-browser-languagedetector/-/i18next-browser-languagedetector-7.1.0.tgz#01876fac51f86b78975e79b48ccb62e2313a2d7d"
