@@ -1,19 +1,30 @@
-import React, { useContext } from "react";
-import { Button, Position, Menu, HTMLSelect, Slider } from "@blueprintjs/core";
+import React, { useState, useContext } from "react";
+import {
+  Button,
+  Position,
+  Menu,
+  HTMLSelect,
+  Slider,
+  ProgressBar,
+} from "@blueprintjs/core";
 import { Popover2 } from "@blueprintjs/popover2";
 import * as unit from "polotno/utils/unit";
 import { ExportIcon } from "../../../../../assets/assets";
 import { useStore } from "../../../../../hooks/polotno";
 import posthog from "posthog-js";
 import { Context } from "../../../../../providers/context";
+import { downloadFile } from "polotno/utils/download";
+import { POLOTNO_API_KEY } from "../../../../../services";
 
 const DownloadBtn = () => {
   const store = useStore();
-  const [saving, setSaving] = React.useState(false);
-  const [quality, setQuality] = React.useState(1);
-  const [type, setType] = React.useState("png");
-  const [fps, setFPS] = React.useState(10);
+  const [saving, setSaving] = useState(false);
+  const [quality, setQuality] = useState(1);
+  const [type, setType] = useState("png");
+  const [fps, setFPS] = useState(10);
   const { contextCanvasIdRef } = useContext(Context);
+  const [progress, setProgress] = useState(0);
+  const [progressStatus, setProgressStatus] = useState("");
 
   const getName = () => {
     const texts = [];
@@ -39,6 +50,40 @@ const DownloadBtn = () => {
     });
   };
 
+  const saveAsVideo = async ({ store, pixelRatio, fps, onProgress }) => {
+    const json = store.toJSON();
+    const req = await fetch(
+      `https://api.polotno.dev/api/renders?KEY=${POLOTNO_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          design: json,
+          pixelRatio,
+          format: "mp4",
+        }),
+      }
+    );
+    const job = await req.json();
+    while (true) {
+      const jobReq = await fetch(
+        `https://api.polotno.dev/api/renders/${job.id}?KEY=${POLOTNO_API_KEY}`
+      );
+      const jobData = await jobReq.json();
+      if (jobData.status === "done") {
+        downloadFile(jobData.output, "posterdotfun.mp4");
+        break;
+      } else if (jobData.status === "error") {
+        throw new Error("Failed to render video");
+      } else {
+        onProgress(jobData.progress, jobData.status);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  };
+
   return (
     <Popover2
       content={
@@ -58,6 +103,7 @@ const DownloadBtn = () => {
             <option value="png">PNG</option>
             <option value="pdf">PDF</option>
             <option value="gif">GIF</option>
+            <option value="mp4">MP4 Video (Beta)</option>
           </HTMLSelect>
 
           <>
@@ -123,6 +169,21 @@ const DownloadBtn = () => {
                   </div>
                 </>
               )}
+              {type === "mp4" && (
+                <>
+                  {saving && (
+                    <div
+                      style={{
+                        padding: "10px",
+                        maxWidth: "180px",
+                        opacity: 0.8,
+                      }}
+                    >
+                      <ProgressBar value={Math.max(3, progress) / 100} />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </>
 
@@ -153,6 +214,20 @@ const DownloadBtn = () => {
                   pixelRatio: quality,
                   fps,
                 });
+                setSaving(false);
+              } else if (type === "mp4") {
+                setSaving(true);
+                setProgressStatus("scheduled");
+                await saveAsVideo({
+                  store,
+                  pixelRatio: quality,
+                  onProgress: (progress, status) => {
+                    setProgress(progress);
+                    setProgressStatus(status);
+                  },
+                });
+                setProgressStatus("done");
+                setProgress(0);
                 setSaving(false);
               } else {
                 store.pages.forEach((page, index) => {
