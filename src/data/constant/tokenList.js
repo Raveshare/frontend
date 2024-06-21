@@ -4,7 +4,7 @@ export const TOKEN_LIST = {
   Base: [
     {
       id: 8453,
-      address: "0x0000000000000000000000000000000000000000",
+      address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
       symbol: "ETH",
       name: "Ether",
       decimals: 18,
@@ -36,6 +36,14 @@ export const TOKEN_LIST = {
     },
   ],
   Degen: [
+    {
+      id: 666666666,
+      address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      symbol: "DEGEN",
+      name: "Degen",
+      decimals: 18,
+      logoURI: "https://basescan.org/token/images/degentips_32.png",
+    },
     {
       id: 666666666,
       address: "0xEb54dACB4C2ccb64F8074eceEa33b5eBb38E5387",
