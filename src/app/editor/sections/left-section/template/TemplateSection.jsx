@@ -183,7 +183,7 @@ const DesignCard = ({
 // Design card component end
 
 const TemplatePanel = () => {
-  const [tab, setTab] = useState("lenspost");
+  const [tab, setTab] = useState("poster");
   const [stIsModalOpen, setStIsModalOpen] = useState(false);
 
   return (
@@ -194,9 +194,9 @@ const TemplatePanel = () => {
           className={`w-1/2 border px-2 py-1 border-black rounded-md ${
             tab === "lenspost" && "bg-[#1B1A1D]"
           } ${tab === "lenspost" && "text-white"}`}
-          onClick={() => setTab("lenspost")}
+          onClick={() => setTab("poster")}
         >
-          Lenspost Drops
+          Poster Templates
         </button>
         <button
           className={`w-1/2 border border-black px-2 py-1 rounded-md ${
@@ -205,10 +205,10 @@ const TemplatePanel = () => {
           onClick={() => setTab("user")}
         >
           {/* User Templates */}
-          Community Drops
+          Community Templates
         </button>
       </div>
-      {tab === "lenspost" && <LenspostTemplates />}
+      {tab === "poster" && <LenspostTemplates />}
       {tab === "user" && <UserTemplates />}
     </div>
     // <TabsCustomAnimation/>
