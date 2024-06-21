@@ -192,8 +192,8 @@ const TemplatePanel = () => {
       <div className="flex items-center justify-center space-x-2 my-4 mb-0">
         <button
           className={`w-1/2 border px-2 py-1 border-black rounded-md ${
-            tab === "lenspost" && "bg-[#1B1A1D]"
-          } ${tab === "lenspost" && "text-white"}`}
+            tab === "poster" && "bg-[#1B1A1D]"
+          } ${tab === "poster" && "text-white"}`}
           onClick={() => setTab("poster")}
         >
           Poster Templates
