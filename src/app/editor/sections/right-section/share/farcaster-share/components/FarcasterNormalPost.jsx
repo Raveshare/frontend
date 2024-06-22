@@ -458,6 +458,15 @@ const FarcasterNormalPost = () => {
         ...canvasParams,
         frameLink: FRAME_URL + "/frame/" + frameId,
       };
+      if (
+        !farcasterStates?.frameData?.isCreatorSponsored &&
+        !farcasterStates?.frameData?.isCustomCurrMint
+      ) {
+        canvasParams = {
+          ...canvasParams,
+          isTransactional: true,
+        };
+      }
     }
 
     return canvasParams;
