@@ -15,6 +15,7 @@ import {
   addressCrop,
   saveToLocalStorage,
   chainLogo,
+  priceFormatter,
 } from "../../../../../../../utils";
 import {
   useAppAuth,
@@ -839,8 +840,10 @@ const FarcasterNormalPost = () => {
         chainId: farcasterStates?.frameData?.selectedNetwork?.id,
         canvasId: contextCanvasIdRef.current,
         currency: farcasterStates?.frameData?.customCurrAddress,
-        pricePerToken:
-          Number(farcasterStates?.frameData?.customCurrAmount) * 10 ** 18,
+        pricePerToken: priceFormatter(
+          chain?.id,
+          farcasterStates?.frameData?.customCurrAmount
+        ),
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
         recipients: sortRecipientsByAddress(
@@ -850,6 +853,7 @@ const FarcasterNormalPost = () => {
           }))
         ),
       };
+
       deployZoraContractFn(deployArgs);
     }
   }, [isUploadSuccess]);
