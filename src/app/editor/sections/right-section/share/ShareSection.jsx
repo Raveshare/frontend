@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
-import { useAccount, useChainId, useChains } from "wagmi";
-// import { Dialog } from "@headlessui/react";
+import { useAccount, useChains } from "wagmi";
 import EmojiPicker, { EmojiStyle, Emoji } from "emoji-picker-react";
 import { DateTimePicker } from "@atlaskit/datetime-picker";
 import { chainLogo, getFromLocalStorage } from "../../../../../utils";

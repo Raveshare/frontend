@@ -1,5 +1,4 @@
 import React from "react";
-import { PowerIcon } from "@heroicons/react/24/outline";
 import { useLogout } from "../../../../../../hooks/app";
 import { Typography } from "@material-tailwind/react";
 import { toast } from "react-toastify";

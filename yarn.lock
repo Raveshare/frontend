@@ -4414,11 +4414,6 @@
     ds-test "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
     forge-std "https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80"
 
-"@zoralabs/zora-1155-contracts@^2.5.0":
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/@zoralabs/zora-1155-contracts/-/zora-1155-contracts-2.10.1.tgz#8006b5df3b3c50c279a27366bcbd24eb264d4848"
-  integrity sha512-/BzMWjqbEpdraIy3YXKKAy+HDbNF9zzOyTgpulQ7GeCPiv/zU7NxRBKiGY6Mq1kH1qkzEO6GQp6JqG5mzuGrzg==
-
 "@zoralabs/zora-721-contracts@^1.15.4":
   version "1.15.4"
   resolved "https://registry.yarnpkg.com/@zoralabs/zora-721-contracts/-/zora-721-contracts-1.15.4.tgz#99ce5e9fdb4858b8cbe5e53d16bc1ca5fe41b980"
@@ -5615,9 +5610,9 @@ draggabilly@^3.0.0:
     get-size "^3.0.0"
     unidragger "^3.0.0"
 
-"ds-test@git+https://github.com/dapphub/ds-test.git#cd98eff28324bfac652e63a239a60632a761790b":
+"ds-test@https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b":
   version "1.0.0"
-  resolved "git+https://github.com/dapphub/ds-test.git#cd98eff28324bfac652e63a239a60632a761790b"
+  resolved "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
 
 duplexify@^4.1.2:
   version "4.1.3"
@@ -6118,13 +6113,13 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
 
-"forge-std@git+https://github.com/foundry-rs/forge-std.git#705263c95892a906d7af65f0f73ce8a4a0c80b80":
+"forge-std@https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80":
   version "1.6.0"
-  resolved "git+https://github.com/foundry-rs/forge-std.git#705263c95892a906d7af65f0f73ce8a4a0c80b80"
+  resolved "https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80"
 
-"forge-std@git+https://github.com/foundry-rs/forge-std.git#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653":
+"forge-std@https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653":
   version "1.1.1"
-  resolved "git+https://github.com/foundry-rs/forge-std.git#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653"
+  resolved "https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653"
 
 form-data@^4.0.0:
   version "4.0.0"
@@ -8207,7 +8202,7 @@ qrcode@1.4.4:
     pngjs "^3.3.0"
     yargs "^13.2.4"
 
-qrcode@1.5.3, qrcode@^1.5.1:
+qrcode@1.5.3:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/qrcode/-/qrcode-1.5.3.tgz#03afa80912c0dccf12bc93f615a535aad1066170"
   integrity sha512-puyri6ApkEHYiVl4CFzo1tDkAZ+ATcnbJrJ6RiBM1Fhctdn/ix9MTE3hRph33omisEbC/2fcfemsseiKgBPKZg==
@@ -8373,11 +8368,6 @@ react-focus-lock@^2.9.5:
     react-clientside-effect "^1.2.6"
     use-callback-ref "^1.3.2"
     use-sidecar "^1.1.2"
-
-react-icons@^4.12.0:
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.12.0.tgz#54806159a966961bfd5cdb26e492f4dafd6a8d78"
-  integrity sha512-IBaDuHiShdZqmfc/TwHu6+d6k2ltNCf3AszxNmjJc1KUfXdEeRJOKyNvLmAHaarhzGmTSVygNdyu8/opXv2gaw==
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
