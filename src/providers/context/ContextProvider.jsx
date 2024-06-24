@@ -22,6 +22,7 @@ const ContextProvider = ({ children }) => {
   // Profile Panel
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [openedProfileModal, setOpenedProfileModal] = useState(false);
+  const [openedLoginModal, setOpenedLoginModal] = useState(false);
   const [openedModalName, setOpenedModalName] = useState("");
 
   // User data from Profile panel
@@ -355,7 +356,7 @@ const ContextProvider = ({ children }) => {
       isRecast: false,
       isFollow: false,
       isChannel: false,
-      channelValue: "", //Gating channel value
+      channelValue: "",
       isCollection: false,
       collectionAddress: "",
 
@@ -376,6 +377,32 @@ const ContextProvider = ({ children }) => {
 
       isExternalLinkError: false,
       externalLinkError: "",
+
+      isCustomCurrMint: false,
+
+      customCurrAmount: 1,
+
+      isCustomCurrAmountError: false,
+      customCurrAmountError: "",
+
+      customCurrSymbol: "",
+      customCurrAddress: "",
+
+      fcSplitRevenueRecipients: [
+        {
+          address: "",
+          percentAllocation: null,
+        },
+      ],
+
+      // split recipient error
+      isFcSplitError: false,
+      fcSplitErrorMsg: "",
+
+      selectedNetwork: {
+        id: "",
+        name: "",
+      },
     },
   });
 
@@ -487,6 +514,10 @@ const ContextProvider = ({ children }) => {
         // for modal in profile panel
         openedModalName,
         setOpenedModalName,
+
+        //for mobile login modal
+        openedLoginModal,
+        setOpenedLoginModal,
 
         // for twitter auth
         queryParams,

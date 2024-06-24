@@ -65,11 +65,11 @@ img {
 /* Overwriting Polotno defaults Start */
 
 .polotno-app-container
-  .bp4-button:not([class*="bp4-intent-"])
-  .bp4-icon:not([class*="bp4-intent-"]) {
+  .bp5-button:not([class*="bp5-intent-"])
+  .bp5-icon:not([class*="bp5-intent-"]) {
   color: rgb(255, 255, 255);
 }
-.bp4-button:not([class*="bp4-intent-"]):hover {
+.bp5-button:not([class*="bp5-intent-"]):hover {
   background-color: rgb(255, 255, 255);
 }
 
@@ -80,9 +80,11 @@ img {
 }
 /* Styling Sidepanel Icons on Click */
 
-.go2941063172:hover,
-.go2941063172.active {
-  background-color: #e1f16ba1 !important;
+.go3244416805:hover {
+  background-color: #e1f16b50 !important;
+}
+.go3244416805.active {
+  background-color: #e1f16b !important;
 }
 /* .go1430256704 .polotno-side-tabs-container::-webkit-scrollbar-track {
   background: #eb0ac5;
@@ -103,7 +105,7 @@ img {
   height: 1600px !important;
 } */
 @media (max-width: 500px) {
-  .go1311524876.bp4-navbar {
+  .go1311524876.bp5-navbar {
     position: absolute !important;
     left: 4vw !important;
     bottom: 64px !important;
@@ -114,22 +116,22 @@ img {
 }
 
 /* Styling the Sidepanel */
-.bp4-navbar {
+.bp5-navbar {
   border-radius: 8px;
   background-color: #ffffff;
 }
-.go2941063172 {
+.go3244416805 {
   /* border-radius: 64px; */
   border-radius: 8px;
 }
-.go2941063172:hover {
+.go3244416805:hover {
   border-radius: 8px;
 }
 /* .go1236784588 {
   height: 99% !important;
 } */
 /* Styling the Buttons */
-.bp4-button {
+.bp5-button {
   /* all:unset; */
   border-radius: 8px;
   background-color: #e1f16ba1;
@@ -147,17 +149,18 @@ img {
   text-align: center;
 }
 /* Styling the Popovers */
-.bp4-popover2 {
+.bp5-popover2 {
   border-radius: 8px;
+  z-index: 10000;
 }
 
 .bp4-popover2 .bp4-popover2-content {
   border-radius: 8px;
 }
-.bp4-menu {
+.bp5-menu {
   border-radius: 8px;
 }
-.bp4-input-group .bp4-input {
+.bp5-input-group .bp5-input {
   border-radius: 8px;
 }
 /* Styling the bottom bar (zoom btn, remove bg ..)*/
@@ -169,25 +172,25 @@ img {
 
 /* Under DEV */
 /* overwrite colors for side-panel tabs */
-.bp4-dark .polotno-side-tabs-container .polotno-side-panel-tab:hover,
-.bp4-dark .polotno-side-tabs-container .polotno-side-panel-tab.active {
+.bp5-dark .polotno-side-tabs-container .polotno-side-panel-tab:hover,
+.bp5-dark .polotno-side-tabs-container .polotno-side-panel-tab.active {
   background-color: #fafafa;
   /* color: white; */
 }
 
 /* change hover style of all buttons */
-.bp4-dark .bp4-button:not([class*="bp4-intent-"]):hover {
+.bp5-dark .bp5-button:not([class*="bp5-intent-"]):hover {
   background-color: #fafafa;
 }
 
 /* change main color of all active buttons */
-.bp4-dark
+.bp5-dark
   .polotno-app-container
-  .bp4-button:not([class*="bp4-intent-"])
-  .bp4-icon:not([class*="bp4-intent-"]) {
+  .bp5-button:not([class*="bp5-intent-"])
+  .bp5-icon:not([class*="bp5-intent-"]) {
   color: white;
 }
-.bp4-dark .polotno-app-container .bp4-button.bp4-minimal.bp4-disabled {
+.bp5-dark .polotno-app-container .bp5-button.bp5-minimal.bp5-disabled {
   color: rgba(117, 186, 255, 0.6);
 }
 
@@ -249,3 +252,39 @@ img {
 }
 
 /* remove it */
+
+/* Left Sidebar */
+
+.go3345817399 {
+  border-radius: 8px !important;
+  padding: 4px !important;
+  background-color: #e8e8ec !important;
+  display: flex;
+  gap: 8px;
+  border: none !important;
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.go806284747::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.go806284747 {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.go806284747 {
+  border-radius: 8px !important;
+  background-color: #fff !important;
+}
+.go1222219977 {
+  border-radius: 8px !important;
+  padding: 4px !important;
+}
+
+.bp5-navbar {
+  box-shadow: 0 1px rgba(137, 137, 137, 0.1), 0 1px 1px rgba(17, 20, 24, 0.2);
+}
+
+.go3593045756{
+  z-index: 0;
+}

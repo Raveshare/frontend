@@ -6,7 +6,11 @@ import { Tabs as TabsCustom, TabsWithArrows } from "../../../common"; // Since M
 import { firstLetterCapital } from "../../../../../utils";
 import CgImage from "@meronex/icons/cg/CgImage";
 import FeaturedTabs from "../../../common/core/FeaturedTabs";
-import { getAssetByQuery, getFeaturedAssets } from "../../../../../services";
+import {
+  getAssetByQuery,
+  getAuthors,
+  getFeaturedAssets,
+} from "../../../../../services";
 import {
   Tabs,
   TabsHeader,
@@ -14,59 +18,40 @@ import {
   Tab,
   TabPanel,
 } from "@material-tailwind/react";
+import { useAppAuth } from "../../../../../hooks/app";
+import { useQuery } from "@tanstack/react-query";
 
 export const BannerPanel = () => {
-  const tabArray = [
-    {
-      name: "Monniverse",
-      author: "monniverse",
-      campaign: "monniverse",
-    },
-    {
-      name: "LOVE on LEVERAGE",
-      author: "UNLONELY",
-      campaign: "LOVE on LEVERAGE",
-    },
-    {
-      name: "Simp",
-      author: null,
-      campaign: "christmas",
-    },
-    {
-      name: "Firefly",
-      author: "Firefly",
-      campaign: "firefly",
-    },
-    {
-      name: "Halloween",
-      author: null,
-      campaign: "halloween",
-    },
-    {
-      name: "Lensjump",
-      author: "lensjump",
-      campaign: "lensjump",
-    },
-    {
-      name: "Supducks",
-      author: "supducks",
-      campaign: null,
-    },
-    {
-      name: "Moonrunners",
-      author: "moonrunners",
-      campaign: null,
-    },
-  ];
+  const { isAuthenticated } = useAppAuth();
 
-  const [currentTab, setCurrentTab] = useState(tabArray[0]);
+  const { data } = useQuery({
+    key: ["assets-authors"],
+    queryFn: getAuthors,
+    enabled: isAuthenticated ? true : false,
+  });
+
+  const tabArray = [];
+  data?.data.map((tab) => {
+    if (tab?.hasBackgrounds) {
+      tabArray.push(tab);
+    }
+  });
+
+  // console.log("tabArray", tabArray);
+  const [currentTab, setCurrentTab] = useState(tabArray?.[0]);
+
+  useEffect(() => {
+    if (data) {
+      setCurrentTab(tabArray?.[0]);
+    }
+  }, [data]);
 
   return (
     <div className="h-full flex flex-col">
       {/* New Material Tailwind Buttons / Tabs : */}
       {/* Reference Link: https://www.material-tailwind.com/docs/react/tabs */}
 
-      <Tabs id="custom-animation" value={currentTab?.name}>
+      <Tabs id="custom-animation" value={currentTab?.author}>
         <div className="w-100 overflow-scroll">
           <TabsWithArrows
             tabsHeaders={
@@ -75,12 +60,23 @@ export const BannerPanel = () => {
                   {tabArray.map((tab, index) => (
                     <Tab
                       key={index}
-                      value={tab?.name}
+                      value={
+                        tab?.campaign
+                          ? tab?.campaign !== tab?.author
+                            ? tab?.campaign
+                            : tab?.author
+                          : tab?.author
+                      }
                       onClick={() => {
                         setCurrentTab(tab);
                       }}
                     >
-                      <div className="appFont"> {tab?.name} </div>
+                      <div className="appFont">
+                        {" "}
+                        {firstLetterCapital(
+                          tab?.campaign ? tab?.campaign : tab?.author
+                        )}
+                      </div>
                     </Tab>
                   ))}
                 </TabsHeader>
@@ -97,14 +93,12 @@ export const BannerPanel = () => {
             }}
           >
             <TabsCustom
-              defaultQuery={currentTab?.name}
-              author={currentTab?.author}
-              campaignName={currentTab?.campaign}
-              getAssetsFn={
-                currentTab?.author === "lensjump"
-                  ? getFeaturedAssets
-                  : getAssetByQuery
+              defaultQuery={
+                currentTab?.campaign ? currentTab?.campaign : currentTab?.author
               }
+              author={currentTab?.campaign ? "" : currentTab?.author}
+              campaignName={currentTab?.campaign}
+              getAssetsFn={getAssetByQuery}
               type="background"
               changeCanvasDimension={true}
             />

@@ -1,3 +1,7 @@
+import { ENVIRONMENT } from "../../services";
+import { FRAME_URLS } from "./frameUrls";
+import { MINT_URLS } from "./mintUrls";
+
 // Sign messages
 export const EVM_MESSAGE = "This message is to login you into lenspost dapp.";
 
@@ -15,4 +19,15 @@ export const APP_SOLANA_ADDRESS =
 export const APP_ETH_ADDRESS = "0x77fAD8D0FcfD481dAf98D0D156970A281e66761b";
 
 export const FREE_MINTS = 10;
-export const FRAME_URL = "https://frames.poster.fun";
+export const FRAME_URL = FRAME_URLS[ENVIRONMENT];
+export const MINT_URL = MINT_URLS[ENVIRONMENT];
+
+// this is wrap degen
+export const ETH_CURRENCY_ADDRESS =
+  "0x0000000000000000000000000000000000000000";
+export const WDEGEN_CURRENCY_ADDRESS =
+  "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387";
+export const DEGEN_CURRENCY_ADDRESS =
+  "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed";
+
+export const isSponsoredChain = [8453, 42161];

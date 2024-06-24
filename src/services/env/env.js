@@ -15,3 +15,4 @@ export const MEME_API_URL = import.meta.env.VITE_MEME_API_URL;
 export const MEME_API_USERNAME = import.meta.env.VITE_MEME_API_USERNAME;
 export const MEME_API_PASSWORD = import.meta.env.VITE_MEME_API_PASSWORD;
 export const FAL_API_KEY = import.meta.env.VITE_FAL_API_KEY;
+export const TIPLINK_API_KEY = import.meta.env.VITE_TIPLINK_API_KEY;
