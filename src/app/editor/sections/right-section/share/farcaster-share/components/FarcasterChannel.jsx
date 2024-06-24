@@ -6,8 +6,6 @@ import {
   Avatar,
   Card,
   Typography,
-  Button,
-  IconButton,
   Spinner,
 } from "@material-tailwind/react";
 import { InputBox } from "../../../../../common";
@@ -15,13 +13,9 @@ import BiSearchAlt2 from "@meronex/icons/bi/BiSearchAlt2";
 import { searchChannelFar } from "../../../../../../../services/apis/BE-apis";
 import { useMutation } from "@tanstack/react-query";
 import FaRegDotCircle from "@meronex/icons/fa/FaRegDotCircle";
-import { useContext } from "react";
-import { Context } from "../../../../../../../providers/context";
 
-const FarcasterChannel = () => {
+const FarcasterChannel = ({ channelState, setChannelState }) => {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(!open);
-  const { farcasterStates, setFarcasterStates } = useContext(Context);
   const [query, setQuery] = useState("");
   const [delayedQuery, setDelayedQuery] = useState(query);
   const [data, setData] = useState([]);
@@ -70,14 +64,6 @@ const FarcasterChannel = () => {
           label="Search channel"
           onChange={(e) => setQuery(e.target.value)}
         />
-        {/* <IconButton
-          size="sm"
-          color="blue-gray"
-          className="!absolute right-1 top-1 rounded-md outline-none text-white"
-          onClick={searchChannel}
-        >
-          <BiSearchAlt2 />
-        </IconButton> */}
       </div>
 
       {open && (
@@ -105,10 +91,7 @@ const FarcasterChannel = () => {
               <List key={item?.id}>
                 <ListItem
                   onClick={() => {
-                    setFarcasterStates({
-                      ...farcasterStates,
-                      channel: item,
-                    });
+                    setChannelState(item);
                     setOpen(false);
                   }}
                 >
@@ -132,7 +115,7 @@ const FarcasterChannel = () => {
         </Card>
       )}
 
-      {farcasterStates.channel && (
+      {channelState && (
         <Card className="mt-2">
           <List>
             <ListItem>
@@ -142,20 +125,17 @@ const FarcasterChannel = () => {
                     <Avatar
                       variant="circular"
                       alt="candice"
-                      src={farcasterStates.channel?.image_url}
+                      src={channelState?.image_url}
                       className="w-10 h-10"
                     />
                   </ListItemPrefix>
 
                   <Typography variant="h6" color="blue-gray">
-                    {farcasterStates.channel?.name}
+                    {channelState?.name}
                   </Typography>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* <Typography variant="h6" color="blue-gray">
-                  Selected
-                </Typography> */}
                   <FaRegDotCircle className="text-green-500" />
                 </div>
               </div>
