@@ -37,6 +37,7 @@ import { useAppAuth, useLocalStorage } from '../../hooks/app'
 import { getFarUserDetails } from '../../services/apis/BE-apis'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { watermarkBase64 } from '../../assets/base64/watermark'
+import { PagesTimeline } from 'polotno/pages-timeline';
 
 // enable animations
 unstable_setAnimationsEnabled(true)
@@ -546,9 +547,10 @@ const Editor = () => {
 							/>
 
 							{/* Bottom section */}
-							<div className="mt-2 mb-2 mr-2 p-1/2 flex flex-row justify-between align-middle border border-black-300 rounded-lg ">
-								<BgRemover />
 								<ZoomButtons store={store} />
+								<PagesTimeline store={store} />
+							<div className="flex flex-row justify-between items-center border border-black-300 rounded-lg ">
+								<BgRemover />
 
 								{/* Quick Tour on the main page */}
 								<div className="flex flex-row ">
@@ -568,7 +570,8 @@ const Editor = () => {
 											}
 										}}
 									>
-										<FcIdea className="m-2" size="16" /> <div className="hidden md:block w-full m-2 ml-0 text-sm text-yellow-600">Need an intro?</div>
+										<FcIdea className="m-2" size="16" /> 
+										{/* <div className="hidden md:block w-full m-2 ml-0 text-sm text-yellow-600">Need an intro?</div> */}
 									</div>
 								</div>
 							</div>

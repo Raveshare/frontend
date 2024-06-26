@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
-import {useAccount } from "wagmi";
-// import { Dialog } from "@headlessui/react";
+import { useAccount, useChains } from "wagmi";
 import EmojiPicker, { EmojiStyle, Emoji } from "emoji-picker-react";
 import { DateTimePicker } from "@atlaskit/datetime-picker";
 import { chainLogo, getFromLocalStorage } from "../../../../../utils";
@@ -8,13 +7,12 @@ import { Context } from "../../../../../providers/context/ContextProvider";
 import BsX from "@meronex/icons/bs/BsX";
 import { Textarea, Typography } from "@material-tailwind/react";
 import logoSolana from "../../../../../assets/logos/logoSolana.png";
-import logoZora from "../../../../../assets/logos/logoZora.png";
 import logoFarcaster from "../../../../../assets/logos/logoFarcaster.jpg";
 import { InputBox } from "../../../common";
 
 const ShareSection = () => {
-  const { address, isConnected } = useAccount();
-  const { chains, chain } = useAccount();
+  const { isConnected } = useAccount();
+  const chains = useChains();
   const {
     setMenu,
     postName,
@@ -60,7 +58,7 @@ const ShareSection = () => {
 
   const filterChains = () => {
     if (chains?.length > 0) {
-      return chains?.slice(0, -3);
+      return chains?.slice(0, -4);
     } else {
       return chainsArray;
     }

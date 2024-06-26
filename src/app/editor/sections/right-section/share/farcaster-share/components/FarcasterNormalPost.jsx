@@ -15,6 +15,7 @@ import {
   addressCrop,
   saveToLocalStorage,
   chainLogo,
+  priceFormatter,
 } from "../../../../../../../utils";
 import {
   useAppAuth,
@@ -30,6 +31,7 @@ import {
   TOKEN_LIST,
   URL_REGEX,
   degen,
+  isSponsoredChain,
 } from "../../../../../../../data";
 import {
   Avatar,
@@ -136,7 +138,7 @@ const FarcasterNormalPost = () => {
     isRefetching: isWalletRefetching,
   } = useQuery({
     queryKey: ["getOrCreateWallet"],
-    queryFn: () => getOrCreateWallet(base?.id),
+    queryFn: () => getOrCreateWallet(chain?.id),
     refetchOnWindowFocus: false,
   });
 
@@ -345,6 +347,17 @@ const FarcasterNormalPost = () => {
         }
       }
 
+      if (name === "collectionAddress") {
+        if (!value) {
+          newState.frameData.isCollectionAddressError = true;
+          newState.frameData.collectionAddressError =
+            "Please enter a valid address";
+        } else {
+          newState.frameData.isCollectionAddressError = false;
+          newState.frameData.collectionAddressError = "";
+        }
+      }
+
       // check if custom currency amount is a valid number
       if (name === "customCurrAmount") {
         if (!value || value <= 0.0001) {
@@ -422,7 +435,10 @@ const FarcasterNormalPost = () => {
         ? base?.id
         : chainId,
       creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
+      gatedChannels: farcasterStates.frameData?.channelValue?.id,
+      gatedCollections: farcasterStates.frameData?.collectionAddress,
     };
+    console.log("Hello", params.gatedChannel, params.gatedCollection);
     postFrameData(params)
       .then((res) => {
         if (res?.status === "success") {
@@ -787,6 +803,10 @@ const FarcasterNormalPost = () => {
     });
   };
 
+  const isSponsoredChainFn = () => {
+    return isSponsoredChain?.includes(chain?.id);
+  };
+
   // add recipient to the split list
   useEffect(() => {
     if (isAuthenticated) {
@@ -843,8 +863,10 @@ const FarcasterNormalPost = () => {
         chainId: farcasterStates?.frameData?.selectedNetwork?.id,
         canvasId: contextCanvasIdRef.current,
         currency: farcasterStates?.frameData?.customCurrAddress,
-        pricePerToken:
-          Number(farcasterStates?.frameData?.customCurrAmount) * 10 ** 18,
+        pricePerToken: priceFormatter(
+          chain?.id,
+          farcasterStates?.frameData?.customCurrAmount
+        ),
         maxSupply: farcasterStates?.frameData?.allowedMints,
         args: [postName, postName?.split(" ")[0].toUpperCase(), 500],
         recipients: sortRecipientsByAddress(
@@ -854,6 +876,7 @@ const FarcasterNormalPost = () => {
           }))
         ),
       };
+
       deployZoraContractFn(deployArgs);
     }
   }, [isUploadSuccess]);
@@ -939,7 +962,7 @@ const FarcasterNormalPost = () => {
     }, 1000);
   }, [farcasterStates?.frameData?.selectedNetwork?.name]);
 
-  console.log("Topup balance", walletData?.balance);
+  console.log({ topUp_balance: walletData?.balance });
 
   return (
     <>
@@ -999,7 +1022,12 @@ const FarcasterNormalPost = () => {
         </div>
       </div>
       <div className={`m-4 ${!farcasterStates.isChannel && "hidden"}`}>
-        <FarcasterChannel />
+        <FarcasterChannel
+          channelState={farcasterStates.channel}
+          setChannelState={(channel) =>
+            setFarcasterStates({ ...farcasterStates, channel })
+          }
+        />
       </div>
 
       <div className="mb-4 m-4">
@@ -1163,6 +1191,98 @@ const FarcasterNormalPost = () => {
                 />{" "}
               </Switch>
             </div>
+
+            <div className="flex justify-between py-2">
+              <h2 className="text-lg mb-2"> Channel </h2>
+              <Switch
+                checked={farcasterStates.frameData?.isChannel}
+                onChange={() =>
+                  setFarcasterStates({
+                    ...farcasterStates,
+                    frameData: {
+                      ...farcasterStates.frameData,
+                      isChannel: !farcasterStates.frameData?.isChannel,
+                    },
+                  })
+                }
+                className={`${
+                  farcasterStates.frameData?.isChannel
+                    ? "bg-[#e1f16b]"
+                    : "bg-gray-200"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
+              >
+                <span
+                  className={`${
+                    farcasterStates.frameData?.isChannel
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />{" "}
+              </Switch>
+            </div>
+            <div
+              className={`${!farcasterStates.frameData?.isChannel && "hidden"}`}
+            >
+              <FarcasterChannel
+                channelState={farcasterStates.frameData.channelValue}
+                setChannelState={(channelValue) =>
+                  setFarcasterStates({
+                    ...farcasterStates,
+                    frameData: {
+                      ...farcasterStates.frameData,
+                      channelValue,
+                    },
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex justify-between py-2">
+              <h2 className="text-lg mb-2"> Collection </h2>
+              <Switch
+                checked={farcasterStates.frameData?.isCollection}
+                onChange={() =>
+                  setFarcasterStates({
+                    ...farcasterStates,
+                    frameData: {
+                      ...farcasterStates.frameData,
+                      isCollection: !farcasterStates.frameData?.isCollection,
+                    },
+                  })
+                }
+                className={`${
+                  farcasterStates.frameData?.isCollection
+                    ? "bg-[#e1f16b]"
+                    : "bg-gray-200"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e1f16b] focus:ring-offset-2`}
+              >
+                <span
+                  className={`${
+                    farcasterStates.frameData?.isCollection
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />{" "}
+              </Switch>
+            </div>
+
+            <div
+              className={`${
+                !farcasterStates.frameData?.isCollection && "hidden"
+              } mt-2`}
+            >
+              <InputBox
+                label="Collection address"
+                name="collectionAddress"
+                onChange={(e) => handleChange(e, "collectionAddress")}
+                onFocus={(e) => handleChange(e, "collectionAddress")}
+              />
+              {farcasterStates.frameData?.isCollectionAddressError && (
+                <InputErrorMsg
+                  message={farcasterStates.frameData?.collectionAddressError}
+                />
+              )}
+            </div>
           </div>
         </div>
         <div className="mb-4">
@@ -1261,7 +1381,7 @@ const FarcasterNormalPost = () => {
             !farcasterStates.frameData?.isCustomCurrMint && "hidden"
           } mt-2`}
         >
-          {chain?.id === 8453 ? (
+          {isSponsoredChainFn() ? (
             <>
               <p className="text-end mt-4">
                 <span>Topup account:</span>
@@ -1433,7 +1553,7 @@ const FarcasterNormalPost = () => {
 
             {farcasterStates.frameData?.isCustomCurrMint &&
               farcasterStates.frameData?.allowedMints > walletData?.sponsored &&
-              chain?.id === base?.id && (
+              isSponsoredChainFn() && (
                 <Topup
                   topUpAccount={walletData?.publicAddress}
                   balance={walletData?.balance}

@@ -50,6 +50,12 @@ const UserCard = ({ username }) => {
     console.log("result", result);
     refetch();
     setLoadingInvite(false);
+
+  };
+
+  const fnGetSocialDetails = async () => {
+    if (!address) return;
+    const result = await getSocialDetails(address, `farcaster`);
   };
 
   useEffect(() => {
