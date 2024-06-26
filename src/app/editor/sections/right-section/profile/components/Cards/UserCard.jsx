@@ -14,21 +14,24 @@ import { getInviteCode } from "../../../../../../../services/apis/BE-apis";
 import {
   apiGenerateInviteCode,
   getENSDomain,
+  getFarcasterDetails,
   getSocialDetails,
 } from "../../../../../../../services";
 import BsArrowRepeat from "@meronex/icons/bs/BsArrowRepeat";
 // import                 src/assets/logos/logoFarcaster.jpg
 import farcasterLogo from "../../../../../../../assets/logos/logoFarcaster.jpg";
+import { Spinner } from "@material-tailwind/react";
 
 const UserCard = ({ username }) => {
   const { points, profileImage, userLevel, farcasterHandle } = useUser();
+  const [loadingInvite, setLoadingInvite] = useState(false);
 
   // const { address } = useAccount();
 
   const address = getFromLocalStorage("user.address");
   const [inviteCodesArr, setInviteCodesArr] = useState([]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["getInviteCode"],
     queryFn: getInviteCode,
   });
@@ -42,24 +45,17 @@ const UserCard = ({ username }) => {
   };
 
   const fnGenerateNewInviteCode = async () => {
+    setLoadingInvite(true);
     const result = await apiGenerateInviteCode();
     console.log("result", result);
-  };
-
-  const fnGetSocialDetails = async () => {
-    if (!address) return;
-    const result = await getSocialDetails(address, `farcaster`);
-    console.log("farcaster handle", result);
+    refetch();
+    setLoadingInvite(false);
   };
 
   useEffect(() => {
-    fnGetSocialDetails();
     setInviteCodesArr(inviteCodeList);
   }, [inviteCodeList, data]);
 
-  useEffect(() => {
-    fnGetSocialDetails();
-  }, []);
 
   return (
     <>
@@ -214,8 +210,8 @@ const UserCard = ({ username }) => {
               <div className=""> Invites : </div>
               <div className="flex items-center">
                 <div className="cursor-pointer">
-                  {" "}
-                  {inviteCodesArr?.length > 0 ? (
+                  {loadingInvite && <Spinner className="w-4 h-4" />}{" "}
+                  {!loadingInvite && inviteCodesArr?.length > 3 ? (
                     <div
                       className="flex align-middle "
                       onClick={() => handleCopy(`Invite Code`, inviteCodesArr)}
@@ -224,15 +220,17 @@ const UserCard = ({ username }) => {
                       <BiCopy className="ml-1 mt-1 cursor-pointer" size={12} />
                     </div>
                   ) : (
-                    <>
-                      <div
-                        onClick={fnGenerateNewInviteCode}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="">Generate</div>
-                        <BsArrowRepeat size={16} />
-                      </div>
-                    </>
+                    !loadingInvite && (
+                      <>
+                        <div
+                          onClick={fnGenerateNewInviteCode}
+                          className="flex items-center gap-2"
+                        >
+                          <div className="">Generate</div>
+                          <BsArrowRepeat size={16} />
+                        </div>
+                      </>
+                    )
                   )}{" "}
                 </div>
               </div>
