@@ -5,7 +5,6 @@ import {
   SolanaMint,
   ZoraMint,
   LensShareWrapper,
-
 } from "../../right-section";
 import { Drawer } from "@blueprintjs/core";
 import { Context } from "../../../../../providers/context";
@@ -15,9 +14,11 @@ import { getAvatar } from "../../../../../utils";
 import { Avatar } from "@material-tailwind/react";
 import { AllTasksNRewards } from "../../right-section/profile/components/section/AllTasksNRewards";
 import ProfilePanel from "../../right-section/profile/ProfilePanel";
+import { useUser } from "../../../../../hooks/user";
 
 const PointsBtn = () => {
   const [transitionRtoL, setTransitionRtoL] = useState(false);
+  const { profileImage } = useUser();
 
   const { menu, setMenu, isProfileOpen, setIsProfileOpen } =
     useContext(Context);
@@ -47,7 +48,7 @@ const PointsBtn = () => {
           variant="circular"
           alt="profile picture"
           className="cursor-pointer outline outline-black"
-          src={getAvatar(address)}
+          src={profileImage || getAvatar(address)}
         />
       </button>
 

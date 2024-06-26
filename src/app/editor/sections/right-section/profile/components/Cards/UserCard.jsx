@@ -87,7 +87,7 @@ const UserCard = ({ username }) => {
                       : NormieDP
                   }
                   alt=""
-                  className="absolute w-[72px] h-[72px] top-[4px] left-[4px] object-cover"
+                  className="absolute object-cover"
                 />
               </div>
               <div className="relative w-[32px] h-[32px] mt-[-16px]">
@@ -211,7 +211,7 @@ const UserCard = ({ username }) => {
               <div className="flex items-center">
                 <div className="cursor-pointer">
                   {loadingInvite && <Spinner className="w-4 h-4" />}{" "}
-                  {!loadingInvite && inviteCodesArr?.length > 3 ? (
+                  {!loadingInvite && inviteCodesArr?.length > 0 ? (
                     <div
                       className="flex align-middle "
                       onClick={() => handleCopy(`Invite Code`, inviteCodesArr)}
