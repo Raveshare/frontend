@@ -30,6 +30,7 @@ import { useAppAuth, useLocalStorage } from "../../../../../../../hooks/app";
 import {
   APP_ETH_ADDRESS,
   ERROR,
+  FRAME_URL,
   LOCAL_STORAGE,
   MINT_URL,
   ham,
@@ -60,6 +61,7 @@ import { LensAuth, LensDispatcher } from "../../lens-share/components";
 import {
   getFarUserDetails,
   mintToXchain,
+  postFrame,
 } from "../../../../../../../services/apis/BE-apis";
 import { zoraURLErc721 } from "../utils/zoraURL";
 import { ZoraLogo } from "../../../../../../../assets";
@@ -78,12 +80,17 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   const { openChainModal } = useChainModal();
   const [recipientsEns, setRecipientsEns] = useState([]);
   const [totalPercent, setTotalPercent] = useState(0);
-
+  const [isStoringFrameData, setIsStoringFrameData] = useState(false);
   // share states
   const [isShareLoading, setIsShareLoading] = useState(false);
   const [isShareSuccess, setIsShareSuccess] = useState(false);
   const [isShareError, setIsShareError] = useState(false);
   const [shareError, setShareError] = useState("");
+  const [isDeployingZoraContractSuccess, setIsDeployingZoraContractSuccess] =
+    useState(false);
+  const [respContractAddress, setRespContractAddress] = useState(null);
+  const [frameId, setFrameId] = useState(null);
+  const [isPostingFrameSuccess, setIsPostingFrameSuccess] = useState(false);
 
   // farcaster data states
   const [farTxHash, setFarTxHash] = useState("");
@@ -107,6 +114,7 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
   } = useSwitchChain();
 
   const {
+    postName,
     zoraErc721Enabled,
     setZoraErc721Enabled,
     zoraErc721StatesError,
@@ -145,6 +153,56 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
     mutationKey: "storeZoraLink",
     mutationFn: mintToXchain,
   });
+  const { mutateAsync: postFrameData } = useMutation({
+    mutationKey: "postFrameData",
+    mutationFn: postFrame,
+  });
+
+  const postFrameDataFn = async () => {
+    setIsStoringFrameData(true);
+
+    const params = {
+      canvasId: contextCanvasIdRef.current,
+      owner: address,
+      isTopUp: farcasterStates.frameData?.isTopup,
+      allowedMints: Number(farcasterStates.frameData?.allowedMints) || 10,
+      metadata: {
+        name: postName,
+        description: postDescription,
+      },
+      isLike: farcasterStates.frameData?.isLike,
+      isRecast: farcasterStates.frameData?.isRecast,
+      isFollow: farcasterStates.frameData?.isFollow,
+      redirectLink: farcasterStates.frameData?.externalLink,
+      contractAddress: respContractAddress,
+      chainId: farcasterStates?.frameData?.isCustomCurrMint
+        ? farcasterStates?.frameData?.selectedNetwork?.id
+        : farcasterStates?.frameData?.isCreatorSponsored
+        ? base?.id
+        : chainId,
+      creatorSponsored: farcasterStates.frameData?.isCreatorSponsored,
+      gatedChannels: farcasterStates.frameData?.channelValue?.id,
+      gatedCollections: farcasterStates.frameData?.collectionAddress,
+    };
+
+    postFrameData(params)
+      .then((res) => {
+        if (res?.status === "success") {
+          setIsStoringFrameData(false);
+          setFrameId(res?.frameId);
+          setIsPostingFrameSuccess(true);
+        } else if (res?.error) {
+          setIsStoringFrameData(false);
+          setIsPostingFrameError(true);
+          toast.error(res?.error);
+        }
+      })
+      .catch((err) => {
+        setIsStoringFrameData(false);
+        setIsPostingFrameError(true);
+        toast.error(errorMessage(err));
+      });
+  };
 
   // create lens open action
   const handleShare = (canvasParams, platform) => {
@@ -948,21 +1006,30 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
 
   // share on farcater
   useEffect(() => {
-    if (isFarcaster && slug) {
+    if (isPostingFrameSuccess) {
       const canvasParams = {
-        zoraMintLink: MINT_URL + "/mint/" + slug,
+        zoraMintLink: "",
         channelId: farcasterStates.channel?.id || "",
+        frameLink: FRAME_URL + "/frame/" + frameId,
+        isTransactional: true,
       };
 
       handleShare(canvasParams, "farcaster");
     }
-  }, [slug]);
+  }, [isPostingFrameSuccess]);
+
+  useEffect(() => {
+    if (isDeployingZoraContractSuccess) {
+      postFrameDataFn();
+    }
+  }, [isDeployingZoraContractSuccess]);
 
   // store the zora link in DB
   useEffect(() => {
     if (isSuccess && receipt?.logs[0]?.address) {
       if (isFarcaster) {
-        setIsShareLoading(true);
+        setIsDeployingZoraContractSuccess(true);
+        setRespContractAddress(receipt?.logs[0]?.address);
       }
       storeZoraLink();
     }
@@ -1031,7 +1098,10 @@ const ERC721Edition = ({ isOpenAction, isFarcaster, selectedChainId }) => {
         data={receipt}
         farTxHash={farTxHash}
         isSuccess={isSuccess}
+        isStoringFrameData={isStoringFrameData}
         slug={slug}
+        isFrame={isFarcaster}
+        frameId={frameId}
       />
       {/* Switch Number 1 Start */}
       <div className="mb-4 m-4">

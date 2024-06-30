@@ -6,6 +6,7 @@ import BaseLogo from "./logos/baseLogo.png";
 import OpMainnetLogo from "./logos/opMainnetLogo.webp";
 import EVMLogo from "./logos/evmLogo.png";
 import HamLogo from "./logos/hamLogo.png";
+import X_Logo from "./logos/X_logo.png";
 
 const arbitrumLogo = "https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg";
 const degenLogo = "https://basescan.org/token/images/degentips_32.png";
@@ -21,4 +22,5 @@ export {
   arbitrumLogo,
   degenLogo,
   HamLogo,
+  X_Logo,
 };

@@ -9,6 +9,7 @@ import { Textarea, Typography } from "@material-tailwind/react";
 import logoSolana from "../../../../../assets/logos/logoSolana.png";
 import logoFarcaster from "../../../../../assets/logos/logoFarcaster.jpg";
 import { InputBox } from "../../../common";
+import { X_Logo } from "../../../../../assets";
 
 const ShareSection = () => {
   const { isConnected } = useAccount();

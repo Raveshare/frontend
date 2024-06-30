@@ -2,15 +2,14 @@ import { Fragment, useContext, useState } from "react";
 import { ShareIcon } from "../../../../../assets/assets";
 import {
   ShareSection,
-  SolanaMint,
+  SolanaMintWrapper,
   ZoraMint,
   LensShareWrapper,
+  XShare,
+  FarcasterShareWrapper,
 } from "../../right-section";
 import { Drawer } from "@blueprintjs/core";
 import { Context } from "../../../../../providers/context";
-import FarcasterShareWrapper from "../../right-section/share/farcaster-share/FarcasterShareWrapper";
-import { LensShare } from "../../right-section/share/lens-share/components";
-import { AllTasksNRewards } from "../../right-section/profile/components/section/AllTasksNRewards";
 
 const ShareButton = () => {
   const [transitionRtoL, setTransitionRtoL] = useState(false);
@@ -30,7 +29,7 @@ const ShareButton = () => {
       <button
         onClick={() => {
           // setIsShareOpen(!isShareOpen);
-          setIsShareOpen(true)
+          setIsShareOpen(true);
           setMenu("share");
         }}
         className="outline-none"
@@ -55,7 +54,8 @@ const ShareButton = () => {
                 {/* {menu === "lensmonetization" && <LensShare />} */}
                 {menu === "farcasterShare" && <FarcasterShareWrapper />}
                 {menu === "lensmonetization" && <LensShareWrapper />}
-                {menu === "solanaMint" && <SolanaMint />}
+                {menu === "solanaMint" && <SolanaMintWrapper />}
+                {menu === "xshare" && <XShare />}
                 {typeof menu === "number" && (
                   <ZoraMint selectedChainId={menu} />
                 )}

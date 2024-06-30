@@ -438,7 +438,7 @@ const FarcasterNormalPost = () => {
       gatedChannels: farcasterStates.frameData?.channelValue?.id,
       gatedCollections: farcasterStates.frameData?.collectionAddress,
     };
-    console.log("Hello", params.gatedChannel, params.gatedCollection);
+
     postFrameData(params)
       .then((res) => {
         if (res?.status === "success") {
