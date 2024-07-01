@@ -329,7 +329,7 @@ const Editor = () => {
 		}, 3000)
 
 		// Load the Watermark
-		fnLoadWatermark()
+		// fnLoadWatermark()
 	}
 
 	// ------ Testing Share Canvas Start --------
@@ -405,9 +405,9 @@ const Editor = () => {
 		})
 	}
 
-	useEffect(() => {
-		fnLoadWatermark()
-	}, [store])
+	// useEffect(() => {
+	// 	fnLoadWatermark()
+	// }, [store])
 
 	// Effect to check with the slugId and fetch the image changes
 	useEffect(() => {
