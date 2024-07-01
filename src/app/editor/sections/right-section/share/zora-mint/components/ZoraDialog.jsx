@@ -214,7 +214,9 @@ const ZoraDialog = ({
               isCreatingSplit ||
               isLoading ||
               isPending ||
-              isShareLoading) && <Spinner color="blue" />}
+              isShareLoading ||
+              isStoringFrameData ||
+              isDeployingZoraContract) && <Spinner color="blue" />}
           </div>
         </DialogBody>
 

@@ -19,8 +19,6 @@ import { chainLogo } from "../../../../utils";
 
 const Networks = ({ className, chains, isUnsupportedChain }) => {
   const { chain } = useAccount();
-  console.log(chain);
-  console.log("above is the chain");
   const { isError, error, isLoading, isSuccess, switchChain, variables } =
     useSwitchChain();
   const [open, setOpen] = useState(false);

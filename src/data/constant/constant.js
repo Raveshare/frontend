@@ -29,3 +29,5 @@ export const WDEGEN_CURRENCY_ADDRESS =
   "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387";
 export const DEGEN_CURRENCY_ADDRESS =
   "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed";
+
+export const isSponsoredChain = [8453, 42161];

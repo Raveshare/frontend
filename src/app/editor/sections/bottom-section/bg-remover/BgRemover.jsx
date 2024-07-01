@@ -127,6 +127,7 @@ const BgRemover = ({ inSpeedDial }) => {
           className="mt-2 mb-2 ml-3 py-1 px-4"
         >
           {`Remove background`}
+          <img className="h-4 -mt-1 ml-2" src="/public/svgs/coin.svg" alt="" />
         </Button>
       )}
 
